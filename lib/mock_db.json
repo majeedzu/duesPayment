@@ -1,0 +1,406 @@
+{
+  "departments": [
+    {
+      "id": "dept-cs-111",
+      "name": "Computer Science",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-it-222",
+      "name": "Information Technology",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "dues_amount": 180
+    },
+    {
+      "id": "dept-ee-333",
+      "name": "Electrical Engineering",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 220
+    },
+    {
+      "id": "dept-htm-444",
+      "name": "Hospitality and Tourism Management",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "dues_amount": 200
+    },
+    {
+      "id": "dept-1782471584825",
+      "name": "Test Department",
+      "faculty": "TEST",
+      "dues_amount": 300
+    }
+  ],
+  "profiles": [
+    {
+      "id": "user-super-admin",
+      "email": "superadmin@htu.edu.gh",
+      "role": "super_admin",
+      "full_name": "HTU Super Administrator",
+      "department_id": null,
+      "avatar_url": null,
+      "password": "password123"
+    },
+    {
+      "id": "user-cs-admin",
+      "email": "csadmin@htu.edu.gh",
+      "role": "dept_admin",
+      "full_name": "CS Department Administrator",
+      "department_id": "dept-cs-111",
+      "avatar_url": null,
+      "password": "password123"
+    },
+    {
+      "id": "user-student-unpaid",
+      "email": "0322080456@htu.edu.gh",
+      "role": "student",
+      "full_name": "John Doe",
+      "department_id": "dept-cs-111",
+      "avatar_url": "data:image/jpeg;base64,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2+73zTj2niWn3rSqCDCC/je+KuK26eK/6CX712a2VXruO++++qS++m26Ce6CqDq3/nCibbrr888++88Ke+GS+2eqmObdTOLfTvn3j888/qA8q++WCuu+iGn5jDOz7+3XWD/+++qA0+W+WC26mGebjnyy+GnXrSDzyyiCCQ8S+WKGaueu2vfib7r7rjiDCCCCCiA4Gqa2qmOGGGZSHHHlnP3WD+aGOKOeq2i+myCeaOOc08VBZbrraL/89/8A/PAvliqgknhhHRUFVQaabdQa/fvPPvPEumjgptqssFPyk+w5911wa/PPPvvunppgnulgvqyHeI661131y6whu40mgqqimpihgzkgz/Q21xl/V1a3/sxzjsinigjqmPHxvNoH4/11+266/vvv/wDtbqK5raLyA9MT4/deNZeuuOP777/p7boYqrN5Z5L/AB6q6v3WejrqLzHKOaGiuCGzjOKKFaZDCCTrqrrrDr9AAAIYEO2MyKLees/XTGkBpprrDHrM848EMWScMri7D8yYVYpUBpV/rrzjggAEuOKKAMyrj3qITTqIoJ5V/rrqrIwgO2O2Xu26LjTUxbezslNk4brrrrAE84Qk2juL3PU1c9/7Z8zlNgrLvrrQ88oUWOajO76LmEE24z+nxhArr3njA88oESuu+evP47tYEw3PtxrurrXfjU88oKa+mqWgLXTf1cmwGjXj2HrXXDE84Cq+WiUnhM7iqEOA+eeXXWXnXWDc+iCqqaK4/wB3yguOqikwf11Vl111g/votulknpjo79j+ij8vom+1VV110g/PBvqvvpkt5N4T5qtVaWVx++/224g0PPrlsrimmk0x9no62xxf19/p465g/ijupsugjz6+ROana6V1a223l311i8IAAknr9581twveFwaUVQ6654667q9PPPmsl74Q77+6dk1aSW9x/wBcPNdesQwgJYpgc1q9feawZeuur9tfYZstsP7zAZKbKvXbtuN/UP8AnrrrrbWanjvDU84Q4s5S+yqTTP0n3/r/AK6759nl2QwAAgANOLu0q1yx2ap6q/8AedNNqqeUsIIAARyy+uu8f58QOsbN/dcMqZRVWu8IIIL778NetspYTMq+OnteudbVVWuwAIoIDTeev/8AESgPLpRtXbrfUVVFr88++OOCefbPp/akTSJ5tj77Kolllj8++++++2r7nfXK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",
+      "password": "password123"
+    },
+    {
+      "id": "user-student-paid",
+      "email": "0322080999@htu.edu.gh",
+      "role": "student",
+      "full_name": "Jane Smith",
+      "department_id": "dept-cs-111",
+      "avatar_url": null,
+      "password": "password123"
+    },
+    {
+      "id": "user-1782472485401",
+      "avatar_url": null,
+      "email": "0325080329@htu.edu.gh",
+      "role": "student",
+      "full_name": "Eugene Dushie",
+      "department_id": "dept-cs-111",
+      "password": "Eugene123"
+    },
+    {
+      "id": "admin-1782472990012",
+      "avatar_url": null,
+      "password": "password123",
+      "email": "profeugene@htu.edu.gh",
+      "full_name": "Prof Eugene",
+      "role": "dept_admin",
+      "department_id": "dept-1782471584825"
+    }
+  ],
+  "students": [
+    {
+      "index_number": "0322080456",
+      "email": "0322080456@htu.edu.gh",
+      "full_name": "John Doe",
+      "programme": "BTech Computer Science",
+      "level": "400",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "department_id": "dept-cs-111"
+    },
+    {
+      "index_number": "0322080999",
+      "email": "0322080999@htu.edu.gh",
+      "full_name": "Jane Smith",
+      "programme": "BTech Computer Science",
+      "level": "300",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "department_id": "dept-cs-111"
+    },
+    {
+      "index_number": "322080456",
+      "full_name": "John Doe",
+      "email": "0322080456@htu.edu.gh",
+      "programme": "BTech Computer Science",
+      "level": "400",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "department_id": "dept-cs-111"
+    },
+    {
+      "index_number": "322080999",
+      "full_name": "Jane Smith",
+      "email": "0322080999@htu.edu.gh",
+      "programme": "BTech Computer Science",
+      "level": "300",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "department_id": "dept-cs-111"
+    },
+    {
+      "index_number": "325080329",
+      "full_name": "Eugene Dushie",
+      "email": "0325080329@htu.edu.gh",
+      "programme": "BTech Computer Science",
+      "level": "100",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "department_id": "dept-cs-111"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay-mock-001",
+      "student_index_number": "0322080999",
+      "amount": 150,
+      "paystack_reference": "TST_MOCK_REF_999",
+      "status": "success",
+      "receipt_id": "REC-HTU-2026-999-55A",
+      "payment_date": "2026-06-25T12:00:00.000Z"
+    },
+    {
+      "id": "pay-1782419289618",
+      "status": "success",
+      "created_at": "2026-06-25T20:28:09.618Z",
+      "updated_at": "2026-06-25T20:28:16.205Z",
+      "student_index_number": "0322080456",
+      "amount": 150,
+      "paystack_reference": "HTU-0322080456-1782419289617",
+      "receipt_id": "REC-HTU-296204-89617",
+      "payment_date": "2026-06-25T20:28:16.205Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-mock-001",
+      "user_id": "user-student-paid",
+      "role": null,
+      "title": "Welcome to HTU Payments",
+      "message": "Welcome Jane Smith! Your account has been registered.",
+      "is_read": true,
+      "created_at": "2026-06-25T11:55:00.000Z"
+    },
+    {
+      "id": "notif-mock-002",
+      "user_id": "user-student-paid",
+      "role": null,
+      "title": "Payment Confirmed",
+      "message": "Your payment of GHS 150.00 for Computer Science Dues has been verified. Download your receipt now.",
+      "is_read": true,
+      "created_at": "2026-06-25T12:00:05.000Z"
+    },
+    {
+      "id": "notif-1782419296210",
+      "title": "Payment Confirmed ✓",
+      "message": "Your dues payment of GHS 150.00 was successful! Receipt ID: REC-HTU-296204-89617",
+      "user_id": "user-student-unpaid",
+      "role": null,
+      "is_read": false,
+      "created_at": "2026-06-25T20:28:16.210Z"
+    },
+    {
+      "id": "notif-1782419296212",
+      "title": "New Payment Received",
+      "message": "John Doe (0322080456) paid departmental dues. Ref: HTU-0322080456-1782419289617",
+      "user_id": null,
+      "role": "dept_admin",
+      "is_read": false,
+      "created_at": "2026-06-25T20:28:16.212Z"
+    },
+    {
+      "id": "notif-1782472241540",
+      "title": "CSV Import Complete",
+      "message": "3 student record(s) were successfully imported. 0 row(s) skipped.",
+      "user_id": null,
+      "role": "dept_admin",
+      "is_read": false,
+      "created_at": "2026-06-26T11:10:41.540Z"
+    },
+    {
+      "id": "notif-1782472485411",
+      "title": "Account Created Successfully",
+      "message": "Welcome Eugene Dushie! Your student portal account has been set up successfully.",
+      "user_id": "user-1782472485401",
+      "role": null,
+      "is_read": false,
+      "created_at": "2026-06-26T11:14:45.411Z"
+    }
+  ],
+  "audit_logs": [
+    {
+      "id": "audit-mock-001",
+      "actor_id": "user-super-admin",
+      "action": "SYSTEM_START",
+      "details": "HTU Dues Payment System initialized in Mock Mode.",
+      "created_at": "2026-06-25T10:00:00.000Z"
+    },
+    {
+      "id": "audit-1782419255233",
+      "actor_id": "user-super-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "HTU Super Administrator (super_admin) logged in.",
+      "created_at": "2026-06-25T20:27:35.233Z"
+    },
+    {
+      "id": "audit-1782419264057",
+      "actor_id": "user-student-paid",
+      "action": "LOGIN_SUCCESS",
+      "details": "Jane Smith (student) logged in.",
+      "created_at": "2026-06-25T20:27:44.057Z"
+    },
+    {
+      "id": "audit-1782419287125",
+      "actor_id": "user-student-unpaid",
+      "action": "LOGIN_SUCCESS",
+      "details": "John Doe (student) logged in.",
+      "created_at": "2026-06-25T20:28:07.125Z"
+    },
+    {
+      "id": "audit-1782419289621",
+      "actor_id": "user-student-unpaid",
+      "action": "PAYMENT_INITIATED",
+      "details": "Student 0322080456 initiated payment of GHS 150. Ref: HTU-0322080456-1782419289617",
+      "created_at": "2026-06-25T20:28:09.621Z"
+    },
+    {
+      "id": "audit-1782419296214",
+      "actor_id": null,
+      "action": "PAYMENT_CONFIRMED_MOCK",
+      "details": "Mock payment confirmed. Ref: HTU-0322080456-1782419289617, Receipt: REC-HTU-296204-89617",
+      "created_at": "2026-06-25T20:28:16.214Z"
+    },
+    {
+      "id": "audit-1782419326406",
+      "actor_id": "user-cs-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "CS Department Administrator (dept_admin) logged in.",
+      "created_at": "2026-06-25T20:28:46.406Z"
+    },
+    {
+      "id": "audit-1782467912386",
+      "actor_id": "user-student-unpaid",
+      "action": "LOGIN_SUCCESS",
+      "details": "John Doe (student) logged in.",
+      "created_at": "2026-06-26T09:58:32.386Z"
+    },
+    {
+      "id": "audit-1782468241715",
+      "actor_id": "user-student-unpaid",
+      "action": "LOGIN_SUCCESS",
+      "details": "John Doe (student) logged in.",
+      "created_at": "2026-06-26T10:04:01.715Z"
+    },
+    {
+      "id": "audit-1782471111404",
+      "actor_id": "user-student-unpaid",
+      "action": "LOGIN_SUCCESS",
+      "details": "John Doe (student) logged in.",
+      "created_at": "2026-06-26T10:51:51.404Z"
+    },
+    {
+      "id": "audit-1782471305005",
+      "actor_id": "user-student-unpaid",
+      "action": "PROFILE_IMAGE_UPDATED",
+      "details": "John Doe updated profile picture.",
+      "created_at": "2026-06-26T10:55:05.005Z"
+    },
+    {
+      "id": "audit-1782471389786",
+      "actor_id": "user-student-paid",
+      "action": "LOGIN_SUCCESS",
+      "details": "Jane Smith (student) logged in.",
+      "created_at": "2026-06-26T10:56:29.786Z"
+    },
+    {
+      "id": "audit-1782471402400",
+      "actor_id": "user-cs-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "CS Department Administrator (dept_admin) logged in.",
+      "created_at": "2026-06-26T10:56:42.400Z"
+    },
+    {
+      "id": "audit-1782471491663",
+      "actor_id": "user-super-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "HTU Super Administrator (super_admin) logged in.",
+      "created_at": "2026-06-26T10:58:11.663Z"
+    },
+    {
+      "id": "audit-1782471584846",
+      "actor_id": "user-super-admin",
+      "action": "CREATE_DEPARTMENT",
+      "details": "Created department: Test Department  under faculty TEST with dues GHS 300",
+      "created_at": "2026-06-26T10:59:44.846Z"
+    },
+    {
+      "id": "audit-1782471680711",
+      "actor_id": "user-student-paid",
+      "action": "LOGIN_SUCCESS",
+      "details": "Jane Smith (student) logged in.",
+      "created_at": "2026-06-26T11:01:20.711Z"
+    },
+    {
+      "id": "audit-1782471938621",
+      "actor_id": "user-cs-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "CS Department Administrator (dept_admin) logged in.",
+      "created_at": "2026-06-26T11:05:38.621Z"
+    },
+    {
+      "id": "audit-1782472227188",
+      "actor_id": "user-cs-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "CS Department Administrator (dept_admin) logged in.",
+      "created_at": "2026-06-26T11:10:27.188Z"
+    },
+    {
+      "id": "audit-1782472241535",
+      "actor_id": "user-cs-admin",
+      "action": "CSV_IMPORT",
+      "details": "CS Department Administrator imported 3 students into department dept-cs-111.",
+      "created_at": "2026-06-26T11:10:41.535Z"
+    },
+    {
+      "id": "audit-1782472485417",
+      "actor_id": "user-1782472485401",
+      "action": "REGISTRATION_SUCCESS",
+      "details": "Student Eugene Dushie registered their account.",
+      "created_at": "2026-06-26T11:14:45.417Z"
+    },
+    {
+      "id": "audit-1782472494522",
+      "actor_id": "user-1782472485401",
+      "action": "LOGIN_SUCCESS",
+      "details": "Eugene Dushie (student) logged in.",
+      "created_at": "2026-06-26T11:14:54.522Z"
+    },
+    {
+      "id": "audit-1782472623280",
+      "actor_id": "user-super-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "HTU Super Administrator (super_admin) logged in.",
+      "created_at": "2026-06-26T11:17:03.280Z"
+    },
+    {
+      "id": "audit-1782472697292",
+      "actor_id": "user-super-admin",
+      "action": "CREATE_ADMIN",
+      "details": "Created Admin account for Prof Eugene (profeugene@htu.edu.gh) assigned to department ID dept-1782471584825",
+      "created_at": "2026-06-26T11:18:17.292Z"
+    },
+    {
+      "id": "audit-1782472915891",
+      "actor_id": "user-super-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "HTU Super Administrator (super_admin) logged in.",
+      "created_at": "2026-06-26T11:21:55.891Z"
+    },
+    {
+      "id": "audit-1782472934726",
+      "actor_id": "user-super-admin",
+      "action": "DELETE_ADMIN",
+      "details": "Removed Admin profile ID admin-1782472697284",
+      "created_at": "2026-06-26T11:22:14.726Z"
+    },
+    {
+      "id": "audit-1782472990021",
+      "actor_id": "user-super-admin",
+      "action": "CREATE_ADMIN",
+      "details": "Created Admin account for Prof Eugene (profeugene@htu.edu.gh) assigned to department ID dept-1782471584825",
+      "created_at": "2026-06-26T11:23:10.021Z"
+    },
+    {
+      "id": "audit-1782473020775",
+      "actor_id": "admin-1782472990012",
+      "action": "LOGIN_SUCCESS",
+      "details": "Prof Eugene (dept_admin) logged in.",
+      "created_at": "2026-06-26T11:23:40.776Z"
+    }
+  ]
+}
