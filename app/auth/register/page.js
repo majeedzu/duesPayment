@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { UserPlus, Mail, Key, ShieldCheck, ArrowLeft, ShieldAlert } from "lucide-react";
+import { UserPlus, Mail, Key, ShieldCheck, ArrowLeft, ShieldAlert, Eye, EyeOff } from "lucide-react";
 
 function RegisterContent() {
   const router = useRouter();
@@ -14,6 +14,8 @@ function RegisterContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
@@ -153,14 +155,34 @@ function RegisterContent() {
             <div style={{ position: "relative" }}>
               <Key style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} size={16} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="Password (min 6 characters)"
                 className="input"
-                style={{ paddingLeft: "2.5rem" }}
+                style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "1rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  opacity: 0.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 
@@ -169,14 +191,34 @@ function RegisterContent() {
             <div style={{ position: "relative" }}>
               <Key style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} size={16} />
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm password"
                 className="input"
-                style={{ paddingLeft: "2.5rem" }}
+                style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{
+                  position: "absolute",
+                  right: "1rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  opacity: 0.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0
+                }}
+              >
+                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 

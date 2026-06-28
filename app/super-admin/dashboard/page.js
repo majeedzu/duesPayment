@@ -736,14 +736,19 @@ export default function SuperAdminDashboard() {
 
               <div className="form-group">
                 <label className="label">Faculty</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Faculty of Applied Sciences"
-                  className="input"
+                <select
+                  className="select"
                   value={deptForm.faculty}
                   onChange={(e) => setDeptForm({ ...deptForm, faculty: e.target.value })}
                   required
-                />
+                >
+                  <option value="">-- Choose Faculty --</option>
+                  <option value="Faculty of Applied Sciences and Technology">Faculty of Applied Sciences and Technology</option>
+                  <option value="Faculty of Engineering">Faculty of Engineering</option>
+                  <option value="Faculty of Art and Design">Faculty of Art and Design</option>
+                  <option value="Faculty of Business and Management Studies">Faculty of Business and Management Studies</option>
+                  <option value="Faculty of Applied Social Sciences">Faculty of Applied Social Sciences</option>
+                </select>
               </div>
 
               <div className="form-group">
@@ -834,7 +839,7 @@ export default function SuperAdminDashboard() {
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", padding: "0.5rem 0.75rem", backgroundColor: "rgba(245, 158, 11, 0.05)", border: "1px dashed rgba(245, 158, 11, 0.2)", borderRadius: "var(--radius)", fontSize: "0.75rem" }}>
                 <AlertCircle size={16} style={{ color: "var(--accent-gold)", flexShrink: 0, marginTop: "2px" }} />
                 <p style={{ opacity: 0.8 }}>
-                  An email validation password setup link is generated automatically. The default account login password will be set as <strong>password123</strong>.
+                  The administrator will be created with a temporary password of <strong>password123</strong>. A password reset email will be sent automatically so they can set their own password. Please inform them to check their inbox.
                 </p>
               </div>
 

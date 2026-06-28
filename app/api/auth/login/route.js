@@ -1,5 +1,5 @@
 import { db } from '@/lib/db';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(req) {
   try {
@@ -11,12 +11,49 @@ export async function POST(req) {
 
     if (isSupabaseConfigured()) {
       // Supabase Authentication
-      const { data, error } = await supabase.auth.signInWithPassword({
+      let { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
       if (error) {
+        // Intercept failed login to see if it is a student logging in for the first time
+        // using their index number as the default password.
+        const studentRecord = await db.getStudentByEmail(email);
+        if (studentRecord && password === studentRecord.index_number) {
+          const existingProfile = await db.getProfile(email);
+          if (!existingProfile && supabaseAdmin) {
+            // Programmatically register the student in Supabase Auth
+            const { data: authData, error: createError } = await supabaseAdmin.auth.admin.createUser({
+              email,
+              password, // index_number as password
+              email_confirm: true
+            });
+
+            if (!createError && authData?.user) {
+              const newProfile = await db.createProfile({
+                id: authData.user.id,
+                email,
+                role: 'student',
+                full_name: studentRecord.full_name,
+                department_id: studentRecord.department_id
+              });
+
+              await db.addNotification(
+                "Account Created Successfully",
+                `Welcome ${studentRecord.full_name}! Your student portal account has been set up successfully.`,
+                newProfile.id
+              );
+
+              await db.addAuditLog(newProfile.id, 'REGISTRATION_SUCCESS', `Student ${studentRecord.full_name} registered via default password login.`);
+
+              return Response.json({
+                success: true,
+                user: newProfile
+              });
+            }
+          }
+        }
         return Response.json({ success: false, message: error.message }, { status: 400 });
       }
 

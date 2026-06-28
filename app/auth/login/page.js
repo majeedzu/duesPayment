@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LogIn, Key, Mail, ShieldAlert, ArrowLeft, HelpCircle } from "lucide-react";
+import { LogIn, Key, Mail, ShieldAlert, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { setClientSession } from "@/lib/session";
 
 function LoginContent() {
@@ -13,25 +13,11 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [isMock, setIsMock] = useState(true); // Always starts as true/checks env on init
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Detect pre-selected role or messages
   useEffect(() => {
-    const roleParam = searchParams.get("role");
     const emailParam = searchParams.get("email");
     if (emailParam) setEmail(emailParam);
-    
-    // Check if Supabase keys exist (by checking api configuration asynchronously)
-    const checkConfig = async () => {
-      try {
-        const res = await fetch("/api/auth/config-check");
-        const data = await res.json();
-        setIsMock(!data.isSupabaseConfigured);
-      } catch (err) {
-        setIsMock(true);
-      }
-    };
-    checkConfig();
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
@@ -163,15 +149,38 @@ function LoginContent() {
             <div style={{ position: "relative" }}>
               <Key style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} size={16} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 className="input"
-                style={{ paddingLeft: "2.5rem" }}
+                style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "1rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  opacity: 0.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0
+                }}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, marginTop: "0.25rem", display: "block" }}>
+              First-time login? Use your student index number as your default password.
+            </span>
           </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "1rem" }} disabled={loading}>
@@ -187,57 +196,6 @@ function LoginContent() {
         </div>
 
       </div>
-
-      {/* Quick-Login presets drawer for testing (Only visible in Mock Mode) */}
-      {isMock && (
-        <div style={{ 
-          maxWidth: "450px", 
-          width: "100%", 
-          marginTop: "1.5rem", 
-          backgroundColor: "rgba(245, 158, 11, 0.07)", 
-          border: "1px dashed rgba(245, 158, 11, 0.3)",
-          borderRadius: "var(--radius)",
-          padding: "1.25rem"
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--accent-gold)", fontWeight: 700, fontSize: "0.85rem", marginBottom: "0.75rem", textTransform: "uppercase" }}>
-            <HelpCircle size={16} />
-            <span>Developer Sandbox Presets (Mock Mode Active)</span>
-          </div>
-          <p style={{ fontSize: "0.8rem", opacity: 0.7, marginBottom: "1rem" }}>
-            Select a role profile below to autofill mock account credentials (password is `password123`).
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-            <button 
-              className="btn btn-outline" 
-              style={{ fontSize: "0.75rem", padding: "0.5rem", borderStyle: "dashed" }}
-              onClick={() => handleQuickLogin("0322080456@htu.edu.gh")}
-            >
-              Unpaid Student
-            </button>
-            <button 
-              className="btn btn-outline" 
-              style={{ fontSize: "0.75rem", padding: "0.5rem", borderStyle: "dashed" }}
-              onClick={() => handleQuickLogin("0322080999@htu.edu.gh")}
-            >
-              Paid Student
-            </button>
-            <button 
-              className="btn btn-outline" 
-              style={{ fontSize: "0.75rem", padding: "0.5rem", borderStyle: "dashed" }}
-              onClick={() => handleQuickLogin("csadmin@htu.edu.gh")}
-            >
-              CS Dept Admin
-            </button>
-            <button 
-              className="btn btn-outline" 
-              style={{ fontSize: "0.75rem", padding: "0.5rem", borderStyle: "dashed" }}
-              onClick={() => handleQuickLogin("superadmin@htu.edu.gh")}
-            >
-              Super Admin
-            </button>
-          </div>
-        </div>
-      )}
 
     </div>
   );

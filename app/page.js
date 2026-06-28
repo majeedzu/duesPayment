@@ -372,7 +372,7 @@ export default function Home() {
           <a href="#verify" style={{ fontSize: "0.85rem", fontWeight: 600, color: highContrast ? "#FFF" : "var(--foreground)" }}>Verification Desk</a>
           <a href="#tariffs" style={{ fontSize: "0.85rem", fontWeight: 600, color: highContrast ? "#FFF" : "var(--foreground)" }}>Dues Catalog</a>
           <Link href="/auth/login" className="btn btn-primary" style={{ padding: "0.5rem 1.25rem", fontSize: "0.85rem" }}>
-            Student Portal
+            Dues Portal
           </Link>
         </nav>
       </header>
@@ -440,7 +440,7 @@ export default function Home() {
                   backgroundColor: highContrast ? "#FFFF00" : "var(--accent-gold)",
                   color: "#000"
                 }}>
-                  <LogIn size={18} /> Access Student Portal
+                  <LogIn size={18} /> Access Dues Portal
                 </Link>
                 <a href="#verify" className="btn btn-outline" style={{ 
                   padding: "1rem 2.25rem", 
@@ -810,7 +810,7 @@ export default function Home() {
               Portal Access
             </h4>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.85rem" }}>
-              <Link href="/auth/login" style={{ opacity: 0.85, textDecoration: "underline" }}>Student Portal Log In</Link>
+              <Link href="/auth/login" style={{ opacity: 0.85, textDecoration: "underline" }}>Dues Portal Log In</Link>
               <Link href="/auth/register" style={{ opacity: 0.85, textDecoration: "underline" }}>First-time Activation</Link>
               <Link href="/auth/login?role=admin" style={{ opacity: 0.85, textDecoration: "underline" }}>Department Admin Desk</Link>
               <Link href="/auth/login?role=super" style={{ opacity: 0.85, textDecoration: "underline" }}>Super Admin Console</Link>

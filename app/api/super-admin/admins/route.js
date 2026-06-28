@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { getServerSession } from '@/lib/session';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(req) {
   try {
@@ -25,12 +26,37 @@ export async function POST(req) {
         return Response.json({ success: false, message: 'Email is already registered.' }, { status: 400 });
       }
 
+      const dept = await db.getDepartment(department_id);
       const newAdmin = await db.createAdmin({
         email: email.toLowerCase().trim(),
         full_name: full_name.trim(),
         role: 'dept_admin',
         department_id: department_id
       });
+
+      // Send a magic link / password reset email so the admin can set their own password
+      if (supabaseAdmin) {
+        await supabaseAdmin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: email.toLowerCase().trim(),
+          options: {
+            data: { full_name: full_name.trim(), role: 'dept_admin' }
+          }
+        });
+        // Also send a password reset link so they can set a proper password
+        await supabaseAdmin.auth.admin.generateLink({
+          type: 'recovery',
+          email: email.toLowerCase().trim()
+        });
+      }
+
+      // Add a welcome notification for the new admin
+      await db.addNotification(
+        'Welcome to HTU Dues Portal',
+        `Hello ${full_name}! Your department administrator account has been set up for ${dept?.name || 'your department'}. Your temporary password is: password123. Please change it immediately after logging in.`,
+        newAdmin.id,
+        null
+      );
 
       await db.addAuditLog(
         session.id,

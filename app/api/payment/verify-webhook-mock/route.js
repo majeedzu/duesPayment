@@ -37,12 +37,11 @@ export async function POST(req) {
             null
           );
         }
-        await db.addNotification(
-          'New Payment Received',
-          `${student.full_name} (${student.index_number}) paid departmental dues. Ref: ${reference}`,
-          null,
-          'dept_admin'
-        );
+        await db.addNotificationToAdminOfDepartment(
+            'New Payment Received',
+            `${student.full_name} (${student.index_number}) paid departmental dues. Ref: ${reference}`,
+            student.department_id
+          );
       }
       await db.addAuditLog(null, 'PAYMENT_CONFIRMED_MOCK', `Mock payment confirmed. Ref: ${reference}, Receipt: ${receiptId}`);
     } else {

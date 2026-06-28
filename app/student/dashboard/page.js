@@ -302,7 +302,7 @@ export default function StudentDashboard() {
             {(!sidebarCollapsed || isMobile) && (
               <div style={{ overflow: "hidden" }}>
                 <h4 style={{ color: "#ffffff", fontWeight: 700, fontSize: "0.9rem", whiteSpace: "nowrap" }}>Ho Tech Uni</h4>
-                <span style={{ fontSize: "0.65rem", opacity: 0.7, display: "block" }}>Student Portal</span>
+                <span style={{ fontSize: "0.65rem", opacity: 0.7, display: "block" }}>Dues Portal</span>
               </div>
             )}
           </div>

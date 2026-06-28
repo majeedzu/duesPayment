@@ -168,7 +168,10 @@ export default function AdminDashboard() {
 
           const data = await response.json();
           if (response.ok && data.success) {
-            setImportSuccess(`Roster updated! Imported ${data.imported} students, skipped ${data.skipped} invalid rows.`);
+            let msg = `Roster updated! Imported ${data.imported} students`;
+            if (data.manualPayments > 0) msg += `, ${data.manualPayments} manual payment(s) recorded`;
+            if (data.skipped > 0) msg += `, ${data.skipped} invalid rows skipped`;
+            setImportSuccess(msg + '.');
             if (data.errors && data.errors.length > 0) {
               setImportErrors(data.errors.slice(0, 5)); // show first 5 warnings
             }
@@ -221,9 +224,9 @@ export default function AdminDashboard() {
   // Download Sample CSV
   const handleDownloadTemplate = () => {
     const csvContent = [
-      ["index_number", "full_name", "email", "programme", "level", "faculty"],
-      ["0322080456", "John Doe", "0322080456@htu.edu.gh", "BTech Computer Science", "400", "Faculty of Applied Sciences and Technology"],
-      ["0322080999", "Jane Smith", "0322080999@htu.edu.gh", "BTech Computer Science", "300", "Faculty of Applied Sciences and Technology"]
+      ["index_number", "full_name", "email", "programme", "level", "faculty", "paid_status"],
+      ["0322080456", "John Doe", "0322080456@htu.edu.gh", "BTech Computer Science", "400", "Faculty of Applied Sciences and Technology", ""],
+      ["0322080999", "Jane Smith", "0322080999@htu.edu.gh", "BTech Computer Science", "300", "Faculty of Applied Sciences and Technology", "paid"]
     ]
       .map(e => e.join(","))
       .join("\n");
@@ -504,8 +507,11 @@ export default function AdminDashboard() {
                   <p style={{ opacity: 0.8, marginTop: "0.25rem", fontStyle: "italic" }}>
                     index_number, full_name, email, programme, level, faculty
                   </p>
+                  <p style={{ opacity: 0.8, marginTop: "0.25rem", fontStyle: "italic" }}>
+                    <strong>Optional:</strong> paid_status (set to <code>paid</code> to record a manual cash payment)
+                  </p>
                   <p style={{ opacity: 0.6, marginTop: "0.25rem" }}>
-                    Emails must end with `@htu.edu.gh` to be accepted.
+                    Emails must end with <code>@htu.edu.gh</code> to be accepted.
                   </p>
                 </div>
               </div>

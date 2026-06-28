@@ -42,13 +42,14 @@ export async function POST(req) {
             null
           );
         }
-        // Notify dept admins
-        await db.addNotification(
-          'New Payment Received',
-          `Student ${student.full_name} (${student.index_number}) has paid dues. Ref: ${reference}`,
-          null,
-          'dept_admin'
-        );
+        // Notify only the admin of the student's specific department
+        if (student.department_id) {
+          await db.addNotificationToAdminOfDepartment(
+            'New Payment Received',
+            `Student ${student.full_name} (${student.index_number}) has paid dues. Ref: ${reference}`,
+            student.department_id
+          );
+        }
       }
 
       await db.addAuditLog(null, 'PAYMENT_CONFIRMED_WEBHOOK', `Paystack webhook confirmed payment. Ref: ${reference}`);
