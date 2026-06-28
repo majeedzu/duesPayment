@@ -10,7 +10,7 @@ export async function POST(req) {
 
     const { action, id, name, faculty, duesAmount } = await req.json();
 
-    if (!action || (action !== 'create' && action !== 'update')) {
+    if (!action || (action !== 'create' && action !== 'update' && action !== 'edit')) {
       return Response.json({ success: false, message: 'Invalid action. Use "create" or "update".' }, { status: 400 });
     }
 
@@ -34,7 +34,7 @@ export async function POST(req) {
       return Response.json({ success: true, department: newDept });
     }
 
-    if (action === 'update') {
+    if (action === 'update' || action === 'edit') {
       if (!id) {
         return Response.json({ success: false, message: 'Department ID is required for updates.' }, { status: 400 });
       }
