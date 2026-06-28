@@ -286,10 +286,12 @@ export default function AdminDashboard() {
       {/* Sidebar Navigation */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-brand">
-          <img src="/htu_logo.jpg" alt="HTU Logo" style={{ width: "40px", height: "40px", borderRadius: "50%", border: "2px solid var(--accent-gold)", objectFit: "cover", flexShrink: 0 }} />
+          <div className="htu-logo-container" style={{ width: "40px", height: "40px", border: "2px solid var(--accent-crimson)" }}>
+            <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
+          </div>
           <div>
             <h4 style={{ color: "white" }}>HTU Dues</h4>
-            <span style={{ fontSize: "0.75rem", color: "var(--accent-gold)", fontWeight: 600 }}>ADMIN PORTAL</span>
+            <span style={{ fontSize: "0.75rem", color: "var(--accent-crimson)", fontWeight: 600 }}>ADMIN PORTAL</span>
           </div>
         </div>
 
@@ -304,14 +306,14 @@ export default function AdminDashboard() {
             Department Info
           </div>
           <div style={{ padding: "0.75rem 1rem", fontSize: "0.85rem", opacity: 0.9, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "var(--radius)" }}>
-            <p style={{ fontWeight: 600, color: "var(--accent-gold)" }}>{department?.name || "Loading..."}</p>
+            <p style={{ fontWeight: 600, color: "var(--accent-crimson)" }}>{department?.name || "Loading..."}</p>
             <p style={{ fontSize: "0.75rem", opacity: 0.7, marginTop: "0.25rem" }}>Dues: GHS {department?.dues_amount?.toFixed(2) || "0.00"}</p>
           </div>
         </div>
 
         <div className="sidebar-footer">
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-            <div style={{ width: "35px", height: "35px", borderRadius: "50%", backgroundColor: "var(--accent-gold)", display: "flex", alignItems: "center", justifyCenter: "center", color: "#000", fontWeight: 700, justifyContent: "center" }}>
+            <div style={{ width: "35px", height: "35px", borderRadius: "50%", backgroundColor: "var(--accent-crimson)", display: "flex", alignItems: "center", justifyCenter: "center", color: "#fff", fontWeight: 700, justifyContent: "center" }}>
               {admin?.full_name?.charAt(0) || "A"}
             </div>
             <div style={{ overflow: "hidden" }}>
@@ -447,12 +449,12 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="card stat-card" style={{ borderLeft: "4px solid var(--accent-gold)" }}>
+            <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)" }}>
               <div>
                 <span style={{ fontSize: "0.85rem", opacity: 0.7, fontWeight: 600 }}>Total Revenue</span>
-                <div className="stat-value" style={{ color: "var(--accent-gold)" }}>GHS {stats.totalRevenue.toFixed(2)}</div>
+                <div className="stat-value" style={{ color: "var(--primary)" }}>GHS {stats.totalRevenue.toFixed(2)}</div>
               </div>
-              <div className="stat-icon-wrapper" style={{ backgroundColor: "var(--warning-bg)", color: "var(--accent-gold)" }}>
+              <div className="stat-icon-wrapper" style={{ backgroundColor: "rgba(var(--primary-rgb), 0.08)", color: "var(--primary)" }}>
                 <CreditCard size={22} />
               </div>
             </div>

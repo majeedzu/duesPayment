@@ -268,7 +268,9 @@ export default function SuperAdminDashboard() {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-brand">
-          <img src="/htu_logo.jpg" alt="HTU Logo" style={{ width: "40px", height: "40px", borderRadius: "50%", border: "2px solid var(--accent-crimson)", objectFit: "cover", flexShrink: 0 }} />
+          <div className="htu-logo-container" style={{ width: "40px", height: "40px", border: "2px solid var(--accent-crimson)" }}>
+            <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
+          </div>
           <div>
             <h4 style={{ color: "white" }}>HTU Dues</h4>
             <span style={{ fontSize: "0.75rem", color: "var(--accent-crimson)", fontWeight: 700 }}>SUPER ADMIN</span>
@@ -389,12 +391,12 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
 
-            <div className="card stat-card" style={{ borderLeft: "4px solid var(--accent-gold)" }}>
+            <div className="card stat-card" style={{ borderLeft: "4px solid var(--accent-crimson)" }}>
               <div>
                 <span style={{ fontSize: "0.85rem", opacity: 0.7, fontWeight: 600 }}>Departments</span>
                 <div className="stat-value">{stats.totalDepartments}</div>
               </div>
-              <div className="stat-icon-wrapper" style={{ backgroundColor: "var(--warning-bg)", color: "var(--accent-gold)" }}>
+              <div className="stat-icon-wrapper" style={{ backgroundColor: "var(--warning-bg)", color: "var(--accent-crimson)" }}>
                 <BookOpen size={22} />
               </div>
             </div>
@@ -837,7 +839,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", padding: "0.5rem 0.75rem", backgroundColor: "rgba(245, 158, 11, 0.05)", border: "1px dashed rgba(245, 158, 11, 0.2)", borderRadius: "var(--radius)", fontSize: "0.75rem" }}>
-                <AlertCircle size={16} style={{ color: "var(--accent-gold)", flexShrink: 0, marginTop: "2px" }} />
+                <AlertCircle size={16} style={{ color: "var(--accent-crimson)", flexShrink: 0, marginTop: "2px" }} />
                 <p style={{ opacity: 0.8 }}>
                   The administrator will be created with a temporary password of <strong>password123</strong>. A password reset email will be sent automatically so they can set their own password. Please inform them to check their inbox.
                 </p>

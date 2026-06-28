@@ -298,7 +298,9 @@ export default function StudentDashboard() {
       >
         <div className="sidebar-brand" style={{ position: "relative" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start" }}>
-            <img src="/htu_logo.jpg" alt="HTU Logo" style={{ width: "35px", height: "35px", borderRadius: "50%", border: "2px solid var(--accent-crimson)", objectFit: "cover", flexShrink: 0 }} />
+            <div className="htu-logo-container" style={{ width: "35px", height: "35px", border: "2px solid var(--accent-crimson)" }}>
+              <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
+            </div>
             {(!sidebarCollapsed || isMobile) && (
               <div style={{ overflow: "hidden" }}>
                 <h4 style={{ color: "#ffffff", fontWeight: 700, fontSize: "0.9rem", whiteSpace: "nowrap" }}>Ho Tech Uni</h4>

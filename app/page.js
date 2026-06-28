@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Search, 
@@ -8,20 +8,68 @@ import {
   CheckCircle, 
   XCircle, 
   CreditCard, 
-  ShieldAlert, 
   Accessibility, 
-  HelpCircle, 
   Phone, 
   Mail, 
   ChevronDown, 
   Info,
   Calendar,
   Sparkles,
-  ArrowRight,
   LogIn,
-  Users,
-  Award
+  Award,
+  Menu,
+  X,
+  BookOpen,
+  Receipt,
+  GraduationCap
 } from "lucide-react";
+
+const NAV_LINKS = [
+  { href: "#how-it-works", label: "How it works" },
+  { href: "#verify", label: "Verify receipt" },
+  { href: "#tariffs", label: "Dues fees" },
+  { href: "#faq", label: "Help" },
+];
+
+const PORTAL_FEATURES = [
+  {
+    title: "Mobile Payments",
+    desc: "Pay with MTN MoMo, Telecel Cash, AT Money, or debit/credit cards.",
+    icon: CreditCard,
+    iconTone: "primary",
+  },
+  {
+    title: "Registry Sync",
+    desc: "Clearance updates automatically on the course registration portal.",
+    icon: CheckCircle,
+    iconTone: "success",
+  },
+  {
+    title: "Receipt Vault",
+    desc: "View, verify, and download stamped receipts from your dashboard.",
+    icon: Receipt,
+    iconTone: "info",
+  },
+  {
+    title: "Secure Check",
+    desc: "Officers verify payments instantly via QR scan or receipt ID.",
+    icon: ShieldCheck,
+    iconTone: "violet",
+  },
+  {
+    title: "All Departments",
+    desc: "Every faculty supported — Applied Sciences, Engineering, Business, and more.",
+    icon: BookOpen,
+    iconTone: "cyan",
+  },
+  {
+    title: "Finance Support",
+    desc: "Reach department finance officers when you need help or updates.",
+    icon: Phone,
+    iconTone: "crimson",
+  },
+];
+
 
 export default function Home() {
   // Verification states
@@ -35,11 +83,37 @@ export default function Home() {
   const [textSize, setTextSize] = useState("normal"); // small, normal, large
   const [readableFont, setReadableFont] = useState(false);
 
-  // FAQ Accordion states
+  // FAQ accordion states
   const [openFaq, setOpenFaq] = useState(null);
 
   // Department Dues search states
   const [deptSearch, setDeptSearch] = useState("");
+  // Floating panel open state
+  const [floatingPanelOpen, setFloatingPanelOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+
+  // Scroll animations trigger
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("reveal-active");
+        }
+      });
+    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+
+    document.querySelectorAll(".reveal-init").forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -108,502 +182,490 @@ export default function Home() {
     "--foreground": "#FFFFFF",
     "--card-bg": "#111111",
     "--card-border": "#FFFFFF",
-    "--primary": "#FFFF00", // High contrast yellow
-    "--primary-hover": "#E5E500",
-    "--secondary": "#00FFFF", // Cyan
+    "--primary": "#FF4444",    // Bright accessible red
+    "--primary-hover": "#CC2222",
+    "--secondary": "#FFFFFF",
     "--border": "#FFFFFF",
-    "--success": "#00FF00",
-    "--danger": "#FF0000",
+    "--success": "#00FF88",
+    "--danger": "#FF4444",
     "--warning-bg": "#222222",
     "--info-bg": "#333333"
   } : {};
 
-  // Custom inline style configuration for the hero layout
-  const heroStyle = {
-    position: "relative",
-    backgroundImage: highContrast ? "none" : "url('/htu_campus_hero.png')",
-    backgroundColor: highContrast ? "#000000" : "var(--primary)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    padding: "6rem 2rem",
-    borderRadius: "var(--radius-lg)",
-    overflow: "hidden",
-    color: "#FFFFFF",
-    marginBottom: "4rem",
-    border: highContrast ? "2px solid #FFFFFF" : "none",
-    boxShadow: "var(--shadow-lg)",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    textAlign: "center"
-  };
 
-  const heroOverlayStyle = {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: highContrast 
-      ? "transparent" 
-      : "linear-gradient(135deg, rgba(0, 55, 114, 0.93) 0%, rgba(0, 71, 173, 0.82) 100%)",
-    zIndex: 1
-  };
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <div style={{ 
-      minHeight: "100vh", 
-      display: "flex", 
-      flexDirection: "column",
-      fontSize: baseFontSize,
-      fontFamily: readableFont ? "Arial, sans-serif" : "var(--font-sans)",
-      transition: "font-size 0.2s ease",
-      ...contrastTheme
-    }}>
+    <div
+      className="landing-page"
+      style={{ 
+        fontSize: baseFontSize,
+        fontFamily: readableFont ? "Arial, sans-serif" : "var(--font-sans)",
+        transition: "font-size 0.2s ease",
+        ...contrastTheme
+      }}
+    >
       
-      {/* 1. Official Top Utility Bar (SLTF-style) */}
-      <div style={{
-        backgroundColor: highContrast ? "#000000" : "var(--primary)",
-        color: "#FFFFFF",
-        padding: "0.5rem 1.5rem",
-        borderBottom: `2px solid ${highContrast ? "#FFFFFF" : "var(--accent-gold)"}`,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: "0.5rem",
-        fontSize: "0.8rem",
-        fontWeight: 600,
-        zIndex: 50
-      }}>
-        <div style={{ display: "flex", gap: "1.25rem", alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-            <Phone size={13} style={{ color: highContrast ? "#FFFF00" : "var(--accent-gold)" }} />
-            <span>Support Hotline: +233 (0)302 751 020</span>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-            <Mail size={13} style={{ color: highContrast ? "#FFFF00" : "var(--accent-gold)" }} />
-            <span>finance@htu.edu.gh</span>
-          </div>
-          <span style={{ color: highContrast ? "#FFFF00" : "var(--accent-gold)", display: "none" }} id="htu-motto">| Adanu Nunya built on Excellence</span>
-          <style jsx global>{`
-            @media (min-width: 768px) {
-              #htu-motto { display: inline !important; }
-            }
-          `}</style>
-        </div>
+      {/* Floating accessibility & contact */}
+      <div className="landing-fab-wrap">
+        {/* Slide-out panel */}
+        {floatingPanelOpen && (
+          <div style={{
+            background: highContrast ? "#000" : "rgba(255,255,255,0.97)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: `1px solid ${highContrast ? "#fff" : "rgba(0,0,140,0.12)"}`,
+            borderRadius: "16px",
+            padding: "1.5rem",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+            minWidth: "280px",
+            maxWidth: "320px",
+            animation: "modalEnter 0.25s cubic-bezier(0.34,1.56,0.64,1)"
+          }}>
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+              <span style={{ fontWeight: 800, fontSize: "0.85rem", color: highContrast ? "#FF6B6B" : "var(--primary)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-heading)" }}>
+                Portal Tools
+              </span>
+              <button onClick={() => setFloatingPanelOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: highContrast ? "#fff" : "#666", fontSize: "1.1rem", lineHeight: 1, padding: "2px 6px", borderRadius: "6px" }}>✕</button>
+            </div>
 
-        {/* Accessibility Toolbar (SLTF-inspired) */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-            <Accessibility size={14} style={{ color: highContrast ? "#FFFF00" : "var(--accent-gold)" }} />
-            <span style={{ fontSize: "0.75rem" }}>Accessibility Tools:</span>
-          </div>
-          
-          {/* Contrast Controls */}
-          <div style={{ display: "flex", gap: "2px" }}>
-            <button 
-              onClick={() => setHighContrast(false)}
-              style={{
-                padding: "2px 6px",
-                fontSize: "0.7rem",
-                cursor: "pointer",
-                backgroundColor: !highContrast ? "#FFFFFF" : "#333",
-                color: !highContrast ? "#000" : "#FFF",
-                border: "1px solid #FFF",
-                borderRadius: "3px",
-                fontWeight: 700
-              }}
-              title="Standard Mode"
-            >
-              Standard
-            </button>
-            <button 
-              onClick={() => setHighContrast(true)}
-              style={{
-                padding: "2px 6px",
-                fontSize: "0.7rem",
-                cursor: "pointer",
-                backgroundColor: highContrast ? "#FFFF00" : "#333",
-                color: "#000",
-                border: "1px solid #FFF",
-                borderRadius: "3px",
-                fontWeight: 700
-              }}
-              title="High Contrast Mode"
-            >
-              Contrast
-            </button>
-          </div>
+            {/* Contact Info */}
+            <div style={{ marginBottom: "1.25rem", paddingBottom: "1.25rem", borderBottom: `1px solid ${highContrast ? "#555" : "rgba(0,0,0,0.07)"}` }}>
+              <p style={{ fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.5, marginBottom: "0.6rem", color: highContrast ? "#fff" : "inherit" }}>Support</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: highContrast ? "#fff" : "var(--foreground)" }}>
+                  <Phone size={13} style={{ color: highContrast ? "#FF6B6B" : "var(--primary)", flexShrink: 0 }} />
+                  <span>+233(0)30 290 5009</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: highContrast ? "#fff" : "var(--foreground)" }}>
+                  <Phone size={13} style={{ color: highContrast ? "#FF6B6B" : "var(--primary)", flexShrink: 0 }} />
+                  <span>+233(0) 50 140 4994</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: highContrast ? "#fff" : "var(--foreground)" }}>
+                  <Mail size={13} style={{ color: highContrast ? "#FF6B6B" : "var(--primary)", flexShrink: 0 }} />
+                  <span>info@htu.edu.gh</span>
+                </div>
+              </div>
+            </div>
 
-          {/* Text Resize Controls */}
-          <div style={{ display: "flex", gap: "2px", alignItems: "center" }}>
-            <button 
-              onClick={() => setTextSize("small")}
-              style={{
-                padding: "2px 6px",
-                fontSize: "0.7rem",
-                cursor: "pointer",
-                backgroundColor: textSize === "small" ? "#FFF" : "#333",
-                color: textSize === "small" ? "#000" : "#FFF",
-                border: "none",
-                borderRadius: "3px",
-                fontWeight: 700
-              }}
-            >
-              A-
-            </button>
-            <button 
-              onClick={() => setTextSize("normal")}
-              style={{
-                padding: "2px 6px",
-                fontSize: "0.7rem",
-                cursor: "pointer",
-                backgroundColor: textSize === "normal" ? "#FFF" : "#333",
-                color: textSize === "normal" ? "#000" : "#FFF",
-                border: "none",
-                borderRadius: "3px",
-                fontWeight: 700
-              }}
-            >
-              A
-            </button>
-            <button 
-              onClick={() => setTextSize("large")}
-              style={{
-                padding: "2px 6px",
-                fontSize: "0.7rem",
-                cursor: "pointer",
-                backgroundColor: textSize === "large" ? "#FFF" : "#333",
-                color: textSize === "large" ? "#000" : "#FFF",
-                border: "none",
-                borderRadius: "3px",
-                fontWeight: 700
-              }}
-            >
-              A+
-            </button>
-          </div>
+            {/* Accessibility Controls */}
+            <div>
+              <p style={{ fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.5, marginBottom: "0.75rem", color: highContrast ? "#fff" : "inherit" }}>Accessibility</p>
 
-          {/* Readable Font Switch */}
-          <button 
-            onClick={() => setReadableFont(!readableFont)}
-            style={{
-              padding: "2px 6px",
-              fontSize: "0.7rem",
-              cursor: "pointer",
-              backgroundColor: readableFont ? "#FFF" : "#333",
-              color: readableFont ? "#000" : "#FFF",
-              border: "none",
-              borderRadius: "3px",
-              fontWeight: 700
-            }}
-          >
-            Readable Font
-          </button>
-        </div>
+              {/* Contrast */}
+              <div style={{ marginBottom: "0.75rem" }}>
+                <p style={{ fontSize: "0.75rem", marginBottom: "0.35rem", fontWeight: 600, color: highContrast ? "#fff" : "var(--foreground)", opacity: 0.7 }}>Contrast</p>
+                <div style={{ display: "flex", gap: "4px" }}>
+                  {[{label:"Standard", val:false}, {label:"High Contrast", val:true}].map(({label, val}) => (
+                    <button key={label} onClick={() => setHighContrast(val)} style={{
+                      flex: 1, padding: "5px 8px", fontSize: "0.72rem", cursor: "pointer", fontWeight: 700, borderRadius: "8px",
+                      border: `1.5px solid ${highContrast === val ? "var(--primary)" : "rgba(0,0,0,0.1)"}`,
+                      background: highContrast === val ? (highContrast ? "#FF6B6B" : "var(--primary)") : "transparent",
+                      color: highContrast === val ? (highContrast ? "#000" : "#fff") : (highContrast ? "#fff" : "var(--foreground)"),
+                      transition: "all 0.15s ease"
+                    }}>{label}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Text size */}
+              <div style={{ marginBottom: "0.75rem" }}>
+                <p style={{ fontSize: "0.75rem", marginBottom: "0.35rem", fontWeight: 600, color: highContrast ? "#fff" : "var(--foreground)", opacity: 0.7 }}>Text Size</p>
+                <div style={{ display: "flex", gap: "4px" }}>
+                  {[{label:"A−", val:"small"}, {label:"A", val:"normal"}, {label:"A+", val:"large"}].map(({label, val}) => (
+                    <button key={val} onClick={() => setTextSize(val)} style={{
+                      flex: 1, padding: "5px 4px", fontSize: "0.75rem", cursor: "pointer", fontWeight: 800, borderRadius: "8px",
+                      border: `1.5px solid ${textSize === val ? "var(--primary)" : "rgba(0,0,0,0.1)"}`,
+                      background: textSize === val ? "var(--primary)" : "transparent",
+                      color: textSize === val ? "#fff" : (highContrast ? "#fff" : "var(--foreground)"),
+                      transition: "all 0.15s ease"
+                    }}>{label}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Readable Font */}
+              <button onClick={() => setReadableFont(!readableFont)} style={{
+                width: "100%", padding: "7px", fontSize: "0.78rem", cursor: "pointer", fontWeight: 700, borderRadius: "8px",
+                border: `1.5px solid ${readableFont ? "var(--primary)" : "rgba(0,0,0,0.1)"}`,
+                background: readableFont ? "var(--primary)" : "transparent",
+                color: readableFont ? "#fff" : (highContrast ? "#fff" : "var(--foreground)"),
+                transition: "all 0.15s ease",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem"
+              }}>
+                <Accessibility size={13} /> {readableFont ? "Readable Font: ON" : "Readable Font: OFF"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Floating trigger button */}
+        <button
+          onClick={() => setFloatingPanelOpen(!floatingPanelOpen)}
+          title="Accessibility & Contact"
+          className="landing-fab-btn"
+          style={{
+            background: highContrast ? "#FF6B6B" : "var(--primary)",
+            color: highContrast ? "#000" : "#fff",
+            transform: floatingPanelOpen ? "rotate(45deg) scale(1.08)" : "scale(1)"
+          }}
+        >
+          <Accessibility size={22} />
+        </button>
       </div>
 
-      {/* 2. Portal Alert Status Banner */}
-      <div style={{
-        backgroundColor: highContrast ? "#222222" : "rgba(245, 158, 11, 0.08)",
-        color: highContrast ? "#FFFF00" : "var(--foreground)",
-        borderBottom: `1px solid ${highContrast ? "#FFFFFF" : "rgba(245, 158, 11, 0.2)"}`,
-        padding: "0.75rem 1.5rem",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        gap: "0.75rem",
-        fontSize: "0.85rem",
-        textAlign: "center",
-        zIndex: 10
-      }}>
-        <Calendar size={16} style={{ color: highContrast ? "#FFFF00" : "var(--accent-gold)", flexShrink: 0 }} />
+      {/* Mobile nav overlay */}
+      <div
+        className={`mobile-nav-backdrop${mobileMenuOpen ? " open" : ""}`}
+        onClick={closeMobileMenu}
+        aria-hidden={!mobileMenuOpen}
+      />
+
+      <nav
+        className={`mobile-nav-drawer${mobileMenuOpen ? " open" : ""}`}
+        aria-label="Mobile navigation"
+        aria-hidden={!mobileMenuOpen}
+        style={{ backgroundColor: highContrast ? "#000" : "var(--card-bg)" }}
+      >
+        <div className="mobile-nav-drawer-header">
+          <div className="landing-brand">
+            <h1 style={{ color: highContrast ? "#FFF" : "var(--primary)", fontFamily: "var(--font-heading)", fontSize: "1rem" }}>
+              HTU Dues Portal
+            </h1>
+            <p style={{ color: highContrast ? "#FF6B6B" : "var(--secondary)" }}>Menu</p>
+          </div>
+          <button
+            type="button"
+            className="mobile-nav-close"
+            aria-label="Close menu"
+            onClick={closeMobileMenu}
+          >
+            <X size={22} />
+          </button>
+        </div>
+        <div className="mobile-nav-drawer-links">
+          {NAV_LINKS.map(({ href, label }) => (
+            <a
+              key={href}
+              href={href}
+              className="mobile-nav-drawer-link"
+              onClick={closeMobileMenu}
+              style={{ color: highContrast ? "#FFF" : "var(--foreground)" }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+        <div className="mobile-nav-drawer-footer">
+          <Link href="/auth/login" className="btn btn-primary mobile-nav-drawer-cta" onClick={closeMobileMenu}>
+            <LogIn size={18} /> Sign in to pay dues
+          </Link>
+        </div>
+      </nav>
+
+      {/* Portal status banner */}
+      <div
+        className="landing-alert"
+        style={{
+          backgroundColor: highContrast ? "#222222" : "rgba(245, 158, 11, 0.08)",
+          color: highContrast ? "#FF6B6B" : "var(--foreground)",
+          borderBottom: `1px solid ${highContrast ? "#FFFFFF" : "rgba(245, 158, 11, 0.2)"}`,
+        }}
+      >
+        <Calendar size={16} style={{ color: highContrast ? "#FF6B6B" : "var(--warning)", flexShrink: 0 }} />
         <span>
-          <strong>2026/2027 Dues Clearance Window:</strong> Departmental dues clearance is fully active. Complete payment before course registration begins.
+          <strong>2026/2027 dues window is open.</strong> Pay your department dues before course registration.
         </span>
       </div>
 
-      {/* 3. Official Crest Header */}
-      <header className="header" style={{ 
-        padding: "0.75rem 2rem", 
-        borderBottom: `1px solid ${highContrast ? "#FFFFFF" : "var(--border)"}`,
-        boxShadow: "var(--shadow-sm)",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: "1rem",
-        backgroundColor: highContrast ? "#000" : "var(--card-bg)"
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          {/* Custom SVG HTU Official Crest representation */}
-          <img src="/htu_logo.jpg" alt="HTU Crest Logo" width="45" height="45" style={{ borderRadius: "50%", border: "2px solid var(--accent-gold)", objectFit: "cover", flexShrink: 0 }} />
-          <div>
-            <h1 style={{ 
-              fontSize: "1.25rem", 
-              fontWeight: 800, 
-              color: highContrast ? "#FFF" : "var(--primary)",
-              fontFamily: "var(--font-heading)",
-              letterSpacing: "-0.01em",
-              margin: 0
-            }}>
-              HO TECHNICAL UNIVERSITY
+      {/* Header */}
+      <header
+        className="header landing-header"
+        style={{
+          borderBottom: `1px solid ${highContrast ? "#FFFFFF" : "var(--border)"}`,
+          boxShadow: "var(--shadow-sm)",
+          backgroundColor: highContrast ? "#000" : "var(--card-bg)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", minWidth: 0 }}>
+          <div className="htu-logo-container" style={{ width: "44px", height: "44px" }}>
+            <img src="/htu_logo.jpg" alt="HTU Crest Logo" className="htu-logo-img" />
+          </div>
+          <div className="landing-brand">
+            <h1 style={{ color: highContrast ? "#FFF" : "var(--primary)", fontFamily: "var(--font-heading)" }}>
+              Ho Technical University
             </h1>
-            <p style={{ 
-              fontSize: "0.75rem", 
-              opacity: 0.7, 
-              fontWeight: 700, 
-              color: highContrast ? "#FFFF00" : "var(--secondary)",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              margin: 0
-            }}>
-              Finance Directorate &bull; Dues Clearance Desk
+            <p style={{ color: highContrast ? "#FF6B6B" : "var(--secondary)" }}>
+              Departmental Dues Portal
             </p>
           </div>
         </div>
 
-        <nav style={{ display: "flex", gap: "1.5rem", alignItems: "center", flexWrap: "wrap" }}>
-          <a href="#about" style={{ fontSize: "0.85rem", fontWeight: 600, color: highContrast ? "#FFF" : "var(--foreground)" }}>About</a>
-          <a href="#how-it-works" style={{ fontSize: "0.85rem", fontWeight: 600, color: highContrast ? "#FFF" : "var(--foreground)" }}>Process Guide</a>
-          <a href="#verify" style={{ fontSize: "0.85rem", fontWeight: 600, color: highContrast ? "#FFF" : "var(--foreground)" }}>Verification Desk</a>
-          <a href="#tariffs" style={{ fontSize: "0.85rem", fontWeight: 600, color: highContrast ? "#FFF" : "var(--foreground)" }}>Dues Catalog</a>
-          <Link href="/auth/login" className="btn btn-primary" style={{ padding: "0.5rem 1.25rem", fontSize: "0.85rem" }}>
-            Dues Portal
+        <nav className="landing-nav landing-nav-desktop" aria-label="Main navigation">
+          {NAV_LINKS.map(({ href, label }) => (
+            <a
+              key={href}
+              href={href}
+              className="landing-nav-link"
+              style={{ color: highContrast ? "#FFF" : "var(--foreground)" }}
+            >
+              {label}
+            </a>
+          ))}
+          <Link href="/auth/login" className="btn btn-primary landing-nav-cta" style={{ padding: "0.5rem 1.1rem", fontSize: "0.85rem" }}>
+            <LogIn size={16} /> Sign in
           </Link>
         </nav>
+
+        <button
+          type="button"
+          className="landing-menu-toggle"
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </header>
 
-      {/* Main Content Body */}
-      <main style={{ flex: 1, padding: "2rem 1.5rem", maxWidth: "1200px", margin: "0 auto", width: "100%" }}>
+      <main className="landing-main">
         
-        {/* SLTF-Style Institutional Hero Header (Full-width campus background) */}
-        <section style={heroStyle}>
-          <div style={heroOverlayStyle}></div>
-          
-          <div style={{ position: "relative", zIndex: 2, maxWidth: "850px", padding: "0 1rem" }}>
-            <div style={{ 
-              display: "inline-flex", 
-              alignItems: "center", 
-              gap: "0.5rem", 
-              padding: "0.4rem 1rem", 
-              backgroundColor: highContrast ? "#222" : "rgba(245, 158, 11, 0.15)", 
-              border: `1px solid ${highContrast ? "#FFFFFF" : "var(--accent-gold)"}`, 
-              borderRadius: "var(--radius-full)", 
-              marginBottom: "1.5rem" 
-            }}>
-              <Award size={14} style={{ color: highContrast ? "#FFFF00" : "var(--accent-gold)" }} />
-              <span style={{ 
-                fontSize: "0.75rem", 
-                fontWeight: 700, 
-                color: highContrast ? "#FFFF00" : "#FFFFFF", 
-                textTransform: "uppercase", 
-                letterSpacing: "0.05em" 
-              }}>
-                Ho Technical University Finance Directorate
-              </span>
+        {/* Hero */}
+        <section
+          className="landing-hero reveal-init"
+          style={{
+            backgroundImage: highContrast ? "none" : "url('/htu_campus_hero.png')",
+            backgroundColor: highContrast ? "#000" : "var(--primary)",
+            border: highContrast ? "2px solid #fff" : "none",
+          }}
+        >
+          {!highContrast && <div className="landing-hero-overlay" />}
+
+          <div className="landing-hero-content">
+            <div className="landing-hero-badge">
+              <Award size={14} />
+              <span>HTU Departmental Dues Portal</span>
             </div>
-            
-            <h2 style={{ 
-              fontSize: "clamp(2rem, 5vw, 3.5rem)", 
-              color: "#FFFFFF", 
-              marginBottom: "1.25rem", 
-              fontFamily: "var(--font-heading)",
-              lineHeight: 1.15,
-              fontWeight: 800,
-              textShadow: highContrast ? "none" : "0 2px 8px rgba(0,0,0,0.5)"
-            }}>
-              Departmental Dues <br />
-              <span style={{ color: highContrast ? "#FFFF00" : "var(--accent-gold)" }}>Clearance Portal</span>
+
+            <h2 style={{ fontFamily: "var(--font-heading)", textShadow: highContrast ? "none" : "0 2px 8px rgba(0,0,0,0.35)" }}>
+              Welcome, pay your dues,<br />
+              <span style={{ color: highContrast ? "#FF6B6B" : "#fff" }}>get cleared in minutes</span>
             </h2>
-            
-            <p style={{ 
-              maxWidth: "750px", 
-              margin: "0 auto 2.5rem", 
-              fontSize: "1.15rem", 
-              opacity: 0.95, 
-              lineHeight: 1.6,
-              textShadow: highContrast ? "none" : "0 1px 4px rgba(0,0,0,0.5)"
-            }}>
-              The secure, official web portal for department-level dues payments at HTU. Activate your account using your institutional student email, complete payments via Mobile Money or Credit/Debit Cards, and instantly verify your electronic clearance certificate.
+
+            <p className="landing-hero-lead">
+              Sign in with your @htu.edu.gh email, pay via Mobile Money or card, and download your receipt instantly. Officers can verify payments right here on this page.
             </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-                <Link href="/auth/login" className="btn btn-accent" style={{ 
-                  padding: "1rem 2.5rem", 
-                  fontSize: "1.05rem", 
-                  boxShadow: highContrast ? "none" : "0 4px 15px rgba(245, 158, 11, 0.4)",
-                  backgroundColor: highContrast ? "#FFFF00" : "var(--accent-gold)",
-                  color: "#000"
-                }}>
-                  <LogIn size={18} /> Access Dues Portal
-                </Link>
-                <a href="#verify" className="btn btn-outline" style={{ 
-                  padding: "1rem 2.25rem", 
-                  fontSize: "1.05rem",
-                  color: "#FFFFFF",
-                  borderColor: "#FFFFFF"
-                }}>
-                  <ShieldCheck size={18} /> Verification Desk
-                </a>
-              </div>
-              
-              {/* Discreet Staff Login */}
-              <div style={{ marginTop: "1rem", fontSize: "0.9rem" }}>
-                <span style={{ opacity: 0.85 }}>Are you a clearance officer or university administrator? </span>
-                <Link href="/auth/login?role=admin" style={{ 
-                  color: highContrast ? "#FFFF00" : "var(--accent-gold)", 
-                  fontWeight: 700,
-                  textDecoration: "underline"
-                }}>
-                  Staff Login Portal &rarr;
-                </Link>
-              </div>
+            <div className="landing-hero-actions">
+              <Link
+                href="/auth/login"
+                className="btn btn-accent"
+                style={{
+                  padding: "0.9rem 1.75rem",
+                  fontSize: "1rem",
+                  ...(highContrast ? { backgroundColor: "#FF6B6B", color: "#000" } : {}),
+                }}
+              >
+                <LogIn size={18} /> Sign in to pay
+              </Link>
+              <a
+                href="#verify"
+                className="btn btn-outline"
+                style={{ padding: "0.9rem 1.6rem", fontSize: "1rem", color: "#fff", borderColor: "rgba(255,255,255,0.6)" }}
+              >
+                <ShieldCheck size={18} /> Verify a receipt
+              </a>
+            </div>
+
+            <p className="landing-hero-note">
+              Staff or admin?{" "}
+              <Link
+                href="/auth/login?role=admin"
+                style={{ color: highContrast ? "#FF6B6B" : "#fff", fontWeight: 700, textDecoration: "underline" }}
+              >
+                Sign in here
+              </Link>
+            </p>
+          </div>
+        </section>
+
+        {/* Portal features */}
+        <section id="features" className="features-section-alt reveal-init">
+          <div className="features-inner">
+            <div className="features-intro">
+              <span className="section-badge">Portal Features</span>
+              <h2>Everything you need to clear your dues</h2>
+              <p>
+                Pay, track, and verify departmental dues in one official HTU portal — built for students and registration staff.
+              </p>
+            </div>
+
+            <div className="features-grid">
+              {PORTAL_FEATURES.map(({ title, desc, icon: Icon, iconTone }) => (
+                <div
+                  key={title}
+                  className={`feature-card${highContrast ? " feature-card-hc" : ""}`}
+                >
+                  <div className={`feature-icon-box feature-icon-${iconTone}`}>
+                    <Icon size={20} />
+                  </div>
+                  <h3>{title}</h3>
+                  <p>{desc}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* About System Section (SLTF style highlights) */}
-        <section id="about" style={{ marginBottom: "4rem", scrollMarginTop: "80px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
-            <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem", borderTop: "4px solid var(--primary)" }}>
-              <div style={{ 
-                width: "48px", 
-                height: "48px", 
-                borderRadius: "var(--radius)", 
-                backgroundColor: highContrast ? "#222" : "rgba(0, 55, 114, 0.08)", 
-                color: highContrast ? "#FFFF00" : "var(--primary)",
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center"
-              }}>
-                <CreditCard size={24} />
+        {/* === Redesigned Benefits & Showcase Section === */}
+        <section id="benefits" className="benefits-section-alt reveal-init">
+          <div className="benefits-container">
+            {/* Left: Showcase image with floating widgets */}
+            <div className="student-showcase-container">
+              <div className="student-showcase-stage">
+                <img
+                  src="/student_paying.png"
+                  alt="HTU Student Paying Dues"
+                  className="student-main-image"
+                />
+
+                {/* Widget 1: Student Status Card */}
+                <div className="floating-metric-card floating-card-1" style={highContrast ? { border: "2px solid #ffffff", background: "#000" } : {}}>
+                <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(0, 0, 140, 0.08)", color: highContrast ? "#fff" : "var(--primary)" }}>
+                  <GraduationCap size={18} />
+                </div>
+                <div className="metric-text-box">
+                  <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Student Status</span>
+                  <strong style={highContrast ? { color: "#fff" } : {}}>Level 400 • Cleared</strong>
+                </div>
               </div>
-              <h3 style={{ color: "var(--primary)", fontSize: "1.2rem", fontFamily: "var(--font-heading)" }}>Integrated Payments</h3>
-              <p style={{ fontSize: "0.9rem", opacity: 0.8, lineHeight: 1.6 }}>
-                Secure integration with Paystack allows seamless collection via mobile money networks (MTN MoMo, Telecel Cash, AT Money) and debit/credit cards.
+
+              {/* Widget 2: Real-time Status Card */}
+              <div className="floating-metric-card floating-card-2" style={highContrast ? { border: "2px solid #ffffff", background: "#000" } : {}}>
+                <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(16, 185, 129, 0.1)", color: highContrast ? "#fff" : "var(--success)" }}>
+                  <Sparkles size={18} />
+                </div>
+                <div className="metric-text-box">
+                  <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Clearance Speed</span>
+                  <strong style={highContrast ? { color: "#fff" } : {}}>Under 2 Mins</strong>
+                </div>
+              </div>
+
+              {/* Widget 3: Success Rate Card */}
+              <div className="floating-metric-card floating-card-3" style={highContrast ? { border: "2px solid #ffffff", background: "#000" } : {}}>
+                <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(245, 158, 11, 0.1)", color: highContrast ? "#fff" : "var(--warning)" }}>
+                  <ShieldCheck size={18} />
+                </div>
+                <div className="metric-text-box">
+                  <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Ledger Verification</span>
+                  <strong style={highContrast ? { color: "#fff" } : {}}>99.8% Success Rate</strong>
+                </div>
+              </div>
+              </div>
+            </div>
+
+            {/* Right: Benefits checklist list */}
+            <div className="benefits-right-content">
+              <span className="section-badge" style={highContrast ? { color: "#FF6B6B" } : {}}>How It Helps You</span>
+              <h2 style={highContrast ? { color: "#fff" } : {}}>Say goodbye to long registration queues</h2>
+              <p className="lead-text" style={highContrast ? { color: "#fff", opacity: 0.9 } : {}}>
+                Designed to make student life easier, the Ho Technical University Departmental Dues Portal replaces manual bank drafts and paper trails with speed, accessibility, and absolute transparency.
+              </p>
+
+              <ul className="benefit-check-list">
+                <li className="benefit-check-item">
+                  <CheckCircle size={18} style={highContrast ? { color: "#fff" } : {}} />
+                  <span style={highContrast ? { color: "#fff" } : {}}>Eliminate hours of waiting at physical bank counters</span>
+                </li>
+                <li className="benefit-check-item">
+                  <CheckCircle size={18} style={highContrast ? { color: "#fff" } : {}} />
+                  <span style={highContrast ? { color: "#fff" } : {}}>Instant receipt generation immediately after payment</span>
+                </li>
+                <li className="benefit-check-item">
+                  <CheckCircle size={18} style={highContrast ? { color: "#fff" } : {}} />
+                  <span style={highContrast ? { color: "#fff" } : {}}>Automatic clearance verification with HTU registry holds</span>
+                </li>
+                <li className="benefit-check-item">
+                  <CheckCircle size={18} style={highContrast ? { color: "#fff" } : {}} />
+                  <span style={highContrast ? { color: "#fff" } : {}}>Easy payment verification via staff mobile QR scan</span>
+                </li>
+                <li className="benefit-check-item">
+                  <CheckCircle size={18} style={highContrast ? { color: "#fff" } : {}} />
+                  <span style={highContrast ? { color: "#fff" } : {}}>Accessible visual themes (Standard & High Contrast)</span>
+                </li>
+                <li className="benefit-check-item">
+                  <CheckCircle size={18} style={highContrast ? { color: "#fff" } : {}} />
+                  <span style={highContrast ? { color: "#fff" } : {}}>Multi-network Mobile Money support (MTN, Telecel, AT)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* How it works */}
+        <section id="how-it-works" className="landing-process-section reveal-init">
+          <div className="landing-section-header">
+            <span className="landing-section-label" style={{ color: highContrast ? "#FF6B6B" : undefined }}>Simple process</span>
+            <h3 className="landing-section-title">Clear your dues in 3 steps</h3>
+          </div>
+
+          <div className="landing-steps-grid">
+            <div className="card landing-step-card landing-feature-card no-hover">
+              <div className="landing-step-num" style={{ backgroundColor: highContrast ? "#222" : "rgba(0, 55, 114, 0.08)", color: "var(--primary)" }}>1</div>
+              <h4 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", marginBottom: "0.5rem", fontSize: "1rem" }}>Sign in</h4>
+              <p style={{ fontSize: "0.85rem", opacity: 0.75, lineHeight: 1.6, margin: 0 }}>
+                Use your @htu.edu.gh email. First time? Activate your account with a secure password.
               </p>
             </div>
 
-            <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem", borderTop: "4px solid var(--accent-gold)" }}>
-              <div style={{ 
-                width: "48px", 
-                height: "48px", 
-                borderRadius: "var(--radius)", 
-                backgroundColor: highContrast ? "#222" : "rgba(245, 158, 11, 0.08)", 
-                color: highContrast ? "#FFFF00" : "var(--accent-gold)",
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center"
-              }}>
-                <ShieldCheck size={24} />
-              </div>
-              <h3 style={{ color: "var(--primary)", fontSize: "1.2rem", fontFamily: "var(--font-heading)" }}>Real-Time Verification</h3>
-              <p style={{ fontSize: "0.9rem", opacity: 0.8, lineHeight: 1.6 }}>
-                Instantly matches unique receipt IDs and digital credentials with student payment profiles. Registration officers scan QR codes to confirm status.
+            <div className="card landing-step-card landing-feature-card no-hover">
+              <div className="landing-step-num" style={{ backgroundColor: highContrast ? "#222" : "rgba(227, 27, 35, 0.08)", color: "var(--accent-crimson)" }}>2</div>
+              <h4 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", marginBottom: "0.5rem", fontSize: "1rem" }}>Pay your dues</h4>
+              <p style={{ fontSize: "0.85rem", opacity: 0.75, lineHeight: 1.6, margin: 0 }}>
+                See your outstanding fees in the dashboard and pay through Paystack checkout.
               </p>
             </div>
 
-            <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem", borderTop: "4px solid var(--success)" }}>
-              <div style={{ 
-                width: "48px", 
-                height: "48px", 
-                borderRadius: "var(--radius)", 
-                backgroundColor: highContrast ? "#222" : "rgba(16, 185, 129, 0.08)", 
-                color: highContrast ? "#FFFF00" : "var(--success)",
-                display: "flex", 
-                alignItems: "center", 
-                justifyContent: "center"
-              }}>
-                <Sparkles size={24} />
-              </div>
-              <h3 style={{ color: "var(--primary)", fontSize: "1.2rem", fontFamily: "var(--font-heading)" }}>Instant Hold Clearance</h3>
-              <p style={{ fontSize: "0.9rem", opacity: 0.8, lineHeight: 1.6 }}>
-                Your payment records update the clearance status immediately. The system generates a digital stamped clearance slip to complete university registration.
+            <div className="card landing-step-card landing-feature-card no-hover">
+              <div className="landing-step-num" style={{ backgroundColor: highContrast ? "#222" : "rgba(16, 185, 129, 0.1)", color: "var(--success)" }}>3</div>
+              <h4 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", marginBottom: "0.5rem", fontSize: "1rem" }}>Get cleared</h4>
+              <p style={{ fontSize: "0.85rem", opacity: 0.75, lineHeight: 1.6, margin: 0 }}>
+                Download your digital receipt. Officers can verify it by receipt ID or QR scan.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Step-by-Step Payment Walkthrough */}
-        <section id="how-it-works" style={{ marginBottom: "4rem", scrollMarginTop: "80px" }}>
-          <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-            <span style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 800, color: highContrast ? "#FFFF00" : "var(--accent-gold)" }}>System Walkthrough</span>
-            <h3 style={{ fontFamily: "var(--font-heading)", color: "var(--primary)", fontSize: "1.75rem", marginTop: "0.25rem" }}>
-              How to Clear Your Dues in 3 Steps
-            </h3>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "2rem" }}>
-            <div className="card" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", padding: "2.5rem 1.5rem" }}>
-              <div style={{ width: "50px", height: "50px", borderRadius: "50%", backgroundColor: highContrast ? "#222" : "rgba(0, 55, 114, 0.08)", color: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1.2rem", marginBottom: "1.25rem" }}>
-                1
-              </div>
-              <h4 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", marginBottom: "0.75rem", fontSize: "1.1rem" }}>1. Validate & Login</h4>
-              <p style={{ fontSize: "0.85rem", opacity: 0.75, lineHeight: 1.6 }}>
-                Log in using your official student email ending in <code>@htu.edu.gh</code>. If you are a first-time user, activate your account by setting up a secure password.
-              </p>
+        {/* Receipt verification */}
+        <section
+          id="verify"
+          className="card landing-verify-section reveal-init"
+          style={{ borderLeftColor: highContrast ? "#fff" : "var(--success)" }}
+        >
+          <div style={{ maxWidth: "700px", margin: "0 auto" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", justifyContent: "center", marginBottom: "0.5rem" }}>
+              <ShieldCheck size={24} style={{ color: "var(--success)" }} />
+              <h3 className="landing-section-title" style={{ fontSize: "1.4rem" }}>Verify a receipt</h3>
             </div>
-
-            <div className="card" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", padding: "2.5rem 1.5rem" }}>
-              <div style={{ width: "50px", height: "50px", borderRadius: "50%", backgroundColor: highContrast ? "#222" : "rgba(245, 158, 11, 0.1)", color: "var(--accent-gold)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1.2rem", marginBottom: "1.25rem" }}>
-                2
-              </div>
-              <h4 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", marginBottom: "0.75rem", fontSize: "1.1rem" }}>2. Complete Dues Checkout</h4>
-              <p style={{ fontSize: "0.85rem", opacity: 0.75, lineHeight: 1.6 }}>
-                View your outstanding department fees in the dashboard. Choose Paystack checkouts to make actual payments or use Sandbox simulation to authorize payments.
-              </p>
-            </div>
-
-            <div className="card" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", padding: "2.5rem 1.5rem" }}>
-              <div style={{ width: "50px", height: "50px", borderRadius: "50%", backgroundColor: highContrast ? "#222" : "rgba(16, 185, 129, 0.1)", color: "var(--success)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "1.2rem", marginBottom: "1.25rem" }}>
-                3
-              </div>
-              <h4 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", marginBottom: "0.75rem", fontSize: "1.1rem" }}>3. Institutional Clearance</h4>
-              <p style={{ fontSize: "0.85rem", opacity: 0.75, lineHeight: 1.6 }}>
-                Instantly download your official stamped digital receipt. Registration officers can verify your clearance by receipt ID or by scanning the receipt QR code.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 4. Receipt Verification Widget (Search Box) */}
-        <section id="verify" className="card" style={{ 
-          padding: "2.5rem", 
-          marginBottom: "4rem", 
-          scrollMarginTop: "100px", 
-          borderLeft: `5px solid ${highContrast ? "#FFFFFF" : "var(--success)"}` 
-        }}>
-          <div style={{ maxWidth: "750px", margin: "0 auto" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", justifyContent: "center", marginBottom: "0.75rem" }}>
-              <ShieldCheck size={26} style={{ color: "var(--success)" }} />
-              <h3 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", fontSize: "1.5rem", margin: 0 }}>
-                Clearance Verification Desk
-              </h3>
-            </div>
-            <p style={{ opacity: 0.8, fontSize: "0.9rem", textAlign: "center", marginBottom: "2rem" }}>
-              Confirm student dues status in real-time. Enter a Receipt ID or Paystack payment reference below to query the university dues ledger database.
+            <p style={{ opacity: 0.8, fontSize: "0.9rem", textAlign: "center", marginBottom: "1.75rem", lineHeight: 1.6 }}>
+              Students and officers can confirm payment status by entering a receipt ID or Paystack reference below.
             </p>
 
-            <form onSubmit={handleVerify} style={{ display: "flex", gap: "0.75rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: "280px", position: "relative" }}>
-                <Search style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", color: "var(--foreground)", opacity: 0.4 }} size={18} />
+            <form onSubmit={handleVerify} className="verify-form">
+              <div className="verify-form-input-wrap">
+                <Search className="verify-form-icon" size={18} />
                 <input
                   type="text"
-                  placeholder="Enter Receipt ID or Ref (e.g. REC-HTU-296204-89617)"
-                  className="input"
-                  style={{ paddingLeft: "2.5rem", border: "1px solid var(--border)" }}
+                  placeholder="Receipt ID or reference"
+                  className="input verify-form-input"
                   value={receiptId}
                   onChange={(e) => setReceiptId(e.target.value)}
                   required
                 />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ minWidth: "160px" }} disabled={loading}>
-                {loading ? "Searching..." : "Verify Status"}
+              <button type="submit" className="btn btn-primary verify-form-submit" disabled={loading}>
+                {loading ? "Checking..." : "Verify"}
               </button>
             </form>
 
@@ -670,37 +732,52 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 5. Interactive Dues Catalog */}
-        <section id="tariffs" style={{ marginBottom: "4rem", scrollMarginTop: "80px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem", marginBottom: "2rem" }}>
+        {/* Dues schedule */}
+        <section id="tariffs" className="reveal-init landing-tariffs-section" style={{ scrollMarginTop: "90px" }}>
+          <div className="landing-tariffs-header">
             <div>
-              <span style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 800, color: highContrast ? "#FFFF00" : "var(--accent-gold)" }}>Tariff Guide</span>
-              <h3 style={{ fontFamily: "var(--font-heading)", color: "var(--primary)", fontSize: "1.75rem", marginTop: "0.25rem" }}>
-                Official Departmental Dues Schedule
-              </h3>
+              <span className="landing-section-label" style={{ color: highContrast ? "#FF6B6B" : undefined }}>Fee schedule</span>
+              <h3 className="landing-section-title">Departmental dues</h3>
             </div>
             
-            <div style={{ position: "relative", minWidth: "280px" }}>
-              <Search style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} size={16} />
+            <div className="landing-tariffs-search">
+              <Search size={16} className="landing-tariffs-search-icon" />
               <input
                 type="text"
-                placeholder="Search department, code, or faculty..."
-                className="input"
-                style={{ paddingLeft: "2.25rem", paddingTop: "0.5rem", paddingBottom: "0.5rem", fontSize: "0.85rem" }}
+                placeholder="Search department..."
+                className="input landing-tariffs-search-input"
                 value={deptSearch}
                 onChange={(e) => setDeptSearch(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="table-container">
+          {/* Mobile card list */}
+          <div className="dues-mobile-list">
+            {filteredDepts.length === 0 ? (
+              <p className="dues-mobile-empty">No matching departments found.</p>
+            ) : (
+              filteredDepts.map((dept, idx) => (
+                <article key={idx} className="dues-mobile-card">
+                  <div className="dues-mobile-card-top">
+                    <span className="dues-mobile-code">{dept.code}</span>
+                    <span className="dues-mobile-fee">GHS {dept.fee.toFixed(2)}</span>
+                  </div>
+                  <h4 className="dues-mobile-name">{dept.name}</h4>
+                  <p className="dues-mobile-faculty">{dept.faculty}</p>
+                </article>
+              ))
+            )}
+          </div>
+
+          <div className="table-container dues-desktop-table">
             <table className="table">
               <thead>
                 <tr>
                   <th style={{ width: "120px" }}>Code</th>
-                  <th>Department Name</th>
-                  <th>Faculty Placement</th>
-                  <th style={{ textAlign: "right", width: "180px" }}>Dues Tariff</th>
+                  <th>Department</th>
+                  <th>Faculty</th>
+                  <th style={{ textAlign: "right", width: "140px" }}>Amount (GHS)</th>
                 </tr>
               </thead>
               <tbody>
@@ -725,24 +802,26 @@ export default function Home() {
           </div>
         </section>
 
-        {/* 6. FAQ Accordion Section */}
-        <section style={{ maxWidth: "850px", margin: "0 auto 4rem" }}>
-          <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-            <span style={{ fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 800, color: highContrast ? "#FFFF00" : "var(--accent-gold)" }}>Help Desk</span>
-            <h3 style={{ fontFamily: "var(--font-heading)", color: "var(--primary)", fontSize: "1.75rem", marginTop: "0.25rem" }}>
-              Frequently Asked Questions
-            </h3>
+        {/* FAQ */}
+        <section id="faq" className="landing-faq-section reveal-init">
+          <div className="landing-section-header">
+            <span className="landing-section-label" style={{ color: highContrast ? "#FF6B6B" : undefined }}>Common questions</span>
+            <h3 className="landing-section-title">Need help?</h3>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <div className="landing-faq-list">
             {faqs.map((faq, i) => (
-              <div 
-                key={i} 
-                className="card" 
-                style={{ 
-                  padding: "1.25rem 1.5rem", 
-                  cursor: "pointer",
-                  transition: "var(--transition-fast)"
+              <div
+                key={i}
+                className="card landing-faq-item"
+                role="button"
+                tabIndex={0}
+                aria-expanded={openFaq === i}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setOpenFaq(openFaq === i ? null : i);
+                  }
                 }}
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
               >
@@ -777,66 +856,70 @@ export default function Home() {
 
       </main>
 
-      {/* 7. Structured Institutional Footer (SLTF inspired) */}
-      <footer style={{ 
-        backgroundColor: highContrast ? "#000" : "var(--primary)", 
-        color: "#ffffff", 
-        borderTop: `4px solid ${highContrast ? "#FFFFFF" : "var(--accent-gold)"}`,
-        padding: "4rem 2rem 2rem",
-        zIndex: 10
-      }}>
-        <div style={{ 
-          maxWidth: "1200px", 
-          margin: "0 auto", 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", 
-          gap: "2.5rem",
-          marginBottom: "3rem"
-        }}>
+      {/* Sticky mobile CTA */}
+      <div className="landing-mobile-cta-bar" aria-hidden="false">
+        <Link href="/auth/login" className="btn btn-accent landing-mobile-cta-btn">
+          <LogIn size={18} /> Sign in to pay
+        </Link>
+      </div>
+
+      {/* Footer */}
+      <footer
+        className="landing-footer"
+        style={{
+          backgroundColor: highContrast ? "#000" : "var(--primary)",
+          borderTopColor: highContrast ? "#fff" : "var(--accent-crimson)",
+        }}
+      >
+        <div className="landing-footer-grid">
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-              <img src="/htu_logo.jpg" alt="HTU Crest Logo" width="30" height="30" style={{ borderRadius: "50%", border: "1.5px solid var(--accent-gold)", objectFit: "cover" }} />
-              <h4 style={{ fontFamily: "var(--font-heading)", color: highContrast ? "#FFFF00" : "var(--accent-gold)", margin: 0, fontSize: "1.1rem" }}>
+              <div className="htu-logo-container" style={{ width: "30px", height: "30px" }}>
+                <img src="/htu_logo.jpg" alt="HTU Crest Logo" className="htu-logo-img" />
+              </div>
+              <h4 style={{ fontFamily: "var(--font-heading)", color: highContrast ? "#FF6B6B" : "#fff", margin: 0, fontSize: "1.05rem" }}>
                 Ho Technical University
               </h4>
             </div>
             <p style={{ fontSize: "0.8rem", opacity: 0.75, lineHeight: 1.6 }}>
-              The premier career-focused technical institution in Volta Region, Ghana. Empowering students with cutting-edge academic education and practical skills training.
+              The premier career focused technical institution in Volta Region, Ghana. Empowering students with cutting edge academic education and practical skills training.
             </p>
           </div>
 
           <div>
-            <h4 style={{ fontSize: "0.95rem", color: highContrast ? "#FFFF00" : "var(--accent-gold)", marginBottom: "1.25rem", fontFamily: "var(--font-heading)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Portal Access
+            <h4 style={{ fontSize: "0.9rem", color: highContrast ? "#FF6B6B" : "rgba(255,255,255,0.92)", marginBottom: "1rem", fontFamily: "var(--font-heading)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Portal links
             </h4>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.85rem" }}>
-              <Link href="/auth/login" style={{ opacity: 0.85, textDecoration: "underline" }}>Dues Portal Log In</Link>
-              <Link href="/auth/register" style={{ opacity: 0.85, textDecoration: "underline" }}>First-time Activation</Link>
-              <Link href="/auth/login?role=admin" style={{ opacity: 0.85, textDecoration: "underline" }}>Department Admin Desk</Link>
-              <Link href="/auth/login?role=super" style={{ opacity: 0.85, textDecoration: "underline" }}>Super Admin Console</Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem", fontSize: "0.85rem" }}>
+              <Link href="/auth/login" style={{ opacity: 0.9 }}>Student sign in</Link>
+              <Link href="/auth/register" style={{ opacity: 0.9 }}>First time activation</Link>
+              <Link href="/auth/login?role=admin" style={{ opacity: 0.9 }}>Department admin</Link>
+              <Link href="/auth/login?role=super" style={{ opacity: 0.9 }}>Super admin</Link>
             </div>
           </div>
 
           <div>
-            <h4 style={{ fontSize: "0.95rem", color: highContrast ? "#FFFF00" : "var(--accent-gold)", marginBottom: "1.25rem", fontFamily: "var(--font-heading)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Quick Contacts
+            <h4 style={{ fontSize: "0.9rem", color: highContrast ? "#FF6B6B" : "rgba(255,255,255,0.92)", marginBottom: "1rem", fontFamily: "var(--font-heading)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Contact
             </h4>
             <p style={{ fontSize: "0.8rem", opacity: 0.75, lineHeight: 1.6, marginBottom: "0.5rem" }}>
-              Finance Directorate, Main Campus<br />
-              P.O. Box HP 217, Ho, Volta Region, Ghana
+              Box HP 217, Ho<br />
+              VH-0044-6820<br />
+              Volta Region, Ghana
             </p>
-            <p style={{ fontSize: "0.8rem", opacity: 0.75 }}>
-              General Enquiries: +233 (0)362 026 123<br />
-              Email: support-finance@htu.edu.gh
+            <p style={{ fontSize: "0.8rem", opacity: 0.75, lineHeight: 1.6 }}>
+              +233(0)30 290 5009<br />
+              +233(0) 50 140 4994<br />
+              Email: info@htu.edu.gh
             </p>
           </div>
 
           <div>
-            <h4 style={{ fontSize: "0.95rem", color: highContrast ? "#FFFF00" : "var(--accent-gold)", marginBottom: "1.25rem", fontFamily: "var(--font-heading)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Portal Compliance
+            <h4 style={{ fontSize: "0.9rem", color: highContrast ? "#FF6B6B" : "rgba(255,255,255,0.92)", marginBottom: "1rem", fontFamily: "var(--font-heading)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Compliance
             </h4>
-            <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", fontSize: "0.75rem", opacity: 0.75, lineHeight: 1.45 }}>
-              <Info size={18} style={{ color: highContrast ? "#FFFF00" : "var(--accent-gold)", flexShrink: 0, marginTop: "2px" }} />
+            <div style={{ display: "flex", gap: "0.5rem", alignItems: "flex-start", fontSize: "0.78rem", opacity: 0.8, lineHeight: 1.5 }}>
+              <Info size={16} style={{ color: highContrast ? "#FF6B6B" : "rgba(255,255,255,0.85)", flexShrink: 0, marginTop: "2px" }} />
               <p>
                 Payments on this portal comply with the HTU Student Representative Council (SRC) financial statutes and Ho Technical University board guidelines.
               </p>
@@ -844,19 +927,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ 
-          maxWidth: "1200px", 
-          margin: "0 auto", 
-          borderTop: "1px solid rgba(255,255,255,0.1)", 
-          paddingTop: "1.5rem",
-          display: "flex", 
-          justifyContent: "space-between", 
-          alignItems: "center", 
-          flexWrap: "wrap", 
-          gap: "1rem",
-          fontSize: "0.8rem",
-          opacity: 0.6
-        }}>
+        <div className="landing-footer-bottom">
           <span>&copy; {new Date().getFullYear()} Ho Technical University. All Rights Reserved.</span>
           <span>Developed by HTU Information &amp; Communication Technology Directorate</span>
         </div>

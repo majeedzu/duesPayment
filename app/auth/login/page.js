@@ -38,17 +38,14 @@ function LoginContent() {
 
       if (!res.ok) {
         if (res.status === 403 && data.needRegistration) {
-          // Direct to registration
           router.push(`/auth/register?email=${encodeURIComponent(email)}`);
           return;
         }
         throw new Error(data.message || "Invalid login credentials.");
       }
 
-      // Store in session cookie
       setClientSession(data.user);
 
-      // Redirect to appropriate dashboard based on role
       const role = data.user.role;
       if (role === "super_admin") {
         router.push("/super-admin/dashboard");
@@ -64,150 +61,142 @@ function LoginContent() {
     }
   };
 
-  // Helper to instantly load preset accounts for mock testing
-  const handleQuickLogin = (presetEmail) => {
-    setEmail(presetEmail);
-    setPassword("password123");
-  };
-
   return (
-    <div style={{ 
-      minHeight: "100vh", 
-      display: "flex", 
-      flexDirection: "column", 
-      alignItems: "center", 
-      justifyContent: "center",
-      background: "radial-gradient(circle at 10% 20%, rgba(0, 55, 114, 0.05) 0%, rgba(0, 71, 173, 0.02) 90.1%)",
-      padding: "2rem 1rem"
-    }}>
-      
-      {/* Back to Home Link */}
-      <Link href="/" style={{ 
-        display: "flex", 
-        alignItems: "center", 
-        gap: "0.5rem", 
-        color: "var(--primary)", 
-        fontWeight: 600,
-        marginBottom: "2rem",
-        alignSelf: "center"
-      }}>
-        <ArrowLeft size={16} /> Back to Landing Page
-      </Link>
-
-      <div className="card" style={{ maxWidth: "450px", width: "100%", padding: "2.5rem" }}>
-        
-        {/* Portal Branding */}
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <img src="/htu_logo.jpg" alt="HTU Logo" style={{ margin: "0 auto 1rem", width: "55px", height: "55px", borderRadius: "50%", border: "2.5px solid var(--accent-gold)", objectFit: "cover", display: "block" }} />
-          <h2 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)" }}>Ho Technical University</h2>
-          <p style={{ opacity: 0.7, fontSize: "0.9rem", marginTop: "0.25rem" }}>Departmental Dues Portal</p>
+    <div className="auth-split-wrapper">
+      <div className="auth-split-left">
+        <div className="auth-left-brand">
+          <div className="htu-logo-container auth-left-logo">
+            <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
+          </div>
+          <div>
+            <h4 className="auth-left-brand-title">HTU Dues</h4>
+            <span className="auth-left-brand-sub">Finance Portal</span>
+          </div>
         </div>
 
-        {/* Error Alert */}
-        {error && (
-          <div className="badge badge-danger" style={{ 
-            display: "flex", 
-            width: "100%", 
-            padding: "0.75rem 1rem", 
-            borderRadius: "var(--radius)", 
-            textTransform: "none", 
-            fontSize: "0.85rem", 
-            alignItems: "center", 
-            gap: "0.5rem",
-            marginBottom: "1.5rem"
-          }}>
-            <ShieldAlert size={16} />
-            <span>{error}</span>
+        <div className="auth-left-showcase">
+          <span className="auth-left-badge">Official student portal</span>
+          <h2>Pay dues. Get cleared. Move on.</h2>
+          <p>
+            Sign in to view your balance, pay through Paystack, and download your stamped receipt — all in one place.
+          </p>
+          <div className="auth-left-img-container">
+            <img
+              src="/student_paying.png"
+              alt="HTU Student Paying Dues"
+              className="auth-left-student-img"
+            />
           </div>
-        )}
-
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <div className="form-group">
-            <label className="label">Institutional Email</label>
-            <div style={{ position: "relative" }}>
-              <Mail style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} size={16} />
-              <input
-                type="email"
-                placeholder="0322080456@htu.edu.gh"
-                className="input"
-                style={{ paddingLeft: "2.5rem" }}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <span style={{ fontSize: "0.75rem", opacity: 0.6 }}>Must end in @htu.edu.gh</span>
-          </div>
-
-          <div className="form-group">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <label className="label">Password</label>
-              <Link href="/auth/reset-password" style={{ fontSize: "0.8rem", color: "var(--secondary)", fontWeight: 500 }}>
-                Forgot?
-              </Link>
-            </div>
-            <div style={{ position: "relative" }}>
-              <Key style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} size={16} />
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                className="input"
-                style={{ paddingLeft: "2.5rem", paddingRight: "2.5rem" }}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: "absolute",
-                  right: "1rem",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  opacity: 0.5,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 0
-                }}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            <span style={{ fontSize: "0.75rem", opacity: 0.6, marginTop: "0.25rem", display: "block" }}>
-              First-time login? Use your student index number as your default password.
-            </span>
-          </div>
-
-          <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "1rem" }} disabled={loading}>
-            {loading ? "Signing In..." : "Sign In"} <LogIn size={18} />
-          </button>
-        </form>
-
-        <div style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.9rem" }}>
-          <span>First-time user? </span>
-          <Link href="/auth/register" style={{ color: "var(--primary)", fontWeight: 700 }}>
-            Register Password
-          </Link>
         </div>
-
       </div>
 
+      <div className="auth-split-right">
+        <div className="auth-mobile-hero">
+          <div className="htu-logo-container auth-mobile-hero-logo">
+            <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
+          </div>
+          <p className="auth-mobile-hero-title">Ho Technical University</p>
+          <p className="auth-mobile-hero-sub">Departmental Dues Portal</p>
+        </div>
+
+        <div className="auth-panel">
+          <Link href="/" className="auth-back-link">
+            <ArrowLeft size={16} /> Back to home
+          </Link>
+
+          <div className="auth-card">
+            <div className="auth-card-header">
+              <h2>Welcome back</h2>
+              <p>Sign in with your institutional email to continue</p>
+            </div>
+
+            {error && (
+              <div className="auth-alert auth-alert-error" role="alert">
+                <ShieldAlert size={16} />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="auth-form">
+              <div className="form-group">
+                <label className="label" htmlFor="login-email">Institutional email</label>
+                <div className="auth-input-wrap">
+                  <Mail className="auth-input-icon" size={18} />
+                  <input
+                    id="login-email"
+                    type="email"
+                    placeholder="0322080456@htu.edu.gh"
+                    className="input auth-input"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    required
+                  />
+                </div>
+                <span className="auth-form-hint">Must end in @htu.edu.gh</span>
+              </div>
+
+              <div className="form-group">
+                <div className="auth-label-row">
+                  <label className="label" htmlFor="login-password">Password</label>
+                  <Link href="/auth/reset-password" className="auth-link-subtle">
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="auth-input-wrap">
+                  <Key className="auth-input-icon" size={18} />
+                  <input
+                    id="login-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    className="input auth-input auth-input-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="auth-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <span className="auth-form-hint">
+                  First time? Use your student index number as your default password.
+                </span>
+              </div>
+
+              <button type="submit" className="btn btn-primary auth-submit" disabled={loading}>
+                {loading ? "Signing in…" : "Sign in"}
+                {!loading && <LogIn size={18} />}
+              </button>
+            </form>
+
+            <div className="auth-card-footer">
+              <span>New to the portal?</span>
+              <Link href="/auth/register" className="auth-link-bold">
+                Activate your account
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyCenter: "center", display: "flex", justifyContent: "center", backgroundColor: "var(--background)" }}>
-        <div className="spinner"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="auth-loading">
+          <div className="spinner" />
+        </div>
+      }
+    >
       <LoginContent />
     </Suspense>
   );

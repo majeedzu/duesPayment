@@ -28,13 +28,13 @@ export async function POST(req) {
     students.forEach((student, i) => {
       const missing = required.filter(f => !student[f] || !String(student[f]).trim());
       if (missing.length > 0) {
-        errors.push(`Row ${i + 1}: Missing fields — ${missing.join(', ')}`);
+        errors.push(`Row ${i + 1}: Missing fields: ${missing.join(', ')}`);
         return;
       }
 
       const emailRegex = /^[a-zA-Z0-9._%+-]+@htu\.edu\.gh$/;
       if (!emailRegex.test(String(student.email).toLowerCase())) {
-        errors.push(`Row ${i + 1}: Invalid email format — ${student.email}`);
+        errors.push(`Row ${i + 1}: Invalid email format: ${student.email}`);
         return;
       }
 
