@@ -64,6 +64,13 @@ export default function SuperAdminDashboard() {
   const [logSearch, setLogSearch] = useState("");
   const [adminSearch, setAdminSearch] = useState("");
 
+  // Broadcast notice states
+  const [notifTitle, setNotifTitle] = useState("");
+  const [notifMessage, setNotifMessage] = useState("");
+  const [sendingNotif, setSendingNotif] = useState(false);
+  const [notifSuccess, setNotifSuccess] = useState("");
+  const [notifError, setNotifError] = useState("");
+
   useEffect(() => {
     const session = getClientSession();
     if (!session) {
@@ -201,6 +208,33 @@ export default function SuperAdminDashboard() {
     }
   };
 
+  const handleSendNotification = async (e) => {
+    e.preventDefault();
+    setSendingNotif(true);
+    setNotifSuccess("");
+    setNotifError("");
+
+    try {
+      const res = await fetch("/api/super-admin/notifications/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: notifTitle, message: notifMessage })
+      });
+      const result = await res.json();
+      if (res.ok && result.success) {
+        setNotifSuccess("Broadcast notice successfully sent to all department administrators!");
+        setNotifTitle("");
+        setNotifMessage("");
+      } else {
+        setNotifError(result.message || "Failed to send notification.");
+      }
+    } catch (err) {
+      setNotifError("Network connection error.");
+    } finally {
+      setSendingNotif(false);
+    }
+  };
+
   const handleDeleteAdmin = async (id, name) => {
     if (!confirm(`Are you sure you want to remove ${name} as a department administrator?`)) return;
 
@@ -268,12 +302,12 @@ export default function SuperAdminDashboard() {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-brand">
-          <div className="htu-logo-container" style={{ width: "40px", height: "40px", border: "2px solid var(--accent-crimson)" }}>
+          <div className="htu-logo-container" style={{ width: "40px", height: "40px" }}>
             <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
           </div>
           <div>
             <h4 style={{ color: "white" }}>HTU Dues</h4>
-            <span style={{ fontSize: "0.75rem", color: "var(--accent-crimson)", fontWeight: 700 }}>SUPER ADMIN</span>
+            <span style={{ fontSize: "0.75rem", color: "var(--dashboard-accent)", fontWeight: 700 }}>SUPER ADMIN</span>
           </div>
         </div>
 
@@ -309,11 +343,18 @@ export default function SuperAdminDashboard() {
           >
             <FileText size={18} /> System Audit Logs
           </button>
+          <button 
+            onClick={() => { setActiveTab("notifications"); setSidebarOpen(false); }} 
+            className={`sidebar-link ${activeTab === "notifications" ? "active" : ""}`}
+            style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}
+          >
+            <Bell size={18} /> Broadcast Alerts
+          </button>
         </div>
 
         <div className="sidebar-footer">
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
-            <div style={{ width: "35px", height: "35px", borderRadius: "50%", backgroundColor: "var(--accent-crimson)", display: "flex", alignItems: "center", justifyCenter: "center", color: "white", fontWeight: 700, justifyContent: "center" }}>
+            <div style={{ width: "35px", height: "35px", borderRadius: "50%", backgroundColor: "var(--dashboard-accent)", display: "flex", alignItems: "center", justifyCenter: "center", color: "white", fontWeight: 700, justifyContent: "center" }}>
               {admin?.full_name?.charAt(0) || "S"}
             </div>
             <div style={{ overflow: "hidden" }}>
@@ -693,6 +734,75 @@ export default function SuperAdminDashboard() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* BROADCAST ALERT PANEL */}
+          {activeTab === "notifications" && (
+            <div className="card">
+              <div style={{ marginBottom: "1.5rem" }}>
+                <h3 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", margin: 0 }}>Broadcast Alerts to Admins</h3>
+                <p style={{ fontSize: "0.85rem", opacity: 0.7, marginTop: "0.25rem" }}>Send global admin dashboard alerts to all registered department administrators.</p>
+              </div>
+
+              {notifSuccess && (
+                <div className="badge badge-success" style={{ display: "block", marginBottom: "1rem", padding: "0.5rem 1rem", textTransform: "none", width: "100%" }}>
+                  {notifSuccess}
+                </div>
+              )}
+              {notifError && (
+                <div className="badge badge-danger" style={{ display: "block", marginBottom: "1rem", padding: "0.5rem 1rem", textTransform: "none", width: "100%" }}>
+                  {notifError}
+                </div>
+              )}
+
+              <form onSubmit={handleSendNotification} style={{ display: "flex", flexDirection: "column", gap: "1.25rem", maxWidth: "600px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, opacity: 0.7 }}>Alert Title</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. System Maintenance Window" 
+                    value={notifTitle}
+                    onChange={(e) => setNotifTitle(e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--border)",
+                      fontSize: "0.9rem",
+                      outline: "none"
+                    }}
+                  />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                  <label style={{ fontSize: "0.75rem", fontWeight: 700, opacity: 0.7 }}>Alert Message</label>
+                  <textarea 
+                    placeholder="Write your alert message details here..." 
+                    value={notifMessage}
+                    onChange={(e) => setNotifMessage(e.target.value)}
+                    required
+                    rows={5}
+                    style={{
+                      width: "100%",
+                      padding: "0.65rem 0.85rem",
+                      borderRadius: "var(--radius-sm)",
+                      border: "1px solid var(--border)",
+                      fontSize: "0.9rem",
+                      outline: "none",
+                      resize: "none"
+                    }}
+                  />
+                </div>
+                <button 
+                  type="submit" 
+                  className="btn btn-primary" 
+                  style={{ alignSelf: "flex-start", padding: "0.65rem 1.75rem", display: "flex", gap: "0.5rem", alignItems: "center" }}
+                  disabled={sendingNotif}
+                >
+                  {sendingNotif ? 'Sending alert...' : 'Broadcast Alert'}
+                </button>
+              </form>
             </div>
           )}
 

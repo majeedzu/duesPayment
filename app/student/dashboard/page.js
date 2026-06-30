@@ -39,6 +39,7 @@ export default function StudentDashboard() {
   const [historyPage, setHistoryPage] = useState(1);
   const [notifFilter, setNotifFilter] = useState("all"); // all, unread, read
   const [notifUpdating, setNotifUpdating] = useState(false);
+  const [sortConfig, setSortConfig] = useState({ key: "created_at", direction: "desc" });
 
   // Monitor screen size for mobile responsive layout
   useEffect(() => {
@@ -239,6 +240,19 @@ export default function StudentDashboard() {
     window.print();
   };
 
+  const requestSort = (key) => {
+    let direction = "asc";
+    if (sortConfig.key === key && sortConfig.direction === "asc") {
+      direction = "desc";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (key) => {
+    if (sortConfig.key !== key) return " ↕";
+    return sortConfig.direction === "asc" ? " ▲" : " ▼";
+  };
+
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem" }}>
@@ -259,8 +273,30 @@ export default function StudentDashboard() {
   }
 
   const { student, profile, department, payments, notifications } = dashboardData;
+  const unreadCount = notifications.filter(n => !n.is_read).length;
   const activePayment = payments.find(p => p.status === "success");
   const isPaid = !!activePayment;
+
+  // Sorting logic for payments history ledger
+  const sortedPayments = [...payments].sort((a, b) => {
+    let aVal = a[sortConfig.key];
+    let bVal = b[sortConfig.key];
+
+    if (sortConfig.key === "created_at" || sortConfig.key === "payment_date") {
+      aVal = new Date(aVal || 0).getTime();
+      bVal = new Date(bVal || 0).getTime();
+    } else if (sortConfig.key === "amount") {
+      aVal = parseFloat(aVal || 0);
+      bVal = parseFloat(bVal || 0);
+    } else {
+      aVal = String(aVal || "").toLowerCase();
+      bVal = String(bVal || "").toLowerCase();
+    }
+
+    if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // Filter and paginated configurations
   const filteredNotifications = notifications.filter(n => {
@@ -270,8 +306,8 @@ export default function StudentDashboard() {
   });
 
   const paymentsPerPage = 5;
-  const totalHistoryPages = Math.ceil(payments.length / paymentsPerPage) || 1;
-  const paginatedPayments = payments.slice(
+  const totalHistoryPages = Math.ceil(sortedPayments.length / paymentsPerPage) || 1;
+  const paginatedPayments = sortedPayments.slice(
     (historyPage - 1) * paymentsPerPage,
     historyPage * paymentsPerPage
   );
@@ -298,7 +334,7 @@ export default function StudentDashboard() {
       >
         <div className="sidebar-brand" style={{ position: "relative" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start" }}>
-            <div className="htu-logo-container" style={{ width: "35px", height: "35px", border: "2px solid var(--accent-crimson)" }}>
+            <div className="htu-logo-container" style={{ width: "35px", height: "35px" }}>
               <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
             </div>
             {(!sidebarCollapsed || isMobile) && (
@@ -349,8 +385,26 @@ export default function StudentDashboard() {
           >
             <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
               <Bell size={18} />
-              {notifications.some(n => !n.is_read) && (
-                <span style={{ position: "absolute", top: "-2px", right: "-2px", width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--accent-crimson)" }} />
+              {unreadCount > 0 && (
+                <span style={{
+                  position: "absolute",
+                  top: "-6px",
+                  right: "-8px",
+                  backgroundColor: "var(--dashboard-accent)",
+                  color: "#FFFFFF",
+                  borderRadius: "50%",
+                  width: "16px",
+                  height: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "9px",
+                  fontWeight: 800,
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                  lineHeight: 1
+                }}>
+                  {unreadCount}
+                </span>
               )}
             </div>
             {(!sidebarCollapsed || isMobile) && <span>Notifications</span>}
@@ -360,7 +414,7 @@ export default function StudentDashboard() {
         <div className="sidebar-footer">
           <button 
             onClick={handleLogout} 
-            className="sidebar-link" 
+            className="sidebar-link sidebar-link-danger" 
             style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", gap: "0.75rem", alignItems: "center" }}
             title="Sign Out"
           >
@@ -387,6 +441,7 @@ export default function StudentDashboard() {
                 onClick={() => setSidebarOpen(true)}
                 className="btn btn-outline" 
                 style={{ padding: "0.5rem", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
+                aria-label="Open sidebar navigation menu"
               >
                 <Menu size={18} />
               </button>
@@ -399,6 +454,7 @@ export default function StudentDashboard() {
                 className="btn btn-outline" 
                 style={{ padding: "0.5rem", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}
                 title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                aria-label={sidebarCollapsed ? "Expand sidebar navigation menu" : "Collapse sidebar navigation menu"}
               >
                 {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
               </button>
@@ -410,7 +466,19 @@ export default function StudentDashboard() {
                 {activeTab === "history" && "Payment Ledger"}
                 {activeTab === "notifications" && "Notification Control"}
               </h3>
-              <p style={{ fontSize: "0.8rem", opacity: 0.7 }}>Welcome back, {student.full_name}</p>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.15rem" }}>
+                <span style={{ fontSize: "0.8rem", opacity: 0.7 }}>Welcome back, {student.full_name.split(' ')[0]}</span>
+                <span style={{ 
+                  width: "6px", 
+                  height: "6px", 
+                  borderRadius: "50%", 
+                  backgroundColor: isPaid ? "var(--success)" : "var(--danger)",
+                  display: "inline-block"
+                }} />
+                <span style={{ fontSize: "0.75rem", fontWeight: 700, color: isPaid ? "var(--success)" : "var(--danger)" }}>
+                  {isPaid ? "Dues Verified" : "Dues Outstanding"}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -420,10 +488,30 @@ export default function StudentDashboard() {
               onClick={() => setActiveTab("notifications")} 
               style={{ position: "relative", cursor: "pointer", padding: "0.4rem", borderRadius: "50%", transition: "background-color 0.2s" }}
               title="View System Alerts"
+              role="button"
+              aria-label="View system alerts and notifications"
             >
               <Bell size={20} />
-              {notifications.some(n => !n.is_read) && (
-                <span style={{ position: "absolute", top: "2px", right: "2px", width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "var(--accent-crimson)" }} />
+              {unreadCount > 0 && (
+                <span style={{
+                  position: "absolute",
+                  top: "-2px",
+                  right: "-2px",
+                  backgroundColor: "var(--dashboard-accent)",
+                  color: "#FFFFFF",
+                  borderRadius: "50%",
+                  width: "16px",
+                  height: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "9px",
+                  fontWeight: 800,
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                  lineHeight: 1
+                }}>
+                  {unreadCount}
+                </span>
               )}
             </div>
 
@@ -434,7 +522,6 @@ export default function StudentDashboard() {
                 borderRadius: "50%",
                 backgroundColor: "var(--border)",
                 overflow: "hidden",
-                border: "2px solid var(--accent-crimson)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center"
@@ -451,42 +538,88 @@ export default function StudentDashboard() {
 
         {/* Body Content */}
         <div className="content-body">
-          
-          {/* TAB 1: Dues Payment */}
           {activeTab === "payment" && (
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr", gap: "2rem" }}>
-              
-              {/* Left Column: Billing card & Department details */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                
-                {/* Payment Status Card */}
-                <div className="card" style={{ 
-                  borderLeft: isPaid ? "6px solid var(--success)" : "6px solid var(--danger)",
-                  backgroundColor: isPaid ? "var(--success-bg)" : "var(--danger-bg)",
-                  color: "var(--foreground)",
-                  padding: "2rem"
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "1200px", width: "100%", margin: "0 auto" }}>
+
+              {/* Welcome Banner Card */}
+              <div className="welcome-banner-card">
+                <div className="welcome-banner-avatar" style={{
+                  width: "60px",
+                  height: "60px",
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                  border: "2px solid #FFFFFF",
+                  boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+                  zIndex: 2,
+                  flexShrink: 0
                 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <span style={{ fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 700, opacity: 0.7 }}>
-                        Departmental Dues Status
-                      </span>
-                      <h2 style={{ fontSize: "2rem", marginTop: "0.25rem", color: "var(--primary)", fontFamily: "var(--font-heading)" }}>
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  ) : (
+                    <User size={30} style={{ color: "#FFFFFF", opacity: 0.9 }} />
+                  )}
+                </div>
+
+                <div style={{ position: "relative", zIndex: 2, flexGrow: 1 }}>
+                  <span style={{ fontSize: "0.7rem", textTransform: "uppercase", fontWeight: 700, opacity: 0.8, letterSpacing: "0.08em", display: "block" }}>Welcome Back,</span>
+                  <h2 style={{ fontSize: "1.6rem", fontWeight: 800, margin: "0.2rem 0", color: "#FFFFFF", fontFamily: "var(--font-heading)" }}>
+                    {student.full_name.toUpperCase()}!
+                  </h2>
+                </div>
+                <div style={{ position: "absolute", top: "-50px", right: "-50px", width: "150px", height: "150px", borderRadius: "50%", background: "rgba(255,255,255,0.05)", zIndex: 1 }} />
+                <div style={{ position: "absolute", bottom: "-30px", right: "20px", width: "80px", height: "80px", borderRadius: "50%", background: "rgba(255,255,255,0.03)", zIndex: 1 }} />
+              </div>
+
+              <div className="dashboard-two-col-grid">
+
+                {/* LEFT COLUMN: Status + Alerts */}
+                <div className="dashboard-main-col" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+
+                {/* Dues Status Card */}
+                <div className="card" style={{
+                  borderLeft: isPaid ? "6px solid var(--success)" : "6px solid var(--danger)",
+                  background: isPaid 
+                    ? "linear-gradient(135deg, rgba(5, 150, 105, 0.12) 0%, rgba(16, 185, 129, 0.03) 100%)" 
+                    : "var(--danger-bg)",
+                  padding: "1.5rem",
+                  width: "100%",
+                  maxWidth: "100%",
+                  boxSizing: "border-box"
+                }}>
+                  <div className="dashboard-status-card-inner" style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                    <div style={{ minWidth: 0 }}>
+                      <span style={{ fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 700, opacity: 0.7 }}>Departmental Dues Status</span>
+                      <h2 style={{ 
+                        fontSize: "clamp(1.4rem, 4vw, 2rem)", 
+                        marginTop: "0.25rem", 
+                        color: "var(--primary)", 
+                        fontFamily: "var(--font-heading)",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.75rem",
+                        flexWrap: "wrap"
+                      }}>
                         {isPaid ? "Dues Fully Paid" : "Dues Outstanding"}
+                        {isPaid ? (
+                          <span className="success-pulse-icon" style={{ display: "inline-flex", alignItems: "center" }}>
+                            <CheckCircle2 size={28} style={{ color: "var(--success)" }} />
+                          </span>
+                        ) : (
+                          <span style={{ display: "inline-flex", alignItems: "center" }}>
+                            <AlertTriangle size={28} style={{ color: "var(--danger)" }} />
+                          </span>
+                        )}
                       </h2>
-                      <p style={{ marginTop: "0.5rem", opacity: 0.8, fontSize: "0.95rem" }}>
-                        {isPaid 
-                          ? `Clearance confirmed. Payment verified on ${new Date(activePayment.payment_date).toLocaleDateString()}.` 
+                      <p style={{ marginTop: "0.5rem", opacity: 0.8, fontSize: "0.9rem" }}>
+                        {isPaid
+                          ? `Clearance confirmed. Payment verified on ${new Date(activePayment.payment_date).toLocaleDateString()}.`
                           : `Please complete payment of GHS ${parseFloat(department.dues_amount).toFixed(2)} to clear registration holds.`
                         }
                       </p>
-                    </div>
-                    <div>
-                      {isPaid ? (
-                        <CheckCircle2 size={56} style={{ color: "var(--success)" }} />
-                      ) : (
-                        <AlertTriangle size={56} style={{ color: "var(--danger)" }} />
-                      )}
                     </div>
                   </div>
 
@@ -496,145 +629,22 @@ export default function StudentDashboard() {
                     </div>
                   )}
 
-                  {!isPaid && (
-                    <button 
-                      onClick={handlePayDues} 
-                      className="btn btn-primary" 
-                      style={{ marginTop: "1.5rem", padding: "0.85rem 2rem", fontSize: "1rem" }}
-                      disabled={paying}
-                    >
-                      {paying ? (
-                        <>
-                          <Loader2 className="spinner" style={{ width: 18, height: 18 }} /> Connecting Paystack...
-                        </>
-                      ) : (
-                        <>
-                          <CreditCard size={18} /> Pay Dues (GHS {parseFloat(department.dues_amount).toFixed(2)})
-                        </>
-                      )}
+                  {!isPaid ? (
+                    <button onClick={handlePayDues} className="btn btn-primary" style={{ marginTop: "1.5rem", width: "100%", padding: "0.85rem", fontSize: "1rem" }} disabled={paying}>
+                      {paying ? <><Loader2 className="spinner" style={{ width: 18, height: 18 }} /> Connecting Paystack...</> : <><CreditCard size={18} /> Pay Dues (GHS {parseFloat(department.dues_amount).toFixed(2)})</>}
                     </button>
-                  )}
-
-                  {isPaid && (
-                    <button 
-                      onClick={() => openReceiptModal(activePayment)} 
-                      className="btn btn-secondary" 
-                      style={{ marginTop: "1.5rem", padding: "0.85rem 2rem", display: "inline-flex", gap: "0.5rem" }}
-                    >
+                  ) : (
+                    <button onClick={() => openReceiptModal(activePayment)} className="btn btn-receipt-highlight" style={{ marginTop: "1.5rem", width: "100%", padding: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
                       <Download size={18} /> View Stamped Receipt
                     </button>
                   )}
                 </div>
 
-                {/* Department Details Card */}
-                <div className="card">
-                  <h3 className="card-title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <Building2 size={20} /> Department Details
-                  </h3>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginTop: "1rem" }}>
-                    <div>
-                      <p style={{ opacity: 0.6, fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 600 }}>Department</p>
-                      <p style={{ fontWeight: 600, color: "var(--primary)" }}>{department.name}</p>
-                    </div>
-                    <div>
-                      <p style={{ opacity: 0.6, fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 600 }}>Faculty</p>
-                      <p style={{ fontWeight: 600 }}>{department.faculty}</p>
-                    </div>
-                    <div>
-                      <p style={{ opacity: 0.6, fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 600 }}>Fixed Dues Rate</p>
-                      <p style={{ fontWeight: 700 }}>GHS {parseFloat(department.dues_amount).toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p style={{ opacity: 0.6, fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 600 }}>Billing Cycle</p>
-                      <p style={{ fontWeight: 600 }}>Academic Year 2025/2026</p>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-
-              {/* Right Column: Profile details & upload */}
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                
-                <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "2rem 1.5rem" }}>
-                  <div style={{ position: "relative", marginBottom: "1.5rem" }}>
-                    <div style={{
-                      width: "120px",
-                      height: "120px",
-                      borderRadius: "50%",
-                      backgroundColor: "var(--background)",
-                      overflow: "hidden",
-                      border: "3px solid var(--primary)",
-                      boxShadow: "var(--shadow)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center"
-                    }}>
-                      {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                      ) : (
-                        <User size={48} style={{ opacity: 0.3 }} />
-                      )}
-                    </div>
-                    
-                    <label htmlFor="avatar-file" style={{
-                      position: "absolute",
-                      bottom: "5px",
-                      right: "5px",
-                      width: "35px",
-                      height: "35px",
-                      borderRadius: "50%",
-                      backgroundColor: "var(--accent-crimson)",
-                      color: "#FFFFFF",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      boxShadow: "var(--shadow)",
-                      border: "2px solid var(--card-bg)"
-                    }}>
-                      {uploadingAvatar ? <Loader2 className="spinner" style={{ width: 14, height: 14, borderTopColor: "#FFFFFF" }} /> : <ImageIcon size={16} />}
-                    </label>
-                    
-                    <input 
-                      type="file" 
-                      id="avatar-file" 
-                      accept="image/*" 
-                      onChange={handleAvatarChange} 
-                      style={{ display: "none" }} 
-                      disabled={uploadingAvatar} 
-                    />
-                  </div>
-                  
-                  <h3 style={{ fontFamily: "var(--font-heading)" }}>{student.full_name}</h3>
-                  <p style={{ opacity: 0.7, fontSize: "0.85rem", margin: "0.25rem 0" }}>{student.email}</p>
-                  
-                  <div style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "1rem 0" }} />
-
-                  <div style={{ width: "100%", textAlign: "left", display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.85rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <FileText size={15} style={{ opacity: 0.5 }} />
-                      <span>Index Number: <strong>{student.index_number}</strong></span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <GraduationCap size={15} style={{ opacity: 0.5 }} />
-                      <span>{student.programme}</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <Calendar size={15} style={{ opacity: 0.5 }} />
-                      <span>Level: <strong>{student.level}</strong></span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quick Alerts Side panel */}
-                <div className="card">
+                {/* Recent Alerts */}
+                <div className="card recent-alerts-card" style={{ width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
                     <h3 className="card-title" style={{ fontSize: "1.05rem", margin: 0 }}>Recent Alerts</h3>
-                    <button 
-                      onClick={() => setActiveTab("notifications")} 
-                      style={{ border: "none", background: "none", color: "var(--primary)", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}
-                    >
+                    <button onClick={() => setActiveTab("notifications")} style={{ border: "none", background: "none", color: "var(--primary)", fontSize: "0.75rem", fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}>
                       View All
                     </button>
                   </div>
@@ -645,10 +655,10 @@ export default function StudentDashboard() {
                       notifications.slice(0, 3).map((notif, index) => (
                         <div key={index} style={{ borderBottom: index !== Math.min(notifications.length, 3) - 1 ? "1px solid var(--border)" : "none", paddingBottom: "0.5rem" }}>
                           <h4 style={{ fontSize: "0.8rem", color: notif.is_read ? "var(--foreground)" : "var(--primary)", fontWeight: notif.is_read ? 600 : 700, display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                            {!notif.is_read && <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--accent-crimson)", display: "inline-block" }} />}
+                            {!notif.is_read && <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "var(--dashboard-accent)", display: "inline-block" }} />}
                             {notif.title}
                           </h4>
-                          <p style={{ fontSize: "0.75rem", opacity: 0.7, marginTop: "0.15rem", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>{notif.message}</p>
+                          <p style={{ fontSize: "0.75rem", opacity: 0.7, marginTop: "0.15rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{notif.message}</p>
                         </div>
                       ))
                     )}
@@ -656,8 +666,75 @@ export default function StudentDashboard() {
                 </div>
 
               </div>
+
+              {/* RIGHT COLUMN: Student Identity Card */}
+              <div className="dashboard-side-col" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+
+                <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "2rem 1.5rem", width: "100%", maxWidth: "100%", boxSizing: "border-box" }}>
+
+                  {/* Avatar */}
+                  <div style={{ position: "relative", marginBottom: "1.5rem" }}>
+                    <div style={{ width: "120px", height: "120px", borderRadius: "50%", backgroundColor: "var(--background)", overflow: "hidden", border: "3px solid var(--primary)", boxShadow: "var(--shadow)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="Profile Avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <User size={48} style={{ opacity: 0.3 }} />
+                      )}
+                    </div>
+                    <label htmlFor="avatar-file" style={{ position: "absolute", bottom: "5px", right: "5px", width: "35px", height: "35px", borderRadius: "50%", backgroundColor: "var(--dashboard-accent)", color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "var(--shadow)", border: "2px solid var(--card-bg)" }}>
+                      {uploadingAvatar ? <Loader2 className="spinner" style={{ width: 14, height: 14 }} /> : <ImageIcon size={16} />}
+                    </label>
+                    <input type="file" id="avatar-file" accept="image/*" onChange={handleAvatarChange} style={{ display: "none" }} disabled={uploadingAvatar} />
+                  </div>
+
+                  {/* Name & Programme */}
+                  <h2 style={{ fontSize: "1.3rem", fontWeight: 800, color: "var(--primary)", textAlign: "center", textTransform: "uppercase", fontFamily: "var(--font-heading)", margin: "0.25rem 0", letterSpacing: "0.02em", width: "100%", wordBreak: "break-word" }}>
+                    {student.full_name}
+                  </h2>
+                  <p style={{ opacity: 0.7, fontSize: "0.85rem", textAlign: "center", fontWeight: 600, width: "100%", wordBreak: "break-word" }}>
+                    {student.programme} &middot; Level {student.level}
+                  </p>
+
+                  <div style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "1.25rem 0" }} />
+
+                  {/* Biodata */}
+                  <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem", fontSize: "0.9rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", minWidth: 0 }}>
+                      <Mail size={16} style={{ opacity: 0.6, color: "var(--primary)", flexShrink: 0 }} />
+                      <span style={{ wordBreak: "break-all", minWidth: 0, flex: 1 }}>{student.email}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", minWidth: 0 }}>
+                      <FileText size={16} style={{ opacity: 0.6, color: "var(--primary)", flexShrink: 0 }} />
+                      <span style={{ minWidth: 0, flex: 1 }}>Index: <strong>{student.index_number}</strong></span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", width: "100%", minWidth: 0 }}>
+                      <Building2 size={16} style={{ opacity: 0.6, color: "var(--primary)", flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.85rem", wordBreak: "break-word", minWidth: 0, flex: 1 }}>{student.faculty}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ width: "100%", height: "1px", backgroundColor: "var(--border)", margin: "1.25rem 0" }} />
+
+                  {/* Billing Grid */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", width: "100%" }}>
+                    <div style={{ backgroundColor: "rgba(0,0,140,0.03)", padding: "0.75rem", borderRadius: "var(--radius-sm)", textAlign: "center" }}>
+                      <span style={{ fontSize: "0.6rem", textTransform: "uppercase", fontWeight: 700, opacity: 0.5, display: "block", marginBottom: "0.25rem" }}>Academic Year</span>
+                      <span style={{ fontWeight: 700, color: "var(--primary)", fontSize: "0.9rem" }}>2025/2026</span>
+                    </div>
+                    <div style={{ backgroundColor: "rgba(0,0,140,0.03)", padding: "0.75rem", borderRadius: "var(--radius-sm)", textAlign: "center" }}>
+                      <span style={{ fontSize: "0.6rem", textTransform: "uppercase", fontWeight: 700, opacity: 0.5, display: "block", marginBottom: "0.25rem" }}>Dues Amount</span>
+                      <span style={{ fontWeight: 700, color: "var(--primary)", fontSize: "0.9rem" }}>GHS {parseFloat(department.dues_amount).toFixed(2)}</span>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
             </div>
-          )}
+
+          </div>
+        )}
 
           {/* TAB 2: Payment History Ledger (with pagination to handle large lists) */}
           {activeTab === "history" && (
@@ -686,10 +763,18 @@ export default function StudentDashboard() {
                     <table className="table">
                       <thead>
                         <tr>
-                          <th>Transaction Reference</th>
-                          <th>Clearance Value</th>
-                          <th>Timestamp</th>
-                          <th>Clearance Status</th>
+                          <th onClick={() => requestSort("paystack_reference")} style={{ cursor: "pointer", userSelect: "none" }}>
+                            Transaction Reference {getSortIcon("paystack_reference")}
+                          </th>
+                          <th onClick={() => requestSort("amount")} style={{ cursor: "pointer", userSelect: "none" }}>
+                            Clearance Value {getSortIcon("amount")}
+                          </th>
+                          <th onClick={() => requestSort("created_at")} style={{ cursor: "pointer", userSelect: "none" }}>
+                            Timestamp {getSortIcon("created_at")}
+                          </th>
+                          <th onClick={() => requestSort("status")} style={{ cursor: "pointer", userSelect: "none" }}>
+                            Clearance Status {getSortIcon("status")}
+                          </th>
                           <th>Verification slip</th>
                         </tr>
                       </thead>

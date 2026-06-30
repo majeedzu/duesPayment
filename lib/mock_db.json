@@ -442,6 +442,76 @@
       "action": "PAYMENT_CONFIRMED_MOCK",
       "details": "Mock payment confirmed. Ref: HTU-325080329-1782672981882, Receipt: REC-HTU-990033-81882",
       "created_at": "2026-06-28T18:56:30.061Z"
+    },
+    {
+      "id": "audit-1782816700402",
+      "actor_id": "user-super-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "HTU Super Administrator (super_admin) logged in.",
+      "created_at": "2026-06-30T10:51:40.402Z"
+    },
+    {
+      "id": "audit-1782816784569",
+      "actor_id": "user-cs-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "CS Department Administrator (dept_admin) logged in.",
+      "created_at": "2026-06-30T10:53:04.570Z"
+    },
+    {
+      "id": "audit-1782817338442",
+      "actor_id": "user-cs-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "CS Department Administrator (dept_admin) logged in.",
+      "created_at": "2026-06-30T11:02:18.442Z"
+    },
+    {
+      "id": "audit-1782819198740",
+      "actor_id": "user-student-unpaid",
+      "action": "LOGIN_SUCCESS",
+      "details": "John Doe (student) logged in.",
+      "created_at": "2026-06-30T11:33:18.740Z"
+    },
+    {
+      "id": "audit-1782819227603",
+      "actor_id": "user-student-paid",
+      "action": "LOGIN_SUCCESS",
+      "details": "Jane Smith (student) logged in.",
+      "created_at": "2026-06-30T11:33:47.603Z"
+    },
+    {
+      "id": "audit-1782823470508",
+      "actor_id": "user-student-unpaid",
+      "action": "LOGIN_SUCCESS",
+      "details": "John Doe (student) logged in.",
+      "created_at": "2026-06-30T12:44:30.508Z"
+    },
+    {
+      "id": "audit-1782823488376",
+      "actor_id": "user-student-paid",
+      "action": "LOGIN_SUCCESS",
+      "details": "Jane Smith (student) logged in.",
+      "created_at": "2026-06-30T12:44:48.376Z"
+    },
+    {
+      "id": "audit-1782825997882",
+      "actor_id": "user-student-paid",
+      "action": "LOGIN_SUCCESS",
+      "details": "Jane Smith (student) logged in.",
+      "created_at": "2026-06-30T13:26:37.882Z"
+    },
+    {
+      "id": "audit-1782827293396",
+      "actor_id": "user-cs-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "CS Department Administrator (dept_admin) logged in.",
+      "created_at": "2026-06-30T13:48:13.396Z"
+    },
+    {
+      "id": "audit-1782827427809",
+      "actor_id": "user-super-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "HTU Super Administrator (super_admin) logged in.",
+      "created_at": "2026-06-30T13:50:27.809Z"
     }
   ]
 }

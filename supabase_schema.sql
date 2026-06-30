@@ -94,15 +94,78 @@ SET email = EXCLUDED.email, full_name = EXCLUDED.full_name, programme = EXCLUDED
 
 --------------------------------------------------------------------------------
 -- 3. Row Level Security (RLS) Configuration
--- For quick setup, you can keep RLS disabled. If you enable RLS, run the policies below.
 --------------------------------------------------------------------------------
 
--- By default, we recommend keeping RLS disabled on these tables initially during testing,
--- or run the following to enable global read/write access for authenticated app queries:
+-- Enable Row Level Security (RLS) for all tables
+ALTER TABLE public.departments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
-ALTER TABLE public.departments DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.students DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.payments DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.notifications DISABLE ROW LEVEL SECURITY;
-ALTER TABLE public.audit_logs DISABLE ROW LEVEL SECURITY;
+-- 3.1. Policies for public.departments
+CREATE POLICY "Allow public read access to departments" ON public.departments 
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow write access to departments for admins" ON public.departments 
+    FOR ALL TO authenticated USING (
+        (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('dept_admin', 'super_admin')
+    );
+
+-- 3.2. Policies for public.profiles
+CREATE POLICY "Allow users to view their own profile and admins to view all" ON public.profiles 
+    FOR SELECT TO authenticated USING (
+        auth.uid() = id OR 
+        (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('dept_admin', 'super_admin')
+    );
+
+CREATE POLICY "Allow users to update their own profile and admins to update all" ON public.profiles 
+    FOR UPDATE TO authenticated USING (
+        auth.uid() = id OR 
+        (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('dept_admin', 'super_admin')
+    );
+
+-- Note: Profile INSERT is handled by the server using the service_role key client (supabaseAdmin) 
+-- during registration/admin creation, which bypasses RLS automatically.
+
+-- 3.3. Policies for public.students
+CREATE POLICY "Allow select access to student directory" ON public.students 
+    FOR SELECT USING (true);
+
+CREATE POLICY "Allow write access to students for admins" ON public.students 
+    FOR ALL TO authenticated USING (
+        (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('dept_admin', 'super_admin')
+    );
+
+-- 3.4. Policies for public.payments
+CREATE POLICY "Allow users to view their own payments and admins to view all" ON public.payments 
+    FOR SELECT TO authenticated USING (
+        (SELECT email FROM public.profiles WHERE id = auth.uid()) = (SELECT email FROM public.students WHERE index_number = student_index_number) OR 
+        (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('dept_admin', 'super_admin')
+    );
+
+-- Note: Payment inserts (initialization) and status updates (verification webhook/callback) 
+-- are executed on the backend via the service_role key client (supabaseAdmin) which bypasses RLS.
+
+-- 3.5. Policies for public.notifications
+CREATE POLICY "Allow users to view their own notifications and admins to view all" ON public.notifications 
+    FOR SELECT TO authenticated USING (
+        auth.uid() = user_id OR 
+        (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('dept_admin', 'super_admin')
+    );
+
+CREATE POLICY "Allow users to update their own notifications (e.g. mark read)" ON public.notifications 
+    FOR UPDATE TO authenticated USING (
+        auth.uid() = user_id
+    );
+
+-- Note: Notification creation (insert) is performed by system triggers or the backend server using the service_role client.
+
+-- 3.6. Policies for public.audit_logs
+CREATE POLICY "Allow admins to view audit logs" ON public.audit_logs 
+    FOR SELECT TO authenticated USING (
+        (SELECT role FROM public.profiles WHERE id = auth.uid()) IN ('dept_admin', 'super_admin')
+    );
+
+-- Note: Audit log inserts are performed by the backend server using the service_role client.

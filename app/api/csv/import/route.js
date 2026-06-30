@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { getServerSession } from '@/lib/session';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, supabaseAdmin } from '@/lib/supabase';
 
 export async function POST(req) {
   try {
@@ -76,7 +76,7 @@ export async function POST(req) {
           const timestamp = Date.now();
           const reference = `MANUAL-${indexNum}-${timestamp}`;
           const receiptId = `REC-HTU-MAN-${timestamp.toString().slice(-6)}`;
-          const { error: payErr } = await supabase.from('payments').insert({
+          const { error: payErr } = await (supabaseAdmin || supabase).from('payments').insert({
             student_index_number: indexNum,
             amount: duesAmount,
             paystack_reference: reference,
