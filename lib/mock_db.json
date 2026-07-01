@@ -131,45 +131,7 @@
       "department_id": "dept-cs-111"
     }
   ],
-  "payments": [
-    {
-      "id": "pay-mock-001",
-      "student_index_number": "0322080999",
-      "amount": 150,
-      "paystack_reference": "TST_MOCK_REF_999",
-      "status": "success",
-      "receipt_id": "REC-HTU-2026-999-55A",
-      "payment_date": "2026-06-25T12:00:00.000Z",
-      "semester": "Both Semesters",
-      "academic_year": "2025/2026"
-    },
-    {
-      "id": "pay-1782419289618",
-      "status": "success",
-      "created_at": "2026-06-25T20:28:09.618Z",
-      "updated_at": "2026-06-25T20:28:16.205Z",
-      "student_index_number": "0322080456",
-      "amount": 150,
-      "paystack_reference": "HTU-0322080456-1782419289617",
-      "receipt_id": "REC-HTU-296204-89617",
-      "payment_date": "2026-06-25T20:28:16.205Z",
-      "semester": "Both Semesters",
-      "academic_year": "2025/2026"
-    },
-    {
-      "id": "pay-1782672981883",
-      "status": "success",
-      "created_at": "2026-06-28T18:56:21.883Z",
-      "updated_at": "2026-06-28T18:56:30.035Z",
-      "student_index_number": "325080329",
-      "amount": 150,
-      "paystack_reference": "HTU-325080329-1782672981882",
-      "receipt_id": "REC-HTU-990033-81882",
-      "payment_date": "2026-06-28T18:56:30.035Z",
-      "semester": "Both Semesters",
-      "academic_year": "2025/2026"
-    }
-  ],
+  "payments": [],
   "notifications": [
     {
       "id": "notif-mock-001",

@@ -3603,6 +3603,12 @@ body.dark-mode .floating-metric-card strong, [data-theme="dark"] .floating-metri
   }
 }
 
+@media (max-width: 768px) {
+  .landing-hero-scroll {
+    display: none !important;
+  }
+}
+
 
 
 
