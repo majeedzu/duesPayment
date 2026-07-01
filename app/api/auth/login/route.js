@@ -11,22 +11,17 @@ export async function POST(req) {
 
     if (isSupabaseConfigured()) {
       // --- Step 1: Try normal Supabase login first ---
-      console.log('[LOGIN] Attempting signInWithPassword for:', email);
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        console.log('[LOGIN] signInWithPassword failed:', error.message);
-
         // --- Step 2: Check if this is a CSV-imported student ---
         const studentRecord = await db.getStudentByEmail(email);
-        console.log('[LOGIN] Student record found:', !!studentRecord, studentRecord ? `index=${studentRecord.index_number}` : '');
 
         if (!studentRecord) {
           return Response.json({ success: false, message: 'Invalid login credentials.' }, { status: 400 });
         }
 
-        // Normalize comparison — strip leading zeros from both sides so
-        // 0325080328 matches 325080328 (CSV parsing may strip leading zeros)
+        // Normalize — strip leading zeros so 0325080328 matches 325080328
         const normalizeId = (s) => String(s).trim().replace(/^0+(\d)/, '$1');
         const indexNum = String(studentRecord.index_number).trim();
         const enteredPassword = String(password).trim();
@@ -34,15 +29,12 @@ export async function POST(req) {
         const matches = enteredPassword === indexNum ||
                         normalizeId(enteredPassword) === normalizeId(indexNum);
 
-        console.log('[LOGIN] Password match check:', JSON.stringify(enteredPassword), '===', JSON.stringify(indexNum), '->', matches);
-
         if (!matches) {
           return Response.json({ success: false, message: 'Invalid login credentials.' }, { status: 400 });
         }
 
-        // --- Step 3: Auto-provision auth account via admin client ---
+        // --- Step 3: Auto-provision Supabase auth account ---
         const adminClient = getSupabaseAdmin();
-        console.log('[LOGIN] Admin client available:', !!adminClient);
 
         if (!adminClient) {
           return Response.json({
@@ -51,46 +43,40 @@ export async function POST(req) {
           }, { status: 500 });
         }
 
-        // Check if Supabase auth user already exists for this email
+        // Check if a Supabase auth user already exists for this email
         const { data: usersData, error: listError } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
-        if (listError) {
-          console.error('[LOGIN] listUsers error:', listError.message);
-        }
-        const existingAuthUser = usersData?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
-        console.log('[LOGIN] Existing auth user:', !!existingAuthUser, existingAuthUser?.id);
+        if (listError) console.error('[AUTH] listUsers error:', listError.message);
 
+        const existingAuthUser = usersData?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
         let authUserId;
 
         if (existingAuthUser) {
-          // Update password + confirm email so they can log in
+          // Auth user exists — confirm email + reset to entered password
           const { error: updateError } = await adminClient.auth.admin.updateUserById(
             existingAuthUser.id,
             { password: enteredPassword, email_confirm: true }
           );
           if (updateError) {
-            console.error('[LOGIN] updateUserById error:', updateError.message);
+            console.error('[AUTH] updateUserById error:', updateError.message);
             return Response.json({ success: false, message: 'Failed to activate account: ' + updateError.message }, { status: 500 });
           }
           authUserId = existingAuthUser.id;
-          console.log('[LOGIN] Updated existing auth user:', authUserId);
         } else {
-          // Create a brand-new confirmed auth user
+          // No auth user — create a confirmed one
           const { data: newAuthData, error: createError } = await adminClient.auth.admin.createUser({
             email,
             password: enteredPassword,
             email_confirm: true
           });
           if (createError) {
-            console.error('[LOGIN] createUser error:', createError.message);
+            console.error('[AUTH] createUser error:', createError.message);
             return Response.json({ success: false, message: 'Failed to create account: ' + createError.message }, { status: 500 });
           }
           authUserId = newAuthData.user.id;
-          console.log('[LOGIN] Created new auth user:', authUserId);
         }
 
         // --- Step 4: Ensure profile record exists ---
         let profile = await db.getProfile(email);
-        console.log('[LOGIN] Existing profile:', !!profile);
 
         if (!profile) {
           profile = await db.createProfile({
@@ -100,7 +86,6 @@ export async function POST(req) {
             full_name: studentRecord.full_name,
             department_id: studentRecord.department_id
           });
-          console.log('[LOGIN] Created profile:', profile?.id);
 
           await db.addNotification(
             "Account Activated",
@@ -110,19 +95,16 @@ export async function POST(req) {
           await db.addAuditLog(profile.id, 'AUTO_REGISTRATION', `Student ${studentRecord.full_name} auto-registered via index number login.`);
         }
 
-        // --- Step 5: Sign in with the now-confirmed credentials ---
-        console.log('[LOGIN] Retrying signInWithPassword after provisioning...');
+        // --- Step 5: Retry sign-in with confirmed credentials ---
         const { error: retryError } = await supabase.auth.signInWithPassword({
           email,
           password: enteredPassword
         });
 
         if (retryError) {
-          console.error('[LOGIN] Retry login failed:', retryError.message);
           return Response.json({ success: false, message: 'Account provisioned. Please try logging in again.' }, { status: 400 });
         }
 
-        console.log('[LOGIN] Provisioned login SUCCESS for:', email);
         return Response.json({
           success: true,
           user: profile,
@@ -131,7 +113,6 @@ export async function POST(req) {
       }
 
       // --- Normal login succeeded ---
-      console.log('[LOGIN] Normal login SUCCESS for:', email);
       let profile = await db.getProfile(email);
       const studentRecord = await db.getStudentByEmail(email);
       const isDefault = studentRecord && (String(password).trim() === String(studentRecord.index_number).trim());
@@ -185,7 +166,7 @@ export async function POST(req) {
       });
     }
   } catch (err) {
-    console.error('[LOGIN] Unexpected error:', err);
+    console.error('[AUTH] Login error:', err);
     return Response.json({ success: false, message: err.message || 'Internal Server Error' }, { status: 500 });
   }
 }
