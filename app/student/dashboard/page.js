@@ -1106,9 +1106,10 @@ export default function StudentDashboard() {
                         backgroundColor: notif.is_read ? "transparent" : "rgba(0, 0, 140, 0.02)",
                         borderLeft: notif.is_read ? "1px solid var(--border)" : "4px solid var(--primary)",
                         display: "flex",
+                        flexDirection: isMobile ? "column" : "row",
                         justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: "1.5rem"
+                        alignItems: isMobile ? "stretch" : "center",
+                        gap: isMobile ? "1rem" : "1.5rem"
                       }}
                     >
                       <div style={{ flex: 1 }}>
@@ -1130,7 +1131,12 @@ export default function StudentDashboard() {
                         <button 
                           onClick={() => handleMarkRead(notif.id)} 
                           className="btn btn-outline" 
-                          style={{ padding: "0.3rem 0.8rem", fontSize: "0.75rem", flexShrink: 0 }}
+                          style={{ 
+                            padding: "0.3rem 0.8rem", 
+                            fontSize: "0.75rem", 
+                            flexShrink: 0,
+                            alignSelf: isMobile ? "flex-end" : "auto"
+                          }}
                           disabled={notifUpdating}
                         >
                           Mark Read
