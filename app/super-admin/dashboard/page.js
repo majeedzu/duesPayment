@@ -24,6 +24,17 @@ import {
 } from "lucide-react";
 import { getClientSession, clearClientSession } from "@/lib/session";
 
+const getFacultyAbbreviation = (name) => {
+  if (!name) return "GEN";
+  const f = name.toLowerCase();
+  if (f.includes("applied sciences") || f.includes("fast")) return "FAST";
+  if (f.includes("engineering") || f.includes("foe")) return "FOE";
+  if (f.includes("art and design") || f.includes("fad")) return "FAD";
+  if (f.includes("business") || f.includes("fbms")) return "FBMS";
+  if (f.includes("social sciences") || f.includes("fass")) return "FASS";
+  return name;
+};
+
 export default function SuperAdminDashboard() {
   const router = useRouter();
   const [admin, setAdmin] = useState(null);
@@ -533,7 +544,8 @@ export default function SuperAdminDashboard() {
                             className="faculty-header-btn"
                           >
                             <div className="faculty-header-left">
-                              <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>{faculty}</span>
+                              <span className="faculty-full-name" style={{ fontWeight: 700, fontSize: "0.95rem" }}>{faculty}</span>
+                              <span className="faculty-abbr-name" style={{ fontWeight: 700, fontSize: "0.95rem" }}>{getFacultyAbbreviation(faculty)}</span>
                               <span style={{ fontSize: "0.75rem", backgroundColor: "rgba(255,255,255,0.2)", padding: "0.15rem 0.5rem", borderRadius: "999px" }}>{depts.length} dept{depts.length > 1 ? "s" : ""}</span>
                             </div>
                             <div className="faculty-header-right">
@@ -681,7 +693,8 @@ export default function SuperAdminDashboard() {
                         >
                           <div className="faculty-header-left">
                             <BookOpen size={16} />
-                            <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>{faculty}</span>
+                            <span className="faculty-full-name" style={{ fontWeight: 700, fontSize: "0.95rem" }}>{faculty}</span>
+                            <span className="faculty-abbr-name" style={{ fontWeight: 700, fontSize: "0.95rem" }}>{getFacultyAbbreviation(faculty)}</span>
                             <span style={{ fontSize: "0.75rem", backgroundColor: "rgba(255,255,255,0.2)", padding: "0.15rem 0.5rem", borderRadius: "999px" }}>{depts.length} dept{depts.length > 1 ? "s" : ""}</span>
                           </div>
                           <div className="faculty-header-right" style={{ borderTop: "none", padding: 0, marginTop: 0, justifyContent: "flex-end" }}>

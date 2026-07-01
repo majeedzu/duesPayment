@@ -531,12 +531,6 @@ export default function Home() {
               </a>
             </div>
 
-            {/* Trust Badges */}
-            <div className="landing-hero-badges-trust animate-fade-in-4">
-              <span className="trust-badge"><CheckCircle size={14} /> Secure Payments</span>
-              <span className="trust-badge"><CheckCircle size={14} /> Instant Receipt</span>
-              <span className="trust-badge"><CheckCircle size={14} /> HTU Official</span>
-            </div>
 
           </div>
 
