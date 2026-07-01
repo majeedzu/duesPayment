@@ -65,7 +65,7 @@ function LoginContent() {
     <div className="auth-split-wrapper">
       <div className="auth-split-card">
         {/* Left Branding Side (45% width) */}
-        <div className="auth-split-left" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+        <div className="auth-split-left" style={{ padding: "2rem" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem", textAlign: "center" }}>
             <div className="htu-logo-container" style={{ width: "160px", height: "160px", borderRadius: "12px", overflow: "hidden", border: "4px solid rgba(255, 255, 255, 0.4)", boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)", backgroundColor: "#ffffff" }}>
               <img src="/htu_logo.jpg" alt="HTU Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
