@@ -530,13 +530,13 @@ export default function SuperAdminDashboard() {
                         <div key={faculty} style={{ marginBottom: "1rem", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
                           <button
                             onClick={() => setExpandedFaculties(p => ({ ...p, [`overview-${faculty}`]: !isOpen }))}
-                            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.25rem", background: "var(--primary)", color: "white", border: "none", cursor: "pointer", gap: "1rem" }}
+                            className="faculty-header-btn"
                           >
-                            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                            <div className="faculty-header-left">
                               <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>{faculty}</span>
                               <span style={{ fontSize: "0.75rem", backgroundColor: "rgba(255,255,255,0.2)", padding: "0.15rem 0.5rem", borderRadius: "999px" }}>{depts.length} dept{depts.length > 1 ? "s" : ""}</span>
                             </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", fontSize: "0.8rem", opacity: 0.85 }}>
+                            <div className="faculty-header-right">
                               <span>{totalStudents} students</span>
                               <span>GHS {totalRevenue.toFixed(2)} collected</span>
                               <span style={{ fontSize: "1rem" }}>{isOpen ? "▲" : "▼"}</span>
@@ -544,7 +544,7 @@ export default function SuperAdminDashboard() {
                           </button>
                           {isOpen && (
                             <div className="table-container" style={{ margin: 0 }}>
-                              <table className="table" style={{ margin: 0 }}>
+                              <table className="table" style={{ minWidth: "950px", margin: 0 }}>
                                 <thead>
                                   <tr>
                                     <th>Department</th>
@@ -606,7 +606,7 @@ export default function SuperAdminDashboard() {
               <div className="card">
                 <h3 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", marginBottom: "1rem" }}>Recent Institutional Payments</h3>
                 <div className="table-container">
-                  <table className="table">
+                  <table className="table" style={{ minWidth: "850px" }}>
                     <thead>
                       <tr>
                         <th>Reference</th>
@@ -677,18 +677,20 @@ export default function SuperAdminDashboard() {
                       <div key={faculty} style={{ marginBottom: "1rem", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
                         <button
                           onClick={() => setExpandedFaculties(p => ({ ...p, [`manage-${faculty}`]: !isOpen }))}
-                          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.25rem", background: "var(--primary)", color: "white", border: "none", cursor: "pointer" }}
+                          className="faculty-header-btn"
                         >
-                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                          <div className="faculty-header-left">
                             <BookOpen size={16} />
                             <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>{faculty}</span>
                             <span style={{ fontSize: "0.75rem", backgroundColor: "rgba(255,255,255,0.2)", padding: "0.15rem 0.5rem", borderRadius: "999px" }}>{depts.length} dept{depts.length > 1 ? "s" : ""}</span>
                           </div>
-                          <span style={{ fontSize: "1rem" }}>{isOpen ? "▲" : "▼"}</span>
+                          <div className="faculty-header-right" style={{ borderTop: "none", padding: 0, marginTop: 0, justifyContent: "flex-end" }}>
+                            <span style={{ fontSize: "1rem" }}>{isOpen ? "▲" : "▼"}</span>
+                          </div>
                         </button>
                         {isOpen && (
                           <div className="table-container" style={{ margin: 0 }}>
-                            <table className="table" style={{ margin: 0 }}>
+                            <table className="table" style={{ minWidth: "750px", margin: 0 }}>
                               <thead>
                                 <tr>
                                   <th>Department Name</th>
@@ -768,7 +770,7 @@ export default function SuperAdminDashboard() {
               </div>
 
               <div className="table-container">
-                <table className="table">
+                <table className="table" style={{ minWidth: "850px" }}>
                   <thead>
                     <tr>
                       <th>Full Name</th>
