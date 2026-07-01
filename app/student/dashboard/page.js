@@ -222,6 +222,19 @@ export default function StudentDashboard() {
     }
   };
 
+  // Auto-verify transaction if redirecting back with reference
+  useEffect(() => {
+    if (!loading && dashboardData) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentRef = urlParams.get("reference");
+      if (paymentRef) {
+        // Clear reference from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        handleVerifyTransaction(paymentRef);
+      }
+    }
+  }, [loading, dashboardData]);
+
   // Profile Picture Upload Handler
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
