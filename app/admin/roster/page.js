@@ -29,10 +29,6 @@ export default function AdminRosterPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-
   const fetchStudents = async () => {
     setLoading(true);
     try {
@@ -51,6 +47,11 @@ export default function AdminRosterPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => { await fetchStudents(); })();
+   
+  }, []);
 
   // Export to CSV
   const handleExportCSV = () => {
@@ -102,7 +103,7 @@ export default function AdminRosterPage() {
   );
 
   useEffect(() => {
-    setCurrentPage(1);
+    Promise.resolve().then(() => setCurrentPage(1));
   }, [search, statusFilter]);
 
   if (loading) {

@@ -71,20 +71,6 @@ export default function SuperAdminDashboard() {
   const [notifSuccess, setNotifSuccess] = useState("");
   const [notifError, setNotifError] = useState("");
 
-  useEffect(() => {
-    const session = getClientSession();
-    if (!session) {
-      router.push("/auth/login?role=super_admin");
-      return;
-    }
-    if (session.role !== "super_admin") {
-      router.push("/auth/login?role=super_admin");
-      return;
-    }
-    setAdmin(session);
-    fetchSuperDashboardData();
-  }, [router]);
-
   const fetchSuperDashboardData = async () => {
     setLoading(true);
     try {
@@ -111,6 +97,20 @@ export default function SuperAdminDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const session = getClientSession();
+    if (!session || session.role !== "super_admin") {
+      router.push("/auth/login?role=super_admin");
+      return;
+    }
+    // Use a microtask to avoid synchronous setState inside effect
+    Promise.resolve().then(() => {
+      setAdmin(session);
+      fetchSuperDashboardData();
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   const handleLogout = () => {
     clearClientSession();

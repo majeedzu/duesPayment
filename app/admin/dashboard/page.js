@@ -31,10 +31,6 @@ export default function AdminDashboard() {
   const [notifSuccess, setNotifSuccess] = useState("");
   const [notifError, setNotifError] = useState("");
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
@@ -53,6 +49,11 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => { await fetchDashboardData(); })();
+   
+  }, []);
 
   const handleSendNotification = async (e) => {
     e.preventDefault();

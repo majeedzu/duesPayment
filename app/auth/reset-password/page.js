@@ -41,114 +41,153 @@ export default function ResetPasswordPage() {
     <div className="auth-split-wrapper">
       {/* Left side: Student illustration showcase */}
       <div className="auth-split-left">
-        {/* Brand header at the top left */}
-        <div style={{ position: "absolute", top: "2.5rem", left: "3rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div className="htu-logo-container" style={{ width: "38px", height: "38px" }}>
+        {/* Centered Logo Header */}
+        <div className="auth-left-logo-centered">
+          <div className="htu-logo-container auth-left-logo-icon" style={{ marginBottom: '0.5rem' }}>
             <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
           </div>
           <div>
-            <h4 style={{ color: "white", fontSize: "0.95rem", margin: 0, fontWeight: 800 }}>HTU Dues</h4>
-            <span style={{ fontSize: "0.68rem", opacity: 0.85, color: "#fff", display: "block", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>Finance Portal</span>
+            <span className="auth-left-brand-sub">Official Finance Portal</span>
           </div>
         </div>
 
-        <div className="auth-left-showcase" style={{ marginTop: "3rem" }}>
-          <h2>Ho Technical University</h2>
+        <div className="auth-left-showcase">
+          <h2>Recover Your Account.</h2>
           <p>
             Recover your portal account by verifying your official institutional email address.
           </p>
-          <div className="auth-left-img-container">
-            <img
-              src="/student_paying.png"
-              alt="HTU Student Paying Dues"
-              className="auth-left-student-img"
-            />
+          
+          <div className="auth-illustration-container">
+            <div className="auth-mock-card" style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+              <div className="auth-mock-header">
+                <div className="auth-mock-chip" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}></div>
+                <span className="auth-mock-value" style={{ color: '#ffffff' }}>Verify Email</span>
+              </div>
+              <div className="auth-mock-body">
+                <div className="auth-mock-row" style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)' }}></div>
+                <div className="auth-mock-row auth-mock-row-short" style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)' }}></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Right side: Reset form */}
       <div className="auth-split-right">
-        <Link href="/auth/login" style={{ 
-          display: "flex", 
-          alignItems: "center", 
-          gap: "0.5rem", 
-          color: "var(--primary)", 
-          fontWeight: 600,
-          marginBottom: "2rem"
-        }}>
-          <ArrowLeft size={16} /> Back to Login
-        </Link>
-
-        <div className="card auth-card-width" style={{ padding: "2.5rem" }}>
-          
-          <div style={{ marginBottom: "2rem" }}>
-            {/* Mobile Only Logo */}
-            <div className="auth-mobile-logo" style={{ textAlign: "center" }}>
-              <div className="htu-logo-container" style={{ margin: "0 auto 1rem", width: "55px", height: "55px" }}>
-                <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
-              </div>
-            </div>
-            <h2 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", fontSize: "1.65rem", fontWeight: 800 }}>Reset Password</h2>
-            <p style={{ opacity: 0.7, fontSize: "0.9rem", marginTop: "0.35rem" }}>Enter your institutional email to proceed</p>
+        {/* Mobile Header Hero (Visible only on mobile screen widths) */}
+        <div className="auth-mobile-hero">
+          <div className="htu-logo-container auth-mobile-hero-logo">
+            <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
           </div>
+          <p className="auth-mobile-hero-sub">Departmental Finance Portal</p>
+          <div className="auth-mobile-hero-badge">
+            <ShieldCheck size={12} style={{ color: '#FFD700' }} />
+            <span>HTU Official Portal</span>
+          </div>
+        </div>
 
-          {error && (
-            <div className="badge badge-danger" style={{ 
-              display: "flex", 
-              width: "100%", 
-              padding: "0.75rem 1rem", 
-              borderRadius: "var(--radius)", 
-              textTransform: "none", 
-              fontSize: "0.85rem", 
-              alignItems: "center", 
-              gap: "0.5rem",
-              marginBottom: "1.5rem"
-            }}>
-              <ShieldAlert size={16} />
-              <span>{error}</span>
+        <div className="auth-panel">
+          <div className="auth-card">
+            
+            <div style={{ marginBottom: "1.75rem" }}>
+              <h2 style={{ color: "#111827", fontFamily: "var(--font-heading)", fontSize: "1.5rem", fontWeight: 800, margin: "0 0 4px" }}>
+                Reset Password
+              </h2>
+              <p style={{ fontSize: "0.9rem", color: "#4B5563", margin: 0 }}>
+                Enter your institutional email to proceed
+              </p>
             </div>
-          )}
 
-          {success && (
-            <div className="badge badge-success" style={{ 
-              display: "flex", 
-              width: "100%", 
-              padding: "0.75rem 1rem", 
-              borderRadius: "var(--radius)", 
-              textTransform: "none", 
-              fontSize: "0.85rem", 
-              alignItems: "center", 
-              gap: "0.5rem",
-              marginBottom: "1.5rem"
-            }}>
-              <ShieldCheck size={16} />
-              <span>{success}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <div className="form-group">
-              <label className="label">Institutional Email</label>
-              <div style={{ position: "relative" }}>
-                <Mail style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", opacity: 0.4 }} size={16} />
-                <input
-                  type="email"
-                  placeholder="username@htu.edu.gh"
-                  className="input"
-                  style={{ paddingLeft: "2.5rem" }}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+            {error && (
+              <div className="auth-alert auth-alert-error" role="alert" style={{ marginBottom: '1.25rem' }}>
+                <ShieldAlert size={16} />
+                <span>{error}</span>
               </div>
+            )}
+
+            {success && (
+              <div style={{
+                display: "flex",
+                gap: "0.75rem",
+                width: "100%",
+                padding: "1rem 1.25rem",
+                borderRadius: "12px",
+                fontSize: "0.85rem",
+                lineHeight: "1.5",
+                marginBottom: "1.25rem",
+                background: "rgba(5, 150, 105, 0.1)",
+                color: "#059669",
+                border: "1px solid rgba(5, 150, 105, 0.2)"
+              }}>
+                <ShieldCheck size={16} />
+                <span>{success}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="auth-form" style={{ gap: "1rem" }}>
+              <div className="form-group">
+                <label className="label" htmlFor="reset-email" style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: '600' }}>
+                  Institutional Email
+                </label>
+                <div className="auth-input-wrap">
+                  <Mail className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
+                  <input
+                    id="reset-email"
+                    type="email"
+                    placeholder="username@htu.edu.gh"
+                    className="input auth-input"
+                    style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem' }}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  height: '48px',
+                  borderRadius: '8px',
+                  background: '#00008C',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: '600',
+                  fontSize: '0.95rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'background 0.2s',
+                  marginTop: '0.5rem'
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.background = '#00005E'; }}
+                onMouseOut={(e) => { e.currentTarget.style.background = '#00008C'; }}
+              >
+                {loading ? "Sending link..." : "Send Reset Link"}
+              </button>
+            </form>
+
+            {/* Back to Login Link */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
+              <Link href="/auth/login" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#6B7280', fontSize: '0.85rem', fontWeight: '600', textDecoration: 'none', transition: 'color 0.2s' }}
+                onMouseOver={(e) => { e.currentTarget.style.color = '#00008C'; }}
+                onMouseOut={(e) => { e.currentTarget.style.color = '#6B7280'; }}
+              >
+                <ArrowLeft size={16} /> Back to Login
+              </Link>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: "100%", marginTop: "1rem" }} disabled={loading}>
-              {loading ? "Sending link..." : "Send Reset Link"}
-            </button>
-          </form>
+            {/* Official Footer Details */}
+            <div style={{ textAlign: 'center', marginTop: '1.5rem', borderTop: '1px solid #F1F5F9', paddingTop: '1rem', fontSize: '0.75rem', color: '#98A2B3' }}>
+              <p style={{ margin: 0, fontWeight: '500' }}>©2026 HTU</p>
+              <p style={{ margin: '4px 0 0', fontWeight: '500' }}>E-mail: info@htu.edu.gh</p>
+            </div>
 
+          </div>
         </div>
       </div>
     </div>

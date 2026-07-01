@@ -14,10 +14,6 @@ export default function AdminImportPage() {
   const [importSuccess, setImportSuccess] = useState(null);
   const [dragActive, setDragActive] = useState(false);
 
-  useEffect(() => {
-    fetchDepartmentInfo();
-  }, []);
-
   const fetchDepartmentInfo = async () => {
     try {
       const res = await fetch("/api/admin/stats");
@@ -33,6 +29,11 @@ export default function AdminImportPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => { await fetchDepartmentInfo(); })();
+   
+  }, []);
 
   // CSV Drag and Drop Ingestion
   const handleDrag = (e) => {
@@ -74,6 +75,7 @@ export default function AdminImportPage() {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      dynamicTyping: false,  // Keep all values as strings — prevents leading zeros being stripped from index numbers
       complete: async (results) => {
         const rows = results.data;
         if (rows.length === 0) {

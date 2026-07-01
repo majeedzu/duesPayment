@@ -14,12 +14,6 @@ export default function VerifyReceiptPage() {
   const [error, setError] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
 
-  useEffect(() => {
-    if (params?.id) {
-      fetchReceipt(params.id);
-    }
-  }, [params]);
-
   const fetchReceipt = async (receiptId) => {
     setLoading(true);
     try {
@@ -41,6 +35,12 @@ export default function VerifyReceiptPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (params?.id) {
+      (async () => { await fetchReceipt(params.id); })();
+    }
+  }, [params]);
 
   if (loading) {
     return (

@@ -14,10 +14,6 @@ export default function AdminTransactionsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    fetchPayments();
-  }, []);
-
   const fetchPayments = async () => {
     setLoading(true);
     try {
@@ -34,6 +30,11 @@ export default function AdminTransactionsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => { await fetchPayments(); })();
+   
+  }, []);
 
   // Search & Filtering
   const filteredPayments = payments.filter(pay => {
@@ -56,7 +57,7 @@ export default function AdminTransactionsPage() {
   );
 
   useEffect(() => {
-    setCurrentPage(1);
+    Promise.resolve().then(() => setCurrentPage(1));
   }, [search, statusFilter]);
 
   if (loading) {

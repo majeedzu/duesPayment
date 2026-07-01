@@ -27,20 +27,6 @@ export default function AdminLayout({ children }) {
   const [showNotifDrawer, setShowNotifDrawer] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    const session = getClientSession();
-    if (!session) {
-      router.push("/auth/login?role=dept_admin");
-      return;
-    }
-    if (session.role !== "dept_admin" && session.role !== "super_admin") {
-      router.push("/auth/login?role=dept_admin");
-      return;
-    }
-    setAdmin(session);
-    fetchLayoutData();
-  }, [router]);
-
   const fetchLayoutData = async () => {
     setLoading(true);
     try {
@@ -58,6 +44,19 @@ export default function AdminLayout({ children }) {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const session = getClientSession();
+    if (!session || (session.role !== "dept_admin" && session.role !== "super_admin")) {
+      router.push("/auth/login?role=dept_admin");
+      return;
+    }
+    Promise.resolve().then(() => {
+      setAdmin(session);
+      fetchLayoutData();
+    });
+   
+  }, [router]);
 
   const handleLogout = () => {
     clearClientSession();

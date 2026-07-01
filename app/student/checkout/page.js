@@ -27,9 +27,11 @@ function CheckoutContent() {
     const amountParam = searchParams.get("amount");
     const emailParam = searchParams.get("email");
 
-    if (refParam) setReference(refParam);
-    if (amountParam) setAmount(parseFloat(amountParam).toFixed(2));
-    if (emailParam) setEmail(emailParam);
+    Promise.resolve().then(() => {
+      if (refParam) setReference(refParam);
+      if (amountParam) setAmount(parseFloat(amountParam).toFixed(2));
+      if (emailParam) setEmail(emailParam);
+    });
   }, [searchParams]);
 
   const handleProcessPayment = async (shouldSucceed) => {

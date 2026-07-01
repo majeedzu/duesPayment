@@ -326,6 +326,7 @@ export default function Home() {
         className={`mobile-nav-drawer${mobileMenuOpen ? " open" : ""}`}
         aria-label="Mobile navigation"
         aria-hidden={!mobileMenuOpen}
+        inert={!mobileMenuOpen}
         style={{ backgroundColor: highContrast ? "#000" : "var(--card-bg)" }}
       >
         <div className="mobile-nav-drawer-header">
@@ -389,10 +390,10 @@ export default function Home() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.85rem", minWidth: 0 }}>
-          <div className="htu-logo-container" style={{ width: "44px", height: "44px" }}>
+          <div className="htu-logo-container animate-fade-in-1" style={{ width: "52px", height: "52px" }}>
             <img src="/htu_logo.jpg" alt="HTU Crest Logo" className="htu-logo-img" />
           </div>
-          <div className="landing-brand">
+          <div className="landing-brand animate-fade-in-1">
             <h1 style={{ color: highContrast ? "#FFF" : "var(--primary)", fontFamily: "var(--font-heading)" }}>
               Ho Technical University
             </h1>
@@ -435,7 +436,7 @@ export default function Home() {
         <section
           className="landing-hero reveal-init"
           style={{
-            backgroundImage: highContrast ? "none" : "url('/htu_campus_hero.png')",
+            backgroundImage: highContrast ? "none" : "url('/htu_campus_hero.jpg')",
             backgroundColor: highContrast ? "#000" : "var(--primary)",
             border: highContrast ? "2px solid #fff" : "none",
           }}
@@ -443,21 +444,22 @@ export default function Home() {
           {!highContrast && <div className="landing-hero-overlay" />}
 
           <div className="landing-hero-content">
-            <div className="landing-hero-badge">
+            <div className="landing-hero-badge animate-fade-in-1">
               <Award size={14} />
               <span>HTU Departmental Dues Portal</span>
             </div>
 
-            <h2 style={{ fontFamily: "var(--font-heading)", textShadow: highContrast ? "none" : "0 2px 8px rgba(0,0,0,0.35)" }}>
-              Welcome, pay your dues,<br />
-              <span style={{ color: highContrast ? "#FF6B6B" : "#fff" }}>get cleared in minutes</span>
+            {/* Memorable Heading Option 4 */}
+            <h2 className="animate-fade-in-2" style={{ fontFamily: "var(--font-heading)", textShadow: highContrast ? "none" : "0 2px 8px rgba(0,0,0,0.35)", fontWeight: '700' }}>
+              Pay once. Get cleared instantly.
             </h2>
 
-            <p className="landing-hero-lead">
-              Sign in with your @htu.edu.gh email, pay via Mobile Money or card, and download your receipt instantly. Officers can verify payments right here on this page.
+            {/* Shortened lead paragraph */}
+            <p className="landing-hero-lead animate-fade-in-3" style={{ fontSize: '16px', lineHeight: '28px', maxWidth: '600px' }}>
+              Pay your department dues securely. Sign in using your HTU email, pay online, and download your receipt instantly.
             </p>
 
-            <div className="landing-hero-actions">
+            <div className="landing-hero-actions animate-fade-in-4">
               <Link
                 href="/auth/login"
                 className="btn btn-accent"
@@ -469,25 +471,50 @@ export default function Home() {
               >
                 <LogIn size={18} /> Sign in to pay
               </Link>
+              
+              {/* Premium Glass Effect button */}
               <a
                 href="#verify"
-                className="btn btn-outline"
-                style={{ padding: "0.9rem 1.6rem", fontSize: "1rem", color: "#fff", borderColor: "rgba(255,255,255,0.6)" }}
+                className="btn"
+                style={{ 
+                  padding: "0.9rem 1.6rem", 
+                  fontSize: "1rem", 
+                  color: "#fff", 
+                  background: "rgba(255, 255, 255, 0.12)",
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255, 255, 255, 0.25)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem"
+                }}
               >
                 <ShieldCheck size={18} /> Verify a receipt
               </a>
             </div>
 
-            <p className="landing-hero-note">
-              Staff or admin?{" "}
-              <Link
-                href="/auth/login?role=admin"
-                style={{ color: highContrast ? "#FF6B6B" : "#fff", fontWeight: 700, textDecoration: "underline" }}
-              >
-                Sign in here
-              </Link>
-            </p>
+            {/* Trust Badges */}
+            <div className="landing-hero-badges-trust animate-fade-in-4">
+              <span className="trust-badge"><CheckCircle size={14} /> Secure Payments</span>
+              <span className="trust-badge"><CheckCircle size={14} /> Instant Receipt</span>
+              <span className="trust-badge"><CheckCircle size={14} /> HTU Official</span>
+            </div>
+
           </div>
+
+          {/* Scroll Indicator */}
+          {!highContrast && (
+            <div 
+              className="landing-hero-scroll animate-fade-in-4" 
+              onClick={() => {
+                const el = document.getElementById("features");
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <span className="scroll-text">Scroll to learn more</span>
+              <ChevronDown className="scroll-arrow" size={14} />
+            </div>
+          )}
         </section>
 
         {/* Portal features */}
@@ -856,12 +883,7 @@ export default function Home() {
 
       </main>
 
-      {/* Sticky mobile CTA */}
-      <div className="landing-mobile-cta-bar" aria-hidden="false">
-        <Link href="/auth/login" className="btn btn-accent landing-mobile-cta-btn">
-          <LogIn size={18} /> Sign in to pay
-        </Link>
-      </div>
+
 
       {/* Footer */}
       <footer

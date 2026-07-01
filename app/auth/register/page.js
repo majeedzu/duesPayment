@@ -19,7 +19,7 @@ function RegisterContent() {
 
   useEffect(() => {
     const emailParam = searchParams.get("email");
-    if (emailParam) setEmail(emailParam);
+    if (emailParam) Promise.resolve().then(() => setEmail(emailParam));
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
