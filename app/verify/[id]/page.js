@@ -90,15 +90,24 @@ export default function VerifyReceiptPage() {
             {/* Receipt Body */}
             <div style={{ padding: "2rem" }}>
 
-              {/* HTU Header */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", borderBottom: "2px solid var(--primary)", paddingBottom: "1.5rem", marginBottom: "1.5rem" }}>
-                <div>
-                  <h3 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", fontSize: "1.2rem" }}>HO TECHNICAL UNIVERSITY</h3>
-                  <p style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em", opacity: 0.6, fontWeight: 700 }}>Official Departmental Dues Receipt</p>
+              {/* HTU Header with Logo */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid var(--primary)", paddingBottom: "1.5rem", marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                  <div style={{ width: "60px", height: "60px", borderRadius: "8px", overflow: "hidden", backgroundColor: "#ffffff", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <img src="/htu_logo.jpg" alt="HTU Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                  </div>
+                  <div>
+                    <h3 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", fontSize: "1.25rem", margin: 0, fontWeight: 800 }}>HO TECHNICAL UNIVERSITY</h3>
+                    <p style={{ fontSize: "0.75rem", opacity: 0.7, margin: "2px 0 0" }}>P. O. Box HP 217, Ho, Ghana | info@htu.edu.gh</p>
+                    <p style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--primary)", fontWeight: 700, marginTop: "4px" }}>Official Departmental Dues Receipt</p>
+                  </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <ShieldCheck size={18} style={{ color: "var(--success)" }} />
-                  <span style={{ color: "var(--success)", fontWeight: 700, fontSize: "0.85rem" }}>VERIFIED</span>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "end", gap: "0.25rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                    <ShieldCheck size={18} style={{ color: "var(--success)" }} />
+                    <span style={{ color: "var(--success)", fontWeight: 800, fontSize: "0.85rem" }}>VERIFIED</span>
+                  </div>
+                  <span style={{ fontSize: "0.7rem", opacity: 0.5 }}>HTU-SECURE-PAY</span>
                 </div>
               </div>
 
@@ -136,6 +145,13 @@ export default function VerifyReceiptPage() {
 
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", opacity: 0.5, fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, marginBottom: "0.25rem" }}>
+                      <Calendar size={12} /> Academic Period
+                    </div>
+                    <p style={{ fontWeight: 600 }}>{data.academic_year || '2025/2026'} &middot; {data.semester || 'Both Semesters'}</p>
+                  </div>
+
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", opacity: 0.5, fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, marginBottom: "0.25rem" }}>
                       <Hash size={12} /> Transaction Ref
                     </div>
                     <p style={{ fontWeight: 600, fontFamily: "monospace", fontSize: "0.85rem" }}>{data.paystack_reference}</p>
@@ -150,10 +166,37 @@ export default function VerifyReceiptPage() {
 
                 </div>
 
-                {/* QR Code */}
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
-                  {qrCodeUrl && <img src={qrCodeUrl} alt="Verification QR Code" style={{ width: "140px", height: "140px" }} />}
-                  <span style={{ fontSize: "0.65rem", opacity: 0.5, textAlign: "center" }}>Scan to re-verify</span>
+                {/* QR Code & Stamped Validation Seal */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>
+                  {qrCodeUrl && (
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.35rem" }}>
+                      <img src={qrCodeUrl} alt="Verification QR Code" style={{ width: "120px", height: "120px", border: "1px solid var(--border)", borderRadius: "8px", padding: "4px", backgroundColor: "#fff" }} />
+                      <span style={{ fontSize: "0.65rem", opacity: 0.5, textAlign: "center" }}>Scan to re-verify</span>
+                    </div>
+                  )}
+
+                  {/* Stamped Seal Block */}
+                  <div style={{
+                    border: "3px double #059669",
+                    borderRadius: "8px",
+                    color: "#059669",
+                    padding: "0.5rem 0.75rem",
+                    transform: "rotate(-4deg)",
+                    display: "inline-block",
+                    fontFamily: "monospace",
+                    fontSize: "0.75rem",
+                    fontWeight: "bold",
+                    textAlign: "center",
+                    lineHeight: "1.3",
+                    textTransform: "uppercase",
+                    backgroundColor: "rgba(5, 150, 105, 0.03)",
+                    boxShadow: "0 4px 10px rgba(5, 150, 105, 0.05)"
+                  }}>
+                    HTU FINANCE<br/>
+                    ★ VERIFIED ★<br/>
+                    {data.payment_date ? new Date(data.payment_date).toLocaleDateString() : new Date().toLocaleDateString()}<br/>
+                    <span style={{ fontSize: "0.6rem", opacity: 0.8 }}>ID: {data.receipt_id?.slice(0, 8)}</span>
+                  </div>
                 </div>
               </div>
 

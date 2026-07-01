@@ -18,6 +18,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState({
     totalStudents: 0,
     paidCount: 0,
+    partiallyPaidCount: 0,
     unpaidCount: 0,
     totalRevenue: 0
   });
@@ -51,6 +52,15 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem("htu-dues-theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.body.classList.remove("dark-mode");
+      document.documentElement.removeAttribute("data-theme");
+    }
+
     (async () => { await fetchDashboardData(); })();
    
   }, []);
@@ -98,44 +108,54 @@ export default function AdminDashboard() {
     <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-4">
-        <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1rem" }}>
+        <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)", padding: "1rem" }}>
           <div>
-            <span style={{ fontSize: "0.8rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Total Students</span>
-            <div className="stat-value">{stats.totalStudents}</div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Total Students</span>
+            <div className="stat-value" style={{ fontSize: "1.5rem" }}>{stats.totalStudents}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ backgroundColor: "rgba(0, 55, 114, 0.1)", color: "var(--primary)" }}>
-            <Users size={22} />
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "rgba(0, 55, 114, 0.1)", color: "var(--primary)" }}>
+            <Users size={18} />
           </div>
         </div>
 
-        <div className="card stat-card" style={{ borderLeft: "4px solid var(--success)" }}>
+        <div className="card stat-card" style={{ borderLeft: "4px solid var(--success)", padding: "1rem" }}>
           <div>
-            <span style={{ fontSize: "0.8rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Paid Dues</span>
-            <div className="stat-value" style={{ color: "var(--success)" }}>{stats.paidCount}</div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Fully Paid</span>
+            <div className="stat-value" style={{ fontSize: "1.5rem", color: "var(--success)" }}>{stats.paidCount}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ backgroundColor: "var(--success-bg)", color: "var(--success)" }}>
-            <Check size={22} />
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "var(--success-bg)", color: "var(--success)" }}>
+            <Check size={18} />
           </div>
         </div>
 
-        <div className="card stat-card" style={{ borderLeft: "4px solid var(--danger)" }}>
+        <div className="card stat-card" style={{ borderLeft: "4px solid #F59E0B", padding: "1rem" }}>
           <div>
-            <span style={{ fontSize: "0.8rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Unpaid Dues</span>
-            <div className="stat-value" style={{ color: "var(--danger)" }}>{stats.unpaidCount}</div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Partially Paid</span>
+            <div className="stat-value" style={{ fontSize: "1.5rem", color: "#F59E0B" }}>{stats.partiallyPaidCount || 0}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ backgroundColor: "var(--danger-bg)", color: "var(--danger)" }}>
-            <X size={22} />
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "rgba(245, 158, 11, 0.1)", color: "#F59E0B" }}>
+            <Check size={18} />
           </div>
         </div>
 
-        <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)" }}>
+        <div className="card stat-card" style={{ borderLeft: "4px solid var(--danger)", padding: "1rem" }}>
           <div>
-            <span style={{ fontSize: "0.8rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Total Revenue</span>
-            <div className="stat-value" style={{ fontSize: "1.5rem", color: "var(--primary)" }}>GHS {stats.totalRevenue.toFixed(2)}</div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Unpaid Dues</span>
+            <div className="stat-value" style={{ fontSize: "1.5rem", color: "var(--danger)" }}>{stats.unpaidCount}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ backgroundColor: "rgba(var(--primary-rgb), 0.08)", color: "var(--primary)" }}>
-            <CreditCard size={22} />
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "var(--danger-bg)", color: "var(--danger)" }}>
+            <X size={18} />
+          </div>
+        </div>
+
+        <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)", padding: "1rem" }}>
+          <div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Total Revenue</span>
+            <div className="stat-value" style={{ fontSize: "1.3rem", color: "var(--primary)" }}>GHS {stats.totalRevenue.toFixed(2)}</div>
+          </div>
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "rgba(var(--primary-rgb), 0.08)", color: "var(--primary)" }}>
+            <CreditCard size={18} />
           </div>
         </div>
       </div>

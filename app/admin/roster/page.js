@@ -66,7 +66,7 @@ export default function AdminRosterPage() {
         s.programme,
         s.level,
         s.faculty,
-        s.isPaid ? "Paid" : "Unpaid"
+        s.paymentStatus || (s.isPaid ? "Fully Paid" : "Unpaid")
       ])
     ]
       .map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(","))
@@ -90,8 +90,9 @@ export default function AdminRosterPage() {
       student.programme.toLowerCase().includes(search.toLowerCase()) ||
       student.level.includes(search);
 
-    if (statusFilter === "paid") return matchesSearch && student.isPaid;
-    if (statusFilter === "unpaid") return matchesSearch && !student.isPaid;
+    if (statusFilter === "paid") return matchesSearch && student.paymentStatus === "Fully Paid";
+    if (statusFilter === "partial") return matchesSearch && (student.paymentStatus === "1st Sem Only" || student.paymentStatus === "2nd Sem Only");
+    if (statusFilter === "unpaid") return matchesSearch && student.paymentStatus === "Unpaid";
     return matchesSearch;
   });
 
@@ -118,32 +119,41 @@ export default function AdminRosterPage() {
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
 
       {/* Mini Stats Strip */}
-      <div className="grid grid-cols-3" style={{ gap: "1rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "1rem" }}>
         <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)", padding: "1rem 1.25rem" }}>
           <div>
             <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Enrolled</span>
             <div style={{ fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-heading)" }}>{stats.totalStudents}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ backgroundColor: "rgba(0, 55, 114, 0.1)", color: "var(--primary)" }}>
-            <Users size={20} />
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "rgba(0, 55, 114, 0.1)", color: "var(--primary)" }}>
+            <Users size={18} />
           </div>
         </div>
         <div className="card stat-card" style={{ borderLeft: "4px solid var(--success)", padding: "1rem 1.25rem" }}>
           <div>
-            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Cleared</span>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Fully Paid</span>
             <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-heading)" }}>{stats.paidCount}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ backgroundColor: "var(--success-bg)", color: "var(--success)" }}>
-            <Check size={20} />
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "var(--success-bg)", color: "var(--success)" }}>
+            <Check size={18} />
+          </div>
+        </div>
+        <div className="card stat-card" style={{ borderLeft: "4px solid #F59E0B", padding: "1rem 1.25rem" }}>
+          <div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Partially Paid</span>
+            <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#F59E0B", fontFamily: "var(--font-heading)" }}>{stats.partiallyPaidCount || 0}</div>
+          </div>
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "rgba(245, 158, 11, 0.1)", color: "#F59E0B" }}>
+            <Check size={18} />
           </div>
         </div>
         <div className="card stat-card" style={{ borderLeft: "4px solid var(--danger)", padding: "1rem 1.25rem" }}>
           <div>
-            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Outstanding</span>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Unpaid Dues</span>
             <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--danger)", fontFamily: "var(--font-heading)" }}>{stats.unpaidCount}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ backgroundColor: "var(--danger-bg)", color: "var(--danger)" }}>
-            <X size={20} />
+          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "var(--danger-bg)", color: "var(--danger)" }}>
+            <X size={18} />
           </div>
         </div>
       </div>
@@ -182,8 +192,9 @@ export default function AdminRosterPage() {
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <option value="all">All Statuses</option>
-                <option value="paid">Paid Only</option>
-                <option value="unpaid">Unpaid Only</option>
+                <option value="paid">Fully Paid</option>
+                <option value="partial">Partially Paid</option>
+                <option value="unpaid">Unpaid</option>
               </select>
             </div>
 
@@ -233,8 +244,16 @@ export default function AdminRosterPage() {
                     <td style={{ fontSize: "0.85rem" }}>L{student.level}</td>
                     <td style={{ fontSize: "0.8rem", opacity: 0.7 }}>{student.faculty}</td>
                     <td>
-                      <span className={`badge ${student.isPaid ? "badge-success" : "badge-danger"}`}>
-                        {student.isPaid ? "Paid" : "Unpaid"}
+                      <span className={`badge ${
+                        student.paymentStatus === "Fully Paid" 
+                          ? "badge-success" 
+                          : student.paymentStatus === "1st Sem Only" 
+                          ? "badge-info" 
+                          : student.paymentStatus === "2nd Sem Only"
+                          ? "badge-warning"
+                          : "badge-danger"
+                      }`}>
+                        {student.paymentStatus || (student.isPaid ? "Fully Paid" : "Unpaid")}
                       </span>
                     </td>
                   </tr>

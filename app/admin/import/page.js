@@ -114,7 +114,7 @@ export default function AdminImportPage() {
           const result = await res.json();
           if (res.ok && result.success) {
             setImportSuccess(
-              `Import complete! Enrolled: ${result.imported} students. Cash payments verified: ${result.manualPayments} records.`
+              `Import complete! Added ${result.imported} new student(s). Verified/Updated ${result.updated || 0} existing student(s). Cash payments verified: ${result.manualPayments} records.`
             );
             if (result.errors && result.errors.length > 0) {
               setImportErrors(result.errors);

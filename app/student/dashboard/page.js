@@ -28,6 +28,7 @@ export default function StudentDashboard() {
   
   // Avatar upload state
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [verifyingRef, setVerifyingRef] = useState(null);
 
   // Collapsible & responsive layout states
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -77,6 +78,15 @@ export default function StudentDashboard() {
   };
 
   useEffect(() => {
+    const savedTheme = localStorage.getItem("htu-dues-theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.body.classList.remove("dark-mode");
+      document.documentElement.removeAttribute("data-theme");
+    }
+
     const userSession = getClientSession();
     if (!userSession || userSession.role !== "student") {
       router.push("/auth/login");
@@ -192,6 +202,26 @@ export default function StudentDashboard() {
     router.push("/");
   };
 
+  const handleVerifyTransaction = async (ref) => {
+    setVerifyingRef(ref);
+    try {
+      const res = await fetch("/api/payment/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reference: ref }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to verify transaction.");
+      
+      alert(result.message);
+      await fetchDashboardData();
+    } catch (err) {
+      alert(err.message || "Error verifying transaction.");
+    } finally {
+      setVerifyingRef(null);
+    }
+  };
+
   // Profile Picture Upload Handler
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
@@ -238,10 +268,15 @@ export default function StudentDashboard() {
   };
 
   // Initialize Payment Handler
-  const handlePayDues = async () => {
+  const handlePayDues = async (semester = 'Both Semesters') => {
     if (!dashboardData) return;
     setPaying(true);
     setPayError("");
+
+    const baselineDues = parseFloat(dashboardData.department.dues_amount);
+    const targetAmount = (semester === '1st Semester' || semester === '2nd Semester')
+      ? baselineDues / 2
+      : baselineDues;
 
     try {
       const res = await fetch("/api/payment/initialize", {
@@ -250,8 +285,10 @@ export default function StudentDashboard() {
         body: JSON.stringify({
           indexNumber: dashboardData.student.index_number,
           email: dashboardData.student.email,
-          amount: dashboardData.department.dues_amount,
-          departmentId: dashboardData.department.id
+          amount: targetAmount,
+          departmentId: dashboardData.department.id,
+          semester,
+          academicYear: "2025/2026"
         })
       });
 
@@ -332,8 +369,20 @@ export default function StudentDashboard() {
 
   const { student, profile, department, payments, notifications } = dashboardData;
   const unreadCount = notifications.filter(n => !n.is_read).length;
-  const activePayment = payments.find(p => p.status === "success");
-  const isPaid = !!activePayment;
+  
+  const academicYear = "2025/2026";
+  const successPayments = payments.filter(p => p.status === "success" && (p.academic_year === academicYear || !p.academic_year));
+
+  const hasPaidFull = successPayments.some(p => p.semester === "Both Semesters" || !p.semester);
+  const hasPaidFirst = successPayments.some(p => p.semester === "1st Semester");
+  const hasPaidSecond = successPayments.some(p => p.semester === "2nd Semester");
+
+  const isFirstSemPaid = hasPaidFull || hasPaidFirst;
+  const isSecondSemPaid = hasPaidFull || hasPaidSecond;
+  const isPaid = isFirstSemPaid && isSecondSemPaid;
+
+  // For backward compatibility receipt views
+  const activePayment = successPayments[0] || null;
 
   // Sorting logic for payments history ledger
   const sortedPayments = [...payments].sort((a, b) => {
@@ -639,16 +688,18 @@ export default function StudentDashboard() {
 
                 {/* Dues Status Card */}
                 <div className="card" style={{
-                  borderLeft: isPaid ? "6px solid var(--success)" : "6px solid var(--danger)",
+                  borderLeft: isPaid ? "6px solid var(--success)" : (isFirstSemPaid || isSecondSemPaid) ? "6px solid #F59E0B" : "6px solid var(--danger)",
                   background: isPaid 
                     ? "linear-gradient(135deg, rgba(5, 150, 105, 0.12) 0%, rgba(16, 185, 129, 0.03) 100%)" 
+                    : (isFirstSemPaid || isSecondSemPaid)
+                    ? "linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(251, 191, 36, 0.03) 100%)"
                     : "var(--danger-bg)",
                   padding: "1.5rem",
                   width: "100%",
                   maxWidth: "100%",
                   boxSizing: "border-box"
                 }}>
-                  <div className="dashboard-status-card-inner" style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  <div className="dashboard-status-card-inner" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                     <div style={{ minWidth: 0 }}>
                       <span style={{ fontSize: "0.8rem", textTransform: "uppercase", fontWeight: 700, opacity: 0.7 }}>Departmental Dues Status</span>
                       <h2 style={{ 
@@ -661,23 +712,53 @@ export default function StudentDashboard() {
                         gap: "0.75rem",
                         flexWrap: "wrap"
                       }}>
-                        {isPaid ? "Dues Fully Paid" : "Dues Outstanding"}
+                        {isPaid ? "Dues Fully Paid" : (isFirstSemPaid || isSecondSemPaid) ? "Partially Paid" : "Dues Outstanding"}
                         {isPaid ? (
                           <span className="success-pulse-icon" style={{ display: "inline-flex", alignItems: "center" }}>
                             <CheckCircle2 size={28} style={{ color: "var(--success)" }} />
                           </span>
                         ) : (
                           <span style={{ display: "inline-flex", alignItems: "center" }}>
-                            <AlertTriangle size={28} style={{ color: "var(--danger)" }} />
+                            <AlertTriangle size={28} style={{ color: (isFirstSemPaid || isSecondSemPaid) ? "#F59E0B" : "var(--danger)" }} />
                           </span>
                         )}
                       </h2>
-                      <p style={{ marginTop: "0.5rem", opacity: 0.8, fontSize: "0.9rem" }}>
-                        {isPaid
-                          ? `Clearance confirmed. Payment verified on ${new Date(activePayment.payment_date).toLocaleDateString()}.`
-                          : `Please complete payment of GHS ${parseFloat(department.dues_amount).toFixed(2)} to clear registration holds.`
-                        }
-                      </p>
+                    </div>
+
+                    {/* Semester-by-semester breakdown layout */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", backgroundColor: "rgba(255, 255, 255, 0.5)", padding: "1rem", borderRadius: "8px", border: "1px solid var(--border)" }}>
+                      <div>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 700, opacity: 0.6, textTransform: "uppercase", display: "block" }}>1st Semester</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.25rem" }}>
+                          {isFirstSemPaid ? (
+                            <>
+                              <CheckCircle2 size={16} style={{ color: "var(--success)" }} />
+                              <span style={{ fontWeight: 700, color: "var(--success)", fontSize: "0.9rem" }}>Paid</span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertTriangle size={16} style={{ color: "var(--danger)" }} />
+                              <span style={{ fontWeight: 700, color: "var(--danger)", fontSize: "0.9rem" }}>Outstanding (GHS {(parseFloat(department.dues_amount) / 2).toFixed(2)})</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ borderLeft: "1px solid var(--border)", paddingLeft: "1rem" }}>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 700, opacity: 0.6, textTransform: "uppercase", display: "block" }}>2nd Semester</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", marginTop: "0.25rem" }}>
+                          {isSecondSemPaid ? (
+                            <>
+                              <CheckCircle2 size={16} style={{ color: "var(--success)" }} />
+                              <span style={{ fontWeight: 700, color: "var(--success)", fontSize: "0.9rem" }}>Paid</span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertTriangle size={16} style={{ color: "var(--danger)" }} />
+                              <span style={{ fontWeight: 700, color: "var(--danger)", fontSize: "0.9rem" }}>Outstanding (GHS {(parseFloat(department.dues_amount) / 2).toFixed(2)})</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -687,15 +768,61 @@ export default function StudentDashboard() {
                     </div>
                   )}
 
-                  {!isPaid ? (
-                    <button onClick={handlePayDues} className="btn btn-primary" style={{ marginTop: "1.5rem", width: "100%", padding: "0.85rem", fontSize: "1rem" }} disabled={paying}>
-                      {paying ? <><Loader2 className="spinner" style={{ width: 18, height: 18 }} /> Connecting Paystack...</> : <><CreditCard size={18} /> Pay Dues (GHS {parseFloat(department.dues_amount).toFixed(2)})</>}
-                    </button>
-                  ) : (
-                    <button onClick={() => openReceiptModal(activePayment)} className="btn btn-receipt-highlight" style={{ marginTop: "1.5rem", width: "100%", padding: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
-                      <Download size={18} /> View Stamped Receipt
-                    </button>
-                  )}
+                  {/* Actions (Pay buttons or receipt triggers) */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1.5rem" }}>
+                    {!isPaid && (
+                      <>
+                        {!isFirstSemPaid && !isSecondSemPaid && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                              <button onClick={() => handlePayDues('1st Semester')} className="btn btn-outline" style={{ flex: 1, padding: "0.75rem", fontSize: "0.85rem", fontWeight: 700 }} disabled={paying}>
+                                Pay 1st Sem (GHS {(parseFloat(department.dues_amount) / 2).toFixed(2)})
+                              </button>
+                              <button onClick={() => handlePayDues('2nd Semester')} className="btn btn-outline" style={{ flex: 1, padding: "0.75rem", fontSize: "0.85rem", fontWeight: 700 }} disabled={paying}>
+                                Pay 2nd Sem (GHS {(parseFloat(department.dues_amount) / 2).toFixed(2)})
+                              </button>
+                            </div>
+                            <button onClick={() => handlePayDues('Both Semesters')} className="btn btn-primary" style={{ width: "100%", padding: "0.85rem", fontSize: "0.95rem" }} disabled={paying}>
+                              {paying ? <><Loader2 className="spinner" style={{ width: 18, height: 18 }} /> Connecting Paystack...</> : <><CreditCard size={18} /> Pay Both Semesters (GHS {parseFloat(department.dues_amount).toFixed(2)})</>}
+                            </button>
+                          </div>
+                        )}
+                        {isFirstSemPaid && !isSecondSemPaid && (
+                          <button onClick={() => handlePayDues('2nd Semester')} className="btn btn-primary" style={{ width: "100%", padding: "0.85rem", fontSize: "0.95rem" }} disabled={paying}>
+                            {paying ? <><Loader2 className="spinner" style={{ width: 18, height: 18 }} /> Connecting Paystack...</> : <><CreditCard size={18} /> Pay 2nd Semester (GHS {(parseFloat(department.dues_amount) / 2).toFixed(2)})</>}
+                          </button>
+                        )}
+                        {!isFirstSemPaid && isSecondSemPaid && (
+                          <button onClick={() => handlePayDues('1st Semester')} className="btn btn-primary" style={{ width: "100%", padding: "0.85rem", fontSize: "0.95rem" }} disabled={paying}>
+                            {paying ? <><Loader2 className="spinner" style={{ width: 18, height: 18 }} /> Connecting Paystack...</> : <><CreditCard size={18} /> Pay 1st Semester (GHS {(parseFloat(department.dues_amount) / 2).toFixed(2)})</>}
+                          </button>
+                        )}
+                      </>
+                    )}
+
+                    {isPaid && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                        {hasPaidFull ? (
+                          <button onClick={() => openReceiptModal(successPayments.find(p => p.semester === 'Both Semesters' || !p.semester))} className="btn btn-receipt-highlight" style={{ width: "100%", padding: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}>
+                            <Download size={18} /> View Stamped Receipt
+                          </button>
+                        ) : (
+                          <div style={{ display: "flex", gap: "0.5rem" }}>
+                            {successPayments.find(p => p.semester === '1st Semester') && (
+                              <button onClick={() => openReceiptModal(successPayments.find(p => p.semester === '1st Semester'))} className="btn btn-receipt-highlight" style={{ flex: 1, padding: "0.75rem", fontSize: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.35rem" }}>
+                                <Download size={14} /> 1st Sem Receipt
+                              </button>
+                            )}
+                            {successPayments.find(p => p.semester === '2nd Semester') && (
+                              <button onClick={() => openReceiptModal(successPayments.find(p => p.semester === '2nd Semester'))} className="btn btn-receipt-highlight" style={{ flex: 1, padding: "0.75rem", fontSize: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.35rem" }}>
+                                <Download size={14} /> 2nd Sem Receipt
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Recent Alerts */}
@@ -827,6 +954,9 @@ export default function StudentDashboard() {
                           <th onClick={() => requestSort("amount")} style={{ cursor: "pointer", userSelect: "none" }}>
                             Clearance Value {getSortIcon("amount")}
                           </th>
+                          <th onClick={() => requestSort("semester")} style={{ cursor: "pointer", userSelect: "none" }}>
+                            Semester {getSortIcon("semester")}
+                          </th>
                           <th onClick={() => requestSort("created_at")} style={{ cursor: "pointer", userSelect: "none" }}>
                             Timestamp {getSortIcon("created_at")}
                           </th>
@@ -841,6 +971,7 @@ export default function StudentDashboard() {
                           <tr key={i}>
                             <td style={{ fontFamily: "monospace", fontSize: "0.85rem", fontWeight: 600 }}>{payment.paystack_reference}</td>
                             <td style={{ fontWeight: 800 }}>GHS {parseFloat(payment.amount).toFixed(2)}</td>
+                            <td style={{ fontSize: "0.85rem", fontWeight: 600 }}>{payment.semester || "Both Semesters"}</td>
                             <td style={{ fontSize: "0.85rem" }}>{new Date(payment.created_at).toLocaleString()}</td>
                             <td>
                               <span className={`badge ${
@@ -861,6 +992,15 @@ export default function StudentDashboard() {
                                   style={{ padding: "0.3rem 0.8rem", fontSize: "0.8rem", display: "inline-flex", gap: "0.35rem", alignItems: "center" }}
                                 >
                                   <Eye size={13} /> View Receipt
+                                </button>
+                              ) : payment.status === "pending" ? (
+                                <button 
+                                  onClick={() => handleVerifyTransaction(payment.paystack_reference)} 
+                                  className="btn btn-outline" 
+                                  style={{ padding: "0.3rem 0.8rem", fontSize: "0.8rem", display: "inline-flex", gap: "0.35rem", alignItems: "center", borderColor: "rgba(245, 158, 11, 0.4)", color: "#F59E0B" }}
+                                  disabled={verifyingRef === payment.paystack_reference}
+                                >
+                                  {verifyingRef === payment.paystack_reference ? "Verifying..." : "Verify Status"}
                                 </button>
                               ) : (
                                 <span style={{ opacity: 0.5, fontSize: "0.8rem" }}>Not Available</span>

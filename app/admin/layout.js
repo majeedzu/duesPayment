@@ -11,9 +11,23 @@ import {
   Upload, 
   RefreshCw, 
   FileText,
-  X
+  X,
+  ShieldAlert
 } from "lucide-react";
 import { getClientSession, clearClientSession } from "@/lib/session";
+
+// Map faculty names to their logo files
+const getFacultyLogo = (facultyName) => {
+  if (!facultyName) return { src: "/htu_logo.jpg", label: null };
+  const f = facultyName.toLowerCase();
+  if (f.includes("applied sciences") || f.includes("fast")) return { src: "/fast_logo.png", label: null };
+  if (f.includes("engineering") || f.includes("foe")) return { src: "/foe_logo.jpg", label: null };
+  // Fallback: HTU logo + short faculty name label
+  const shortName = facultyName
+    .replace("Faculty of ", "")
+    .replace("Faculty ", "");
+  return { src: "/htu_logo.jpg", label: shortName };
+};
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
@@ -22,6 +36,7 @@ export default function AdminLayout({ children }) {
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [department, setDepartment] = useState(null);
+  const [deptError, setDeptError] = useState("");
   
   // UI states
   const [showNotifDrawer, setShowNotifDrawer] = useState(false);
@@ -31,15 +46,16 @@ export default function AdminLayout({ children }) {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/stats");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          setDepartment(data.data.department);
-          setNotifications(data.data.notifications || []);
-        }
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setDepartment(data.data.department);
+        setNotifications(data.data.notifications || []);
+      } else {
+        setDeptError(data.message || "Access restricted. No department assigned.");
       }
     } catch (error) {
       console.error("Error fetching layout details:", error);
+      setDeptError("Failed to fetch department status details.");
     } finally {
       setLoading(false);
     }
@@ -70,6 +86,23 @@ export default function AdminLayout({ children }) {
     router.refresh();
   };
 
+  if (deptError) {
+    return (
+      <div style={{ display: "flex", minHeight: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "var(--background)", padding: "1.5rem" }}>
+        <div className="card" style={{ maxWidth: "450px", width: "100%", textAlign: "center", padding: "3rem 2rem", borderTop: "4px solid var(--danger)", boxShadow: "0 10px 25px rgba(0, 0, 0, 0.05)" }}>
+          <ShieldAlert size={60} style={{ color: "var(--danger)", margin: "0 auto 1.5rem" }} />
+          <h2 style={{ color: "var(--danger)", fontFamily: "var(--font-heading)", fontSize: "1.5rem", marginBottom: "1rem" }}>Access Restricted</h2>
+          <p style={{ fontSize: "0.95rem", opacity: 0.8, lineHeight: "1.6", marginBottom: "2rem" }}>
+            {deptError}
+          </p>
+          <button onClick={handleLogout} className="btn btn-outline" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", width: "100%", justifyContent: "center" }}>
+            <LogOut size={16} /> Logout Account
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (loading && !admin) {
     return (
       <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", backgroundColor: "var(--background)" }}>
@@ -91,12 +124,22 @@ export default function AdminLayout({ children }) {
       {/* Sidebar Navigation */}
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-brand">
-          <div className="htu-logo-container" style={{ width: "40px", height: "40px" }}>
-            <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
+          <div className="htu-logo-container" style={{ width: "40px", height: "40px", flexShrink: 0 }}>
+            <img
+              src={getFacultyLogo(department?.faculty).src}
+              alt="Faculty Logo"
+              className="htu-logo-img"
+            />
           </div>
-          <div>
-            <h4 style={{ color: "white" }}>HTU Dues</h4>
-            <span style={{ fontSize: "0.75rem", color: "var(--dashboard-accent)", fontWeight: 600 }}>ADMIN PORTAL</span>
+          <div style={{ overflow: "hidden" }}>
+            <h4 style={{ color: "white", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>HTU Dues</h4>
+            {getFacultyLogo(department?.faculty).label ? (
+              <span style={{ fontSize: "0.7rem", color: "var(--dashboard-accent)", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block" }}>
+                {getFacultyLogo(department?.faculty).label.toUpperCase()}
+              </span>
+            ) : (
+              <span style={{ fontSize: "0.75rem", color: "var(--dashboard-accent)", fontWeight: 600 }}>ADMIN PORTAL</span>
+            )}
           </div>
         </div>
 
@@ -117,12 +160,35 @@ export default function AdminLayout({ children }) {
             <CreditCard size={18} /> Transactions
           </Link>
 
-          <div style={{ marginTop: "1rem", padding: "0.5rem 1rem", fontSize: "0.75rem", opacity: 0.6, letterSpacing: "0.05em", textTransform: "uppercase" }}>
-            Department
-          </div>
-          <div style={{ padding: "0.75rem 1rem", fontSize: "0.85rem", opacity: 0.9, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "var(--radius)" }}>
-            <p style={{ fontWeight: 600, color: "var(--dashboard-accent)" }}>{department?.name || "Loading..."}</p>
-            <p style={{ fontSize: "0.75rem", opacity: 0.7, marginTop: "0.25rem" }}>Dues: GHS {department?.dues_amount?.toFixed(2) || "0.00"}</p>
+          {/* Department Name Banner — highly visible */}
+          <div style={{
+            margin: "1.25rem 0.75rem 0",
+            padding: "1rem",
+            borderRadius: "var(--radius)",
+            background: "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            boxShadow: "0 0 18px rgba(var(--dashboard-accent-rgb, 255,193,7), 0.15)"
+          }}>
+            <p style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.55, marginBottom: "0.35rem", color: "white" }}>Current Department</p>
+            <p style={{
+              fontWeight: 800,
+              fontSize: "0.95rem",
+              lineHeight: 1.3,
+              color: "var(--dashboard-accent)",
+              textShadow: "0 0 12px rgba(255,193,7,0.4)",
+              letterSpacing: "0.01em"
+            }}>
+              {department?.name || "Loading..."}
+            </p>
+            {department?.faculty && (
+              <p style={{ fontSize: "0.7rem", opacity: 0.6, marginTop: "0.4rem", color: "white", lineHeight: 1.3 }}>
+                {department.faculty}
+              </p>
+            )}
+            <div style={{ marginTop: "0.6rem", paddingTop: "0.6rem", borderTop: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "0.7rem", opacity: 0.55, color: "white" }}>Dues Amount</span>
+              <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--dashboard-accent)" }}>GHS {department?.dues_amount?.toFixed(2) || "0.00"}</span>
+            </div>
           </div>
         </div>
 
@@ -165,15 +231,31 @@ export default function AdminLayout({ children }) {
               }
             `}</style>
             <div>
-              <h2 style={{ fontSize: "1.5rem", color: "var(--primary)" }}>
-                {pathname === "/admin/dashboard" && "Dashboard"}
-                {pathname === "/admin/roster" && "Student Roster"}
-                {pathname === "/admin/import" && "CSV Roster Upload"}
-                {pathname === "/admin/transactions" && "Transactions Monitor"}
-              </h2>
-              <p style={{ fontSize: "0.85rem", opacity: 0.7 }}>
-                {pathname === "/admin/dashboard" && `Overview for ${department?.name || "..."}`}
-                {pathname === "/admin/roster" && `All enrolled students for ${department?.name || "..."}`}
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
+                <h2 style={{ fontSize: "1.5rem", color: "var(--primary)", margin: 0 }}>
+                  {pathname === "/admin/dashboard" && "Dashboard"}
+                  {pathname === "/admin/roster" && "Student Roster"}
+                  {pathname === "/admin/import" && "CSV Roster Upload"}
+                  {pathname === "/admin/transactions" && "Transactions Monitor"}
+                </h2>
+                {department?.name && (
+                  <span style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    padding: "0.25rem 0.65rem",
+                    borderRadius: "999px",
+                    backgroundColor: "var(--primary)",
+                    color: "white",
+                    letterSpacing: "0.02em",
+                    whiteSpace: "nowrap"
+                  }}>
+                    {department.name}
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: "0.85rem", opacity: 0.7, marginTop: "0.25rem" }}>
+                {pathname === "/admin/dashboard" && `Overview · ${department?.faculty || ""}`}
+                {pathname === "/admin/roster" && `All enrolled students · ${department?.name || "..."}`}
                 {pathname === "/admin/import" && "Import students using `.csv` templates"}
                 {pathname === "/admin/transactions" && "Live checkouts & cash verification log"}
               </p>

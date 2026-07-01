@@ -59,6 +59,15 @@ export default function SuperAdminDashboard() {
   const [actionLoading, setActionLoading] = useState(false);
   const [showNotifDrawer, setShowNotifDrawer] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedFaculties, setExpandedFaculties] = useState({});
+
+  // Delete confirmation modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deptToDelete, setDeptToDelete] = useState(null); // { id, name }
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+
+  // Admin info popover
+  const [adminPopover, setAdminPopover] = useState(null); // admin object
 
   // Search states
   const [logSearch, setLogSearch] = useState("");
@@ -137,6 +146,36 @@ export default function SuperAdminDashboard() {
     setFormError("");
     setFormSuccess("");
     setShowDeptModal(true);
+  };
+
+  const handleDeleteDept = (id, name) => {
+    setDeptToDelete({ id, name });
+    setDeleteConfirmText("");
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteDept = async () => {
+    if (!deptToDelete) return;
+    setActionLoading(true);
+    setFormError("");
+    setFormSuccess("");
+    setShowDeleteModal(false);
+    try {
+      const res = await fetch("/api/super-admin/departments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", id: deptToDelete.id }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to delete department.");
+      setFormSuccess(`"${deptToDelete.name}" deleted successfully!`);
+      setDeptToDelete(null);
+      await fetchSuperDashboardData();
+    } catch (err) {
+      setFormError(err.message || "An error occurred.");
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleDeptSubmit = async (e) => {
@@ -472,46 +511,95 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="table-container">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Department</th>
-                        <th>Faculty</th>
-                        <th>Dues Fee</th>
-                        <th>Students</th>
-                        <th>Paid</th>
-                        <th>Unpaid</th>
-                        <th>Revenue Collected</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {departments.length === 0 ? (
-                        <tr>
-                          <td colSpan="8" style={{ textAlign: "center", padding: "2rem", opacity: 0.6 }}>No departments configured.</td>
-                        </tr>
-                      ) : (
-                        departments.map((dept) => (
-                          <tr key={dept.id}>
-                            <td style={{ fontWeight: 700 }}>{dept.name}</td>
-                            <td style={{ fontSize: "0.85rem" }}>{dept.faculty}</td>
-                            <td style={{ fontWeight: 600 }}>GHS {dept.duesAmount.toFixed(2)}</td>
-                            <td>{dept.totalStudents}</td>
-                            <td style={{ color: "var(--success)", fontWeight: 600 }}>{dept.paidCount}</td>
-                            <td style={{ color: "var(--danger)", fontWeight: 600 }}>{dept.unpaidCount}</td>
-                            <td style={{ fontWeight: 700, color: "var(--primary)" }}>GHS {dept.revenue.toFixed(2)}</td>
-                            <td>
-                              <button onClick={() => handleOpenDeptEdit(dept)} className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }} title="Edit Department Details">
-                                <Edit2 size={12} /> Edit
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                {/* Faculty-grouped department sections */}
+                {departments.length === 0 ? (
+                  <p style={{ textAlign: "center", padding: "2rem", opacity: 0.6 }}>No departments configured.</p>
+                ) : (
+                  (() => {
+                    const grouped = departments.reduce((acc, dept) => {
+                      const key = dept.faculty || "Unassigned";
+                      if (!acc[key]) acc[key] = [];
+                      acc[key].push(dept);
+                      return acc;
+                    }, {});
+                    return Object.entries(grouped).map(([faculty, depts]) => {
+                      const isOpen = expandedFaculties[`overview-${faculty}`] !== false;
+                      const totalRevenue = depts.reduce((s, d) => s + (d.revenue || 0), 0);
+                      const totalStudents = depts.reduce((s, d) => s + (d.totalStudents || 0), 0);
+                      return (
+                        <div key={faculty} style={{ marginBottom: "1rem", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+                          <button
+                            onClick={() => setExpandedFaculties(p => ({ ...p, [`overview-${faculty}`]: !isOpen }))}
+                            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.25rem", background: "var(--primary)", color: "white", border: "none", cursor: "pointer", gap: "1rem" }}
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                              <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>{faculty}</span>
+                              <span style={{ fontSize: "0.75rem", backgroundColor: "rgba(255,255,255,0.2)", padding: "0.15rem 0.5rem", borderRadius: "999px" }}>{depts.length} dept{depts.length > 1 ? "s" : ""}</span>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", fontSize: "0.8rem", opacity: 0.85 }}>
+                              <span>{totalStudents} students</span>
+                              <span>GHS {totalRevenue.toFixed(2)} collected</span>
+                              <span style={{ fontSize: "1rem" }}>{isOpen ? "▲" : "▼"}</span>
+                            </div>
+                          </button>
+                          {isOpen && (
+                            <div className="table-container" style={{ margin: 0 }}>
+                              <table className="table" style={{ margin: 0 }}>
+                                <thead>
+                                  <tr>
+                                    <th>Department</th>
+                                    <th>Dues Fee</th>
+                                    <th>Students</th>
+                                    <th>Paid</th>
+                                    <th>Unpaid</th>
+                                    <th>Revenue</th>
+                                    <th>Actions</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {depts.map(dept => (
+                                    <tr key={dept.id}>
+                                      <td style={{ fontWeight: 700 }}>{dept.name}</td>
+                                      <td style={{ fontWeight: 600 }}>GHS {dept.duesAmount.toFixed(2)}</td>
+                                      <td>{dept.totalStudents}</td>
+                                      <td style={{ color: "var(--success)", fontWeight: 600 }}>{dept.paidCount}</td>
+                                      <td style={{ color: "var(--danger)", fontWeight: 600 }}>{dept.unpaidCount}</td>
+                                      <td style={{ fontWeight: 700, color: "var(--primary)" }}>GHS {dept.revenue.toFixed(2)}</td>
+                                      <td>
+                                        {(() => {
+                                          const assignedAdmin = admins.find(a => a.department_id === dept.id);
+                                          return assignedAdmin ? (
+                                            <button
+                                              onClick={() => setAdminPopover(assignedAdmin)}
+                                              style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700, padding: "0.2rem 0.55rem", borderRadius: "999px", backgroundColor: "var(--success-bg)", color: "var(--success)", whiteSpace: "nowrap", border: "none", cursor: "pointer" }}
+                                              title="Click to view admin details"
+                                            >
+                                              <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "var(--success)", display: "inline-block" }} /> Admin Active
+                                            </button>
+                                          ) : (
+                                            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700, padding: "0.2rem 0.55rem", borderRadius: "999px", backgroundColor: "var(--warning-bg)", color: "#b45309", whiteSpace: "nowrap" }}>
+                                              <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#f59e0b", display: "inline-block" }} /> No Admin
+                                            </span>
+                                          );
+                                        })()}
+                                      </td>
+                                      <td>
+                                        <div style={{ display: "flex", gap: "0.35rem" }}>
+                                          <button onClick={() => handleOpenDeptEdit(dept)} className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><Edit2 size={12} /> Edit</button>
+                                          <button onClick={() => handleDeleteDept(dept.id, dept.name)} className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "var(--danger)", borderColor: "rgba(239,68,68,0.2)" }} disabled={actionLoading}><Trash2 size={12} /> Delete</button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    });
+                  })()
+                )}
               </div>
 
               {/* Recent System Payments */}
@@ -572,34 +660,83 @@ export default function SuperAdminDashboard() {
                 </button>
               </div>
 
-              <div className="table-container">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Department Name</th>
-                      <th>Faculty</th>
-                      <th>Dues Amount (GHS)</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {departments.map((dept) => (
-                      <tr key={dept.id}>
-                        <td style={{ fontSize: "0.75rem", opacity: 0.6 }}>{dept.id}</td>
-                        <td style={{ fontWeight: 700 }}>{dept.name}</td>
-                        <td>{dept.faculty}</td>
-                        <td style={{ fontWeight: 700, color: "var(--primary)" }}>GHS {dept.duesAmount.toFixed(2)}</td>
-                        <td>
-                          <button onClick={() => handleOpenDeptEdit(dept)} className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }}>
-                            <Edit2 size={12} /> Edit Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              {/* Faculty-grouped department management */}
+              {departments.length === 0 ? (
+                <p style={{ textAlign: "center", padding: "2rem", opacity: 0.6 }}>No departments configured. Add one above.</p>
+              ) : (
+                (() => {
+                  const grouped = departments.reduce((acc, dept) => {
+                    const key = dept.faculty || "Unassigned";
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(dept);
+                    return acc;
+                  }, {});
+                  return Object.entries(grouped).map(([faculty, depts]) => {
+                    const isOpen = expandedFaculties[`manage-${faculty}`] !== false;
+                    return (
+                      <div key={faculty} style={{ marginBottom: "1rem", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+                        <button
+                          onClick={() => setExpandedFaculties(p => ({ ...p, [`manage-${faculty}`]: !isOpen }))}
+                          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0.85rem 1.25rem", background: "var(--primary)", color: "white", border: "none", cursor: "pointer" }}
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                            <BookOpen size={16} />
+                            <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>{faculty}</span>
+                            <span style={{ fontSize: "0.75rem", backgroundColor: "rgba(255,255,255,0.2)", padding: "0.15rem 0.5rem", borderRadius: "999px" }}>{depts.length} dept{depts.length > 1 ? "s" : ""}</span>
+                          </div>
+                          <span style={{ fontSize: "1rem" }}>{isOpen ? "▲" : "▼"}</span>
+                        </button>
+                        {isOpen && (
+                          <div className="table-container" style={{ margin: 0 }}>
+                            <table className="table" style={{ margin: 0 }}>
+                              <thead>
+                                <tr>
+                                  <th>Department Name</th>
+                                  <th>Dues Amount (GHS)</th>
+                                  <th>Admin Status</th>
+                                  <th>Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {depts.map(dept => (
+                                  <tr key={dept.id}>
+                                    <td style={{ fontWeight: 700 }}>{dept.name}</td>
+                                    <td style={{ fontWeight: 700, color: "var(--primary)" }}>GHS {dept.duesAmount.toFixed(2)}</td>
+                                    <td>
+                                      {(() => {
+                                        const assignedAdmin = admins.find(a => a.department_id === dept.id);
+                                        return assignedAdmin ? (
+                                          <button
+                                            onClick={() => setAdminPopover(assignedAdmin)}
+                                            style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700, padding: "0.2rem 0.55rem", borderRadius: "999px", backgroundColor: "var(--success-bg)", color: "var(--success)", whiteSpace: "nowrap", border: "none", cursor: "pointer" }}
+                                            title="Click to view admin details"
+                                          >
+                                            <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "var(--success)", display: "inline-block" }} /> Admin Active
+                                          </button>
+                                        ) : (
+                                          <span style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700, padding: "0.2rem 0.55rem", borderRadius: "999px", backgroundColor: "var(--warning-bg)", color: "#b45309", whiteSpace: "nowrap" }}>
+                                            <span style={{ width: 7, height: 7, borderRadius: "50%", backgroundColor: "#f59e0b", display: "inline-block" }} /> No Admin
+                                          </span>
+                                        );
+                                      })()}
+                                    </td>
+                                    <td>
+                                      <div style={{ display: "flex", gap: "0.35rem" }}>
+                                        <button onClick={() => handleOpenDeptEdit(dept)} className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><Edit2 size={12} /> Edit</button>
+                                        <button onClick={() => handleDeleteDept(dept.id, dept.name)} className="btn btn-outline" style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "var(--danger)", borderColor: "rgba(239,68,68,0.2)" }} disabled={actionLoading}><Trash2 size={12} /> Delete</button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()
+              )}
             </div>
           )}
 
@@ -808,6 +945,136 @@ export default function SuperAdminDashboard() {
 
         </div>
       </main>
+
+      {/* ADMIN INFO POPOVER */}
+      {adminPopover && (
+        <div className="modal-overlay" onClick={() => setAdminPopover(null)}>
+          <div className="modal" style={{ maxWidth: "380px" }} onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setAdminPopover(null)}
+              style={{ position: "absolute", top: "1rem", right: "1rem", border: "none", background: "none", cursor: "pointer", opacity: 0.5 }}
+            >
+              <X size={18} />
+            </button>
+
+            {/* Avatar + Name */}
+            <div style={{ textAlign: "center", paddingBottom: "1.5rem", borderBottom: "1px solid var(--border)" }}>
+              <div style={{
+                width: 70, height: 70, borderRadius: "50%",
+                background: "linear-gradient(135deg, var(--primary), var(--primary-hover))",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 1rem",
+                fontSize: "1.75rem", fontWeight: 800, color: "white",
+                boxShadow: "0 4px 16px rgba(0,0,139,0.25)"
+              }}>
+                {adminPopover.full_name?.charAt(0).toUpperCase()}
+              </div>
+              <h3 style={{ fontFamily: "var(--font-heading)", color: "var(--primary)", marginBottom: "0.3rem" }}>
+                {adminPopover.full_name}
+              </h3>
+              <span className="badge badge-info" style={{ fontSize: "0.72rem" }}>
+                {adminPopover.role === "super_admin" ? "Super Admin" : "Dept Admin"}
+              </span>
+            </div>
+
+            {/* Details */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem", padding: "1.25rem 0 0.5rem" }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                <div style={{ width: 34, height: 34, borderRadius: "50%", backgroundColor: "rgba(0,0,139,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ fontSize: "0.9rem" }}>✉️</span>
+                </div>
+                <div>
+                  <p style={{ fontSize: "0.7rem", opacity: 0.5, marginBottom: "0.1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Email</p>
+                  <p style={{ fontWeight: 600, fontSize: "0.88rem", wordBreak: "break-all" }}>{adminPopover.email}</p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                <div style={{ width: 34, height: 34, borderRadius: "50%", backgroundColor: "rgba(0,0,139,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ fontSize: "0.9rem" }}>🏛️</span>
+                </div>
+                <div>
+                  <p style={{ fontSize: "0.7rem", opacity: 0.5, marginBottom: "0.1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Assigned Department</p>
+                  <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--primary)" }}>
+                    {getDeptName(adminPopover.department_id) || "Not assigned"}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
+                <div style={{ width: 34, height: 34, borderRadius: "50%", backgroundColor: "var(--success-bg)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "var(--success)", display: "inline-block" }} />
+                </div>
+                <div>
+                  <p style={{ fontSize: "0.7rem", opacity: 0.5, marginBottom: "0.1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Status</p>
+                  <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--success)" }}>Active Administrator</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setAdminPopover(null)}
+              className="btn btn-outline"
+              style={{ width: "100%", marginTop: "1.25rem" }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE DEPARTMENT CONFIRMATION MODAL */}
+      {showDeleteModal && deptToDelete && (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: "460px" }}>
+            <div style={{ textAlign: "center", padding: "0.5rem 0 1.5rem" }}>
+              <div style={{ width: 60, height: 60, borderRadius: "50%", backgroundColor: "var(--danger-bg)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1rem" }}>
+                <Trash2 size={28} style={{ color: "var(--danger)" }} />
+              </div>
+              <h3 style={{ color: "var(--danger)", fontFamily: "var(--font-heading)", marginBottom: "0.5rem" }}>Delete Department?</h3>
+              <p style={{ fontSize: "0.9rem", opacity: 0.75, lineHeight: 1.6 }}>
+                You are about to permanently delete:
+              </p>
+              <div style={{ margin: "1rem 0", padding: "0.75rem 1rem", backgroundColor: "var(--danger-bg)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "var(--radius)" }}>
+                <p style={{ fontWeight: 800, fontSize: "1rem", color: "var(--danger)" }}>{deptToDelete.name}</p>
+              </div>
+              <p style={{ fontSize: "0.8rem", opacity: 0.65, lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                ⚠️ Student roster and payment records linked to this department will remain in the database, but their department ties will be cleared. <strong>This cannot be undone.</strong>
+              </p>
+              <div className="form-group" style={{ textAlign: "left", marginBottom: "1.25rem" }}>
+                <label className="label" style={{ marginBottom: "0.4rem", display: "block" }}>
+                  Type <strong style={{ color: "var(--danger)" }}>DELETE</strong> to confirm
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Type DELETE here..."
+                  value={deleteConfirmText}
+                  onChange={e => setDeleteConfirmText(e.target.value)}
+                  autoFocus
+                />
+              </div>
+              <div style={{ display: "flex", gap: "0.75rem" }}>
+                <button
+                  onClick={() => { setShowDeleteModal(false); setDeptToDelete(null); }}
+                  className="btn btn-outline"
+                  style={{ flex: 1 }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteDept}
+                  className="btn btn-danger"
+                  style={{ flex: 1 }}
+                  disabled={deleteConfirmText !== "DELETE" || actionLoading}
+                >
+                  <Trash2 size={15} /> {actionLoading ? "Deleting..." : "Yes, Delete"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DEPARTMENT MODAL */}
       {showDeptModal && (

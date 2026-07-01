@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Search, 
-  ShieldCheck, 
-  CheckCircle, 
-  XCircle, 
-  CreditCard, 
-  Accessibility, 
-  Phone, 
-  Mail, 
-  ChevronDown, 
+import {
+  Search,
+  ShieldCheck,
+  CheckCircle,
+  XCircle,
+  CreditCard,
+  Accessibility,
+  Phone,
+  Mail,
+  ChevronDown,
   Info,
   Calendar,
   Sparkles,
@@ -82,6 +82,26 @@ export default function Home() {
   const [highContrast, setHighContrast] = useState(false);
   const [textSize, setTextSize] = useState("normal"); // small, normal, large
   const [readableFont, setReadableFont] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("htu-dues-theme");
+    if (savedTheme === "dark") {
+      setDarkMode(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.body.classList.add("dark-mode");
+      document.documentElement.setAttribute("data-theme", "dark");
+      localStorage.setItem("htu-dues-theme", "dark");
+    } else {
+      document.body.classList.remove("dark-mode");
+      document.documentElement.removeAttribute("data-theme");
+      localStorage.setItem("htu-dues-theme", "light");
+    }
+  }, [darkMode]);
 
   // FAQ accordion states
   const [openFaq, setOpenFaq] = useState(null);
@@ -126,7 +146,7 @@ export default function Home() {
     try {
       const res = await fetch(`/api/receipt/${encodeURIComponent(receiptId.trim())}`);
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.message || "Receipt not found or invalid.");
       }
@@ -167,8 +187,8 @@ export default function Home() {
     }
   ];
 
-  const filteredDepts = mockDepartments.filter(d => 
-    d.name.toLowerCase().includes(deptSearch.toLowerCase()) || 
+  const filteredDepts = mockDepartments.filter(d =>
+    d.name.toLowerCase().includes(deptSearch.toLowerCase()) ||
     d.faculty.toLowerCase().includes(deptSearch.toLowerCase()) ||
     d.code.toLowerCase().includes(deptSearch.toLowerCase())
   );
@@ -198,23 +218,23 @@ export default function Home() {
   return (
     <div
       className="landing-page"
-      style={{ 
+      style={{
         fontSize: baseFontSize,
         fontFamily: readableFont ? "Arial, sans-serif" : "var(--font-sans)",
         transition: "font-size 0.2s ease",
         ...contrastTheme
       }}
     >
-      
+
       {/* Floating accessibility & contact */}
       <div className="landing-fab-wrap">
         {/* Slide-out panel */}
         {floatingPanelOpen && (
           <div style={{
-            background: highContrast ? "#000" : "rgba(255,255,255,0.97)",
+            background: highContrast ? "#000" : (darkMode ? "rgba(15, 23, 42, 0.97)" : "rgba(255,255,255,0.97)"),
             backdropFilter: "blur(20px)",
             WebkitBackdropFilter: "blur(20px)",
-            border: `1px solid ${highContrast ? "#fff" : "rgba(0,0,140,0.12)"}`,
+            border: `1px solid ${highContrast ? "#fff" : (darkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,140,0.12)")}`,
             borderRadius: "16px",
             padding: "1.5rem",
             boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
@@ -224,26 +244,26 @@ export default function Home() {
           }}>
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-              <span style={{ fontWeight: 800, fontSize: "0.85rem", color: highContrast ? "#FF6B6B" : "var(--primary)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-heading)" }}>
+              <span style={{ fontWeight: 800, fontSize: "0.85rem", color: highContrast ? "#FF6B6B" : (darkMode ? "#60A5FA" : "var(--primary)"), textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "var(--font-heading)" }}>
                 Portal Tools
               </span>
-              <button onClick={() => setFloatingPanelOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: highContrast ? "#fff" : "#666", fontSize: "1.1rem", lineHeight: 1, padding: "2px 6px", borderRadius: "6px" }}>✕</button>
+              <button onClick={() => setFloatingPanelOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: highContrast ? "#fff" : (darkMode ? "#fff" : "#666"), fontSize: "1.1rem", lineHeight: 1, padding: "2px 6px", borderRadius: "6px" }}>✕</button>
             </div>
 
             {/* Contact Info */}
-            <div style={{ marginBottom: "1.25rem", paddingBottom: "1.25rem", borderBottom: `1px solid ${highContrast ? "#555" : "rgba(0,0,0,0.07)"}` }}>
+            <div style={{ marginBottom: "1.25rem", paddingBottom: "1.25rem", borderBottom: `1px solid ${highContrast ? "#555" : (darkMode ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)")}` }}>
               <p style={{ fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", opacity: 0.5, marginBottom: "0.6rem", color: highContrast ? "#fff" : "inherit" }}>Support</p>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: highContrast ? "#fff" : "var(--foreground)" }}>
-                  <Phone size={13} style={{ color: highContrast ? "#FF6B6B" : "var(--primary)", flexShrink: 0 }} />
+                  <Phone size={13} style={{ color: highContrast ? "#FF6B6B" : (darkMode ? "#60A5FA" : "var(--primary)"), flexShrink: 0 }} />
                   <span>+233(0)30 290 5009</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: highContrast ? "#fff" : "var(--foreground)" }}>
-                  <Phone size={13} style={{ color: highContrast ? "#FF6B6B" : "var(--primary)", flexShrink: 0 }} />
+                  <Phone size={13} style={{ color: highContrast ? "#FF6B6B" : (darkMode ? "#60A5FA" : "var(--primary)"), flexShrink: 0 }} />
                   <span>+233(0) 50 140 4994</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.82rem", color: highContrast ? "#fff" : "var(--foreground)" }}>
-                  <Mail size={13} style={{ color: highContrast ? "#FF6B6B" : "var(--primary)", flexShrink: 0 }} />
+                  <Mail size={13} style={{ color: highContrast ? "#FF6B6B" : (darkMode ? "#60A5FA" : "var(--primary)"), flexShrink: 0 }} />
                   <span>info@htu.edu.gh</span>
                 </div>
               </div>
@@ -257,7 +277,7 @@ export default function Home() {
               <div style={{ marginBottom: "0.75rem" }}>
                 <p style={{ fontSize: "0.75rem", marginBottom: "0.35rem", fontWeight: 600, color: highContrast ? "#fff" : "var(--foreground)", opacity: 0.7 }}>Contrast</p>
                 <div style={{ display: "flex", gap: "4px" }}>
-                  {[{label:"Standard", val:false}, {label:"High Contrast", val:true}].map(({label, val}) => (
+                  {[{ label: "Standard", val: false }, { label: "High Contrast", val: true }].map(({ label, val }) => (
                     <button key={label} onClick={() => setHighContrast(val)} style={{
                       flex: 1, padding: "5px 8px", fontSize: "0.72rem", cursor: "pointer", fontWeight: 700, borderRadius: "8px",
                       border: `1.5px solid ${highContrast === val ? "var(--primary)" : "rgba(0,0,0,0.1)"}`,
@@ -269,11 +289,29 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Theme */}
+              {!highContrast && (
+                <div style={{ marginBottom: "0.75rem" }}>
+                  <p style={{ fontSize: "0.75rem", marginBottom: "0.35rem", fontWeight: 600, color: "var(--foreground)", opacity: 0.7 }}>Theme</p>
+                  <div style={{ display: "flex", gap: "4px" }}>
+                    {[{ label: "Light", val: false }, { label: "Dark Mode", val: true }].map(({ label, val }) => (
+                      <button key={label} onClick={() => setDarkMode(val)} style={{
+                        flex: 1, padding: "5px 8px", fontSize: "0.72rem", cursor: "pointer", fontWeight: 700, borderRadius: "8px",
+                        border: `1.5px solid ${darkMode === val ? "var(--primary)" : "rgba(0,0,0,0.1)"}`,
+                        background: darkMode === val ? "var(--primary)" : "transparent",
+                        color: darkMode === val ? "#fff" : "var(--foreground)",
+                        transition: "all 0.15s ease"
+                      }}>{label}</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Text size */}
               <div style={{ marginBottom: "0.75rem" }}>
                 <p style={{ fontSize: "0.75rem", marginBottom: "0.35rem", fontWeight: 600, color: highContrast ? "#fff" : "var(--foreground)", opacity: 0.7 }}>Text Size</p>
                 <div style={{ display: "flex", gap: "4px" }}>
-                  {[{label:"A−", val:"small"}, {label:"A", val:"normal"}, {label:"A+", val:"large"}].map(({label, val}) => (
+                  {[{ label: "A−", val: "small" }, { label: "A", val: "normal" }, { label: "A+", val: "large" }].map(({ label, val }) => (
                     <button key={val} onClick={() => setTextSize(val)} style={{
                       flex: 1, padding: "5px 4px", fontSize: "0.75rem", cursor: "pointer", fontWeight: 800, borderRadius: "8px",
                       border: `1.5px solid ${textSize === val ? "var(--primary)" : "rgba(0,0,0,0.1)"}`,
@@ -431,7 +469,7 @@ export default function Home() {
       </header>
 
       <main className="landing-main">
-        
+
         {/* Hero */}
         <section
           className="landing-hero reveal-init"
@@ -471,15 +509,15 @@ export default function Home() {
               >
                 <LogIn size={18} /> Sign in to pay
               </Link>
-              
+
               {/* Premium Glass Effect button */}
               <a
                 href="#verify"
                 className="btn"
-                style={{ 
-                  padding: "0.9rem 1.6rem", 
-                  fontSize: "1rem", 
-                  color: "#fff", 
+                style={{
+                  padding: "0.9rem 1.6rem",
+                  fontSize: "1rem",
+                  color: "#fff",
                   background: "rgba(255, 255, 255, 0.12)",
                   backdropFilter: "blur(10px)",
                   WebkitBackdropFilter: "blur(10px)",
@@ -504,8 +542,8 @@ export default function Home() {
 
           {/* Scroll Indicator */}
           {!highContrast && (
-            <div 
-              className="landing-hero-scroll animate-fade-in-4" 
+            <div
+              className="landing-hero-scroll animate-fade-in-4"
               onClick={() => {
                 const el = document.getElementById("features");
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -559,36 +597,36 @@ export default function Home() {
 
                 {/* Widget 1: Student Status Card */}
                 <div className="floating-metric-card floating-card-1" style={highContrast ? { border: "2px solid #ffffff", background: "#000" } : {}}>
-                <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(0, 0, 140, 0.08)", color: highContrast ? "#fff" : "var(--primary)" }}>
-                  <GraduationCap size={18} />
+                  <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(0, 0, 140, 0.08)", color: highContrast ? "#fff" : "var(--primary)" }}>
+                    <GraduationCap size={18} />
+                  </div>
+                  <div className="metric-text-box">
+                    <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Student Status</span>
+                    <strong style={highContrast ? { color: "#fff" } : {}}>Level 400 • Cleared</strong>
+                  </div>
                 </div>
-                <div className="metric-text-box">
-                  <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Student Status</span>
-                  <strong style={highContrast ? { color: "#fff" } : {}}>Level 400 • Cleared</strong>
-                </div>
-              </div>
 
-              {/* Widget 2: Real-time Status Card */}
-              <div className="floating-metric-card floating-card-2" style={highContrast ? { border: "2px solid #ffffff", background: "#000" } : {}}>
-                <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(16, 185, 129, 0.1)", color: highContrast ? "#fff" : "var(--success)" }}>
-                  <Sparkles size={18} />
+                {/* Widget 2: Real-time Status Card */}
+                <div className="floating-metric-card floating-card-2" style={highContrast ? { border: "2px solid #ffffff", background: "#000" } : {}}>
+                  <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(16, 185, 129, 0.1)", color: highContrast ? "#fff" : "var(--success)" }}>
+                    <Sparkles size={18} />
+                  </div>
+                  <div className="metric-text-box">
+                    <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Clearance Speed</span>
+                    <strong style={highContrast ? { color: "#fff" } : {}}>Under 2 Mins</strong>
+                  </div>
                 </div>
-                <div className="metric-text-box">
-                  <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Clearance Speed</span>
-                  <strong style={highContrast ? { color: "#fff" } : {}}>Under 2 Mins</strong>
-                </div>
-              </div>
 
-              {/* Widget 3: Success Rate Card */}
-              <div className="floating-metric-card floating-card-3" style={highContrast ? { border: "2px solid #ffffff", background: "#000" } : {}}>
-                <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(245, 158, 11, 0.1)", color: highContrast ? "#fff" : "var(--warning)" }}>
-                  <ShieldCheck size={18} />
+                {/* Widget 3: Success Rate Card */}
+                <div className="floating-metric-card floating-card-3" style={highContrast ? { border: "2px solid #ffffff", background: "#000" } : {}}>
+                  <div className="metric-icon-wrapper" style={{ backgroundColor: highContrast ? "#222" : "rgba(245, 158, 11, 0.1)", color: highContrast ? "#fff" : "var(--warning)" }}>
+                    <ShieldCheck size={18} />
+                  </div>
+                  <div className="metric-text-box">
+                    <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Ledger Verification</span>
+                    <strong style={highContrast ? { color: "#fff" } : {}}>99.8% Success Rate</strong>
+                  </div>
                 </div>
-                <div className="metric-text-box">
-                  <span style={highContrast ? { color: "#fff", opacity: 0.8 } : {}}>Ledger Verification</span>
-                  <strong style={highContrast ? { color: "#fff" } : {}}>99.8% Success Rate</strong>
-                </div>
-              </div>
               </div>
             </div>
 
@@ -706,11 +744,11 @@ export default function Home() {
             )}
 
             {verificationResult && (
-              <div style={{ 
-                border: "1px solid var(--success)", 
-                backgroundColor: "var(--success-bg)", 
-                borderRadius: "var(--radius)", 
-                padding: "1.75rem", 
+              <div style={{
+                border: "1px solid var(--success)",
+                backgroundColor: "var(--success-bg)",
+                borderRadius: "var(--radius)",
+                padding: "1.75rem",
                 animation: "modalEnter 0.3s ease",
                 marginTop: "1.5rem",
                 boxShadow: "var(--shadow-sm)"
@@ -719,7 +757,7 @@ export default function Home() {
                   <CheckCircle size={20} />
                   <span>Dues Cleared & Stamped (Record Authentic)</span>
                 </div>
-                
+
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem", fontSize: "0.85rem" }}>
                   <div>
                     <span style={{ opacity: 0.6, fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700 }}>Student Full Name</span>
@@ -766,7 +804,7 @@ export default function Home() {
               <span className="landing-section-label" style={{ color: highContrast ? "#FF6B6B" : undefined }}>Fee schedule</span>
               <h3 className="landing-section-title">Departmental dues</h3>
             </div>
-            
+
             <div className="landing-tariffs-search">
               <Search size={16} className="landing-tariffs-search-icon" />
               <input
@@ -854,20 +892,20 @@ export default function Home() {
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <h4 style={{ fontSize: "0.95rem", color: "var(--primary)", margin: 0, fontWeight: 700 }}>{faq.q}</h4>
-                  <ChevronDown 
-                    size={16} 
-                    style={{ 
-                      transform: openFaq === i ? "rotate(180deg)" : "rotate(0)", 
+                  <ChevronDown
+                    size={16}
+                    style={{
+                      transform: openFaq === i ? "rotate(180deg)" : "rotate(0)",
                       transition: "var(--transition-fast)",
                       opacity: 0.6
-                    }} 
+                    }}
                   />
                 </div>
                 {openFaq === i && (
-                  <p style={{ 
-                    marginTop: "0.75rem", 
-                    fontSize: "0.85rem", 
-                    opacity: 0.8, 
+                  <p style={{
+                    marginTop: "0.75rem",
+                    fontSize: "0.85rem",
+                    opacity: 0.8,
                     lineHeight: 1.6,
                     borderTop: "1px solid var(--border)",
                     paddingTop: "0.75rem",

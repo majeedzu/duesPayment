@@ -61,7 +61,7 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'No valid records to import.', errors }, { status: 400 });
     }
 
-    const imported = await db.importStudentsCSV(valid);
+    const { data: importedData, insertedCount, updatedCount } = await db.importStudentsCSV(valid);
 
     // Create manual payment records for students with paid_status = paid
     let manualPaymentsCreated = 0;
@@ -93,20 +93,21 @@ export async function POST(req) {
     await db.addAuditLog(
       session.id,
       'CSV_IMPORT',
-      `${session.full_name} imported ${imported.length} students into department ${departmentId}. ${manualPaymentsCreated} manual payment(s) recorded.`
+      `${session.full_name} imported students into department ${departmentId}: ${insertedCount} new added, ${updatedCount} updated/verified. ${manualPaymentsCreated} manual payment(s) recorded.`
     );
 
     // Notify only the uploading admin, not all dept admins
     await db.addNotification(
       'CSV Import Complete',
-      `${imported.length} student record(s) imported. ${manualPaymentsCreated} manual payment(s) recorded. ${errors.length} row(s) skipped.`,
+      `${insertedCount} new student record(s) added, ${updatedCount} updated/verified. ${manualPaymentsCreated} manual payment(s) recorded. ${errors.length} row(s) skipped.`,
       session.id,
       null
     );
 
     return Response.json({
       success: true,
-      imported: imported.length,
+      imported: insertedCount,
+      updated: updatedCount,
       manualPayments: manualPaymentsCreated,
       skipped: errors.length,
       errors

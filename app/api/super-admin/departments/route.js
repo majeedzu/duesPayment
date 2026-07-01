@@ -10,12 +10,28 @@ export async function POST(req) {
 
     const { action, id, name, faculty, duesAmount } = await req.json();
 
-    if (!action || (action !== 'create' && action !== 'update' && action !== 'edit')) {
-      return Response.json({ success: false, message: 'Invalid action. Use "create" or "update".' }, { status: 400 });
+    if (!action || (action !== 'create' && action !== 'update' && action !== 'edit' && action !== 'delete')) {
+      return Response.json({ success: false, message: 'Invalid action. Use "create", "update", or "delete".' }, { status: 400 });
     }
 
-    if (!name || !faculty || duesAmount === undefined) {
+    if (action !== 'delete' && (!name || !faculty || duesAmount === undefined)) {
       return Response.json({ success: false, message: 'Name, faculty, and dues amount are required.' }, { status: 400 });
+    }
+
+    if (action === 'delete') {
+      if (!id) {
+        return Response.json({ success: false, message: 'Department ID is required for deletion.' }, { status: 400 });
+      }
+
+      await db.deleteDepartment(id);
+
+      await db.addAuditLog(
+        session.id,
+        'DELETE_DEPARTMENT',
+        `Deleted department ID ${id}`
+      );
+
+      return Response.json({ success: true, message: 'Department deleted successfully.' });
     }
 
     if (action === 'create') {

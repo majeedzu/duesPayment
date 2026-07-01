@@ -75,12 +75,40 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
 -- 2. Insert Mock Seed Data (Initial Configuration)
 --------------------------------------------------------------------------------
 
--- Insert Departments
+-- Insert Departments (All HTU Faculties)
 INSERT INTO public.departments (id, name, faculty, dues_amount) VALUES
-('dept-cs-111', 'Computer Science', 'Faculty of Applied Sciences and Technology', 150.00),
-('dept-it-222', 'Information Technology', 'Faculty of Applied Sciences and Technology', 180.00),
-('dept-ee-333', 'Electrical Engineering', 'Faculty of Engineering', 220.00),
-('dept-htm-444', 'Hospitality and Tourism Management', 'Faculty of Applied Sciences and Technology', 200.00)
+-- Faculty of Applied Sciences and Technology
+('dept-cs-111', 'Department of Computer Science', 'Faculty of Applied Sciences and Technology', 150.00),
+('dept-agro-222', 'Department of Agro Enterprise Development', 'Faculty of Applied Sciences and Technology', 150.00),
+('dept-fst-333', 'Department of Food Science and Technology', 'Faculty of Applied Sciences and Technology', 150.00),
+('dept-htm-444', 'Department of Hospitality and Tourism Management', 'Faculty of Applied Sciences and Technology', 150.00),
+('dept-ms-555', 'Department of Mathematics and Statistics', 'Faculty of Applied Sciences and Technology', 150.00),
+-- Faculty of Engineering
+('dept-eee-601', 'Electrical & Electronic Engineering', 'Faculty of Engineering', 150.00),
+('dept-auto-602', 'Automobile Engineering', 'Faculty of Engineering', 150.00),
+('dept-civil-603', 'Civil Engineering', 'Faculty of Engineering', 150.00),
+('dept-aee-604', 'Agricultural & Environmental Engineering', 'Faculty of Engineering', 150.00),
+('dept-ageng-605', 'Agricultural Engineering', 'Faculty of Engineering', 150.00),
+('dept-dme-606', 'Design & Manufacturing Engineering', 'Faculty of Engineering', 150.00),
+('dept-btech-607', 'Building Technology', 'Faculty of Engineering', 150.00),
+('dept-arch-608', 'Architectural Technology', 'Faculty of Engineering', 150.00),
+('dept-fm-609', 'Facilities Management', 'Faculty of Engineering', 150.00),
+-- Faculty of Art and Design
+('dept-fdt-701', 'Fashion Design and Textiles', 'Faculty of Art and Design', 150.00),
+('dept-ias-702', 'Industrial Art with Sculpture', 'Faculty of Art and Design', 150.00),
+('dept-paint-703', 'Painting', 'Faculty of Art and Design', 150.00),
+('dept-gd-704', 'Graphic Design', 'Faculty of Art and Design', 150.00),
+('dept-cer-705', 'Ceramics', 'Faculty of Art and Design', 150.00),
+('dept-tex-706', 'Textiles', 'Faculty of Art and Design', 150.00),
+-- Faculty of Business and Management Studies
+('dept-acct-801', 'Accounting & Taxation', 'Faculty of Business and Management Studies', 150.00),
+('dept-mkt-802', 'Marketing & IT', 'Faculty of Business and Management Studies', 150.00),
+('dept-psm-803', 'Procurement & Supply Chain Management', 'Faculty of Business and Management Studies', 150.00),
+('dept-sms-804', 'Secretaryship & Management Studies', 'Faculty of Business and Management Studies', 150.00),
+-- Faculty of Applied Social Sciences
+('dept-comm-901', 'Communication Studies', 'Faculty of Applied Social Sciences', 150.00),
+('dept-eng-902', 'English', 'Faculty of Applied Social Sciences', 150.00),
+('dept-fr-903', 'French', 'Faculty of Applied Social Sciences', 150.00)
 ON CONFLICT (id) DO UPDATE 
 SET name = EXCLUDED.name, faculty = EXCLUDED.faculty, dues_amount = EXCLUDED.dues_amount;
 

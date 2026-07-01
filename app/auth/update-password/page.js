@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Mail, ShieldCheck, ShieldAlert, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Key, ShieldCheck, ShieldAlert, ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
-export default function ResetPasswordPage() {
-  const [email, setEmail] = useState("");
+export default function UpdatePasswordPage() {
+  const router = useRouter();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -14,24 +19,42 @@ export default function ResetPasswordPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
+      if (isSupabaseConfigured()) {
+        const { error: resetError } = await supabase.auth.updateUser({
+          password: password,
+        });
 
-      const data = await res.json();
+        if (resetError) {
+          throw new Error(resetError.message);
+        }
 
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to initiate password reset.");
+        setSuccess("Password updated successfully! Redirecting to login...");
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 3000);
+      } else {
+        // Simulated local fallback
+        setSuccess("Mock password updated successfully! Redirecting to login...");
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 3000);
       }
-
-      setSuccess("A password reset link has been simulated & logged! Check your inbox.");
     } catch (err) {
-      setError(err.message || "An error occurred. Try again.");
+      setError(err.message || "Failed to update password. Link may have expired.");
     } finally {
       setLoading(false);
     }
@@ -52,16 +75,16 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className="auth-left-showcase">
-          <h2>Recover Your Account.</h2>
+          <h2>Secure Your Account.</h2>
           <p>
-            Recover your portal account by verifying your official institutional email address.
+            Choose a strong, secure password to protect your payment account and credentials.
           </p>
           
           <div className="auth-illustration-container">
             <div className="auth-mock-card" style={{ background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
               <div className="auth-mock-header">
                 <div className="auth-mock-chip" style={{ backgroundColor: 'rgba(255, 255, 255, 0.4)' }}></div>
-                <span className="auth-mock-value" style={{ color: '#ffffff' }}>Verify Email</span>
+                <span className="auth-mock-value" style={{ color: '#ffffff' }}>Save Password</span>
               </div>
               <div className="auth-mock-body">
                 <div className="auth-mock-row" style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)' }}></div>
@@ -91,27 +114,17 @@ export default function ResetPasswordPage() {
             
             <div style={{ marginBottom: "1.75rem" }}>
               <h2 style={{ color: "#111827", fontFamily: "var(--font-heading)", fontSize: "1.5rem", fontWeight: 800, margin: "0 0 4px" }}>
-                Reset Password
+                Create New Password
               </h2>
               <p style={{ fontSize: "0.9rem", color: "#4B5563", margin: 0 }}>
-                Enter your institutional email to proceed
+                Set a new password for your HTU portal account
               </p>
             </div>
 
             {error && (
-              <div className="auth-alert auth-alert-error" role="alert" style={{ marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', alignItems: 'start', gap: '0.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ShieldAlert size={16} style={{ flexShrink: 0 }} />
-                  <span style={{ fontWeight: 600 }}>{error}</span>
-                </div>
-                {error.includes("No registered account") && (
-                  <p style={{ margin: "4px 0 0 1.5rem", fontSize: "0.8rem", opacity: 0.9, lineHeight: "1.4" }}>
-                    If this is your first time logging in, please click here to{" "}
-                    <Link href={`/auth/register?email=${encodeURIComponent(email)}`} style={{ textDecoration: "underline", fontWeight: 700, color: "inherit" }}>
-                      Register / Activate Account
-                    </Link>.
-                  </p>
-                )}
+              <div className="auth-alert auth-alert-error" role="alert" style={{ marginBottom: '1.25rem' }}>
+                <ShieldAlert size={16} />
+                <span>{error}</span>
               </div>
             )}
 
@@ -135,20 +148,47 @@ export default function ResetPasswordPage() {
             )}
 
             <form onSubmit={handleSubmit} className="auth-form" style={{ gap: "1rem" }}>
+              <div className="form-group" style={{ position: "relative" }}>
+                <label className="label" htmlFor="new-password" style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: '600' }}>
+                  New Password
+                </label>
+                <div className="auth-input-wrap" style={{ position: "relative" }}>
+                  <Key className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
+                  <input
+                    id="new-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••"
+                    className="input auth-input"
+                    style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem', width: '100%' }}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="auth-password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', zIndex: 10 }}
+                  >
+                    {showPassword ? <EyeOff size={18} style={{ color: '#98A2B3' }} /> : <Eye size={18} style={{ color: '#98A2B3' }} />}
+                  </button>
+                </div>
+              </div>
+
               <div className="form-group">
-                <label className="label" htmlFor="reset-email" style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: '600' }}>
-                  Institutional Email
+                <label className="label" htmlFor="confirm-password" style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: '600' }}>
+                  Confirm Password
                 </label>
                 <div className="auth-input-wrap">
-                  <Mail className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
+                  <Key className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
                   <input
-                    id="reset-email"
-                    type="email"
-                    placeholder="username@htu.edu.gh"
+                    id="confirm-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••"
                     className="input auth-input"
-                    style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem' }}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem', width: '100%' }}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                   />
                 </div>
@@ -177,7 +217,7 @@ export default function ResetPasswordPage() {
                 onMouseOver={(e) => { e.currentTarget.style.background = '#00005E'; }}
                 onMouseOut={(e) => { e.currentTarget.style.background = '#00008C'; }}
               >
-                {loading ? "Sending link..." : "Send Reset Link"}
+                {loading ? <><Loader2 className="spinner animate-spin" size={18} /> Updating...</> : "Update Password"}
               </button>
             </form>
 

@@ -65,38 +65,14 @@ function LoginContent() {
     <div className="auth-split-wrapper">
       <div className="auth-split-card">
         {/* Left Branding Side (45% width) */}
-        <div className="auth-split-left">
-          <div className="auth-left-showcase">
-            {/* Centered Logo Header */}
-            <div className="auth-left-logo-centered">
-              <div className="htu-logo-container auth-left-logo-icon" style={{ marginBottom: '0.5rem' }}>
-                <img src="/htu_logo.jpg" alt="HTU Logo" className="htu-logo-img" />
-              </div>
-              <div>
-                <span className="auth-left-brand-sub">Official Finance Portal</span>
-              </div>
+        <div className="auth-split-left" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem", textAlign: "center" }}>
+            <div className="htu-logo-container" style={{ width: "160px", height: "160px", borderRadius: "12px", overflow: "hidden", border: "4px solid rgba(255, 255, 255, 0.4)", boxShadow: "0 10px 25px rgba(0, 0, 0, 0.15)", backgroundColor: "#ffffff" }}>
+              <img src="/htu_logo.jpg" alt="HTU Logo" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             </div>
-
-            <h2>Pay Fees. Download Receipts. Stay Cleared.</h2>
-            <p>
-              Securely manage your departmental dues, view real-time payment history, and download official stamped receipts.
-            </p>
-            
-            {/* Premium CSS-based Illustration Mockup */}
-            <div className="auth-illustration-container">
-              <div className="auth-mock-card">
-                <div className="auth-mock-header">
-                  <div className="auth-mock-chip"></div>
-                  <span className="auth-mock-value">GH₵ 150.00</span>
-                </div>
-                <div className="auth-mock-body">
-                  <div className="auth-mock-row"></div>
-                  <div className="auth-mock-row auth-mock-row-short"></div>
-                  <div className="auth-mock-badge">
-                    <span>✓ Stamped & Cleared</span>
-                  </div>
-                </div>
-              </div>
+            <div>
+              <h2 style={{ fontSize: "1.75rem", fontWeight: 800, margin: "0 0 0.5rem", color: "#ffffff", fontFamily: "var(--font-heading)" }}>Ho Technical University</h2>
+              <p style={{ fontSize: "0.95rem", opacity: 0.9, color: "rgba(255, 255, 255, 0.8)", maxWidth: "320px", margin: "0 auto" }}>Official Departmental Dues Portal</p>
             </div>
           </div>
         </div>
@@ -117,9 +93,12 @@ function LoginContent() {
 
           <div className="auth-panel">
             <div className="auth-card">
-              <div className="auth-card-header" style={{ marginBottom: '1.75rem' }}>
-                <p style={{ fontSize: '0.95rem', color: '#374151', fontWeight: '500', margin: 0 }}>
-                  Welcome, please login to register.
+              <div style={{ marginBottom: "1.75rem" }}>
+                <h2 style={{ color: "#111827", fontFamily: "var(--font-heading)", fontSize: "1.50rem", fontWeight: 800, margin: "0 0 4px" }}>
+                  Sign In
+                </h2>
+                <p style={{ fontSize: "0.85rem", color: "#4B5563", margin: 0 }}>
+                  Access your departmental dues dashboard
                 </p>
               </div>
 
