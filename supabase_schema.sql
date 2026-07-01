@@ -47,6 +47,8 @@ CREATE TABLE IF NOT EXISTS public.payments (
     status TEXT NOT NULL CHECK (status IN ('pending', 'success', 'failed')) DEFAULT 'pending',
     receipt_id TEXT UNIQUE,
     payment_date TIMESTAMP WITH TIME ZONE,
+    semester TEXT DEFAULT 'Both Semesters',
+    academic_year TEXT DEFAULT '2025/2026',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

@@ -574,7 +574,9 @@ export default function StudentDashboard() {
                 {activeTab === "notifications" && "Notification Control"}
               </h3>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.15rem" }}>
-                <span style={{ fontSize: "0.8rem", opacity: 0.7 }}>Welcome back, {student.full_name.split(' ')[0]}</span>
+                {!isMobile && (
+                  <span style={{ fontSize: "0.8rem", opacity: 0.7 }}>Welcome back, {student.full_name.split(' ')[0]}</span>
+                )}
                 <span style={{ 
                   width: "6px", 
                   height: "6px", 
