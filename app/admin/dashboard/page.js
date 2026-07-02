@@ -108,7 +108,7 @@ export default function AdminDashboard() {
     <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
 
       {/* Stats Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, minmax(0, 1fr))", gap: "1rem" }}>
+      <div className="admin-stats-grid">
         <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)", padding: "1rem" }}>
           <div>
             <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>Total Students</span>

@@ -3609,6 +3609,41 @@ body.dark-mode .floating-metric-card strong, [data-theme="dark"] .floating-metri
   }
 }
 
+/* Responsive Grid for Admin Dashboard Stats */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+  .admin-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-stats-grid > div:last-child {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 560px) {
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-stats-grid > div:last-child {
+    grid-column: span 1;
+  }
+  .grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 
 
 
