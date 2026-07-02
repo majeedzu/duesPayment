@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     full_name TEXT NOT NULL,
     department_id TEXT REFERENCES public.departments(id) ON DELETE SET NULL,
     avatar_url TEXT,
+    whatsapp TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

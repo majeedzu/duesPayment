@@ -19,6 +19,7 @@ export async function GET(req) {
     const department = await db.getDepartment(student.department_id);
     const payments = await db.getPaymentsByStudent(student.index_number);
     const notifications = await db.getNotifications(profile?.id, 'student');
+    const deptAdmin = await db.getDeptAdmin(student.department_id);
 
     return Response.json({
       success: true,
@@ -27,7 +28,8 @@ export async function GET(req) {
         student,
         department,
         payments,
-        notifications
+        notifications,
+        deptAdmin
       }
     });
   } catch (err) {

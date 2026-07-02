@@ -73,7 +73,7 @@ export default function SuperAdminDashboard() {
   const [showDeptModal, setShowDeptModal] = useState(false);
   const [deptModalMode, setDeptModalMode] = useState("create"); // create, edit
   
-  const [adminForm, setAdminForm] = useState({ email: "", full_name: "", department_id: "" });
+  const [adminForm, setAdminForm] = useState({ email: "", full_name: "", department_id: "", whatsapp: "" });
   const [showAdminModal, setShowAdminModal] = useState(false);
 
   // Status indicators
@@ -297,14 +297,15 @@ export default function SuperAdminDashboard() {
           action: "create",
           email: adminForm.email,
           full_name: adminForm.full_name,
-          department_id: adminForm.department_id
+          department_id: adminForm.department_id,
+          whatsapp: adminForm.whatsapp
         })
       });
 
       const data = await response.json();
       if (response.ok && data.success) {
         setFormSuccess("Administrator assigned successfully! Default password is 'password123'.");
-        setAdminForm({ email: "", full_name: "", department_id: "" });
+        setAdminForm({ email: "", full_name: "", department_id: "", whatsapp: "" });
         fetchSuperDashboardData();
         setTimeout(() => setShowAdminModal(false), 1500);
       } else {
@@ -1287,6 +1288,18 @@ export default function SuperAdminDashboard() {
                     <option key={dept.id} value={dept.id}>{dept.name}</option>
                   ))}
                 </select>
+              </div>
+
+              <div className="form-group">
+                <label className="label">WhatsApp Number (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g., +233244123456"
+                  className="input"
+                  value={adminForm.whatsapp}
+                  onChange={(e) => setAdminForm({ ...adminForm, whatsapp: e.target.value })}
+                />
+                <span style={{ fontSize: "0.75rem", opacity: 0.6 }}>Include country code (e.g. +233)</span>
               </div>
 
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", padding: "0.5rem 0.75rem", backgroundColor: "rgba(245, 158, 11, 0.05)", border: "1px dashed rgba(245, 158, 11, 0.2)", borderRadius: "var(--radius)", fontSize: "0.75rem" }}>

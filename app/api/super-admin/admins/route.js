@@ -9,7 +9,7 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'Unauthorized.' }, { status: 401 });
     }
 
-    const { action, id, email, full_name, department_id } = await req.json();
+    const { action, id, email, full_name, department_id, whatsapp } = await req.json();
 
     if (!action || (action !== 'create' && action !== 'delete')) {
       return Response.json({ success: false, message: 'Invalid action. Use "create" or "delete".' }, { status: 400 });
@@ -31,7 +31,8 @@ export async function POST(req) {
         email: email.toLowerCase().trim(),
         full_name: full_name.trim(),
         role: 'dept_admin',
-        department_id: department_id
+        department_id: department_id,
+        whatsapp: whatsapp ? whatsapp.trim() : null
       });
 
       // Send a magic link / password reset email so the admin can set their own password
