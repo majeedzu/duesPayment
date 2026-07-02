@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Key, ShieldCheck, ShieldAlert, ArrowLeft, Loader2, Eye, EyeOff } from "lucide-react";
+import { Key, ShieldCheck, ShieldAlert, ArrowLeft, Loader2, Eye, EyeOff, Lock } from "lucide-react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export default function UpdatePasswordPage() {
@@ -14,6 +14,41 @@ export default function UpdatePasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  // Whether we have received the PASSWORD_RECOVERY session from Supabase
+  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionChecking, setSessionChecking] = useState(true);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      // No Supabase — allow the mock form immediately
+      setSessionReady(true);
+      setSessionChecking(false);
+      return;
+    }
+
+    // Supabase automatically parses the #access_token fragment from the URL
+    // and fires PASSWORD_RECOVERY via onAuthStateChange.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setSessionReady(true);
+        setSessionChecking(false);
+      } else if (event === "SIGNED_IN" && session) {
+        // Already signed in (e.g. token already exchanged) — allow form
+        setSessionReady(true);
+        setSessionChecking(false);
+      }
+    });
+
+    // Fallback: also check current session in case the event already fired
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setSessionReady(true);
+      }
+      setSessionChecking(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -121,105 +156,128 @@ export default function UpdatePasswordPage() {
               </p>
             </div>
 
-            {error && (
-              <div className="auth-alert auth-alert-error" role="alert" style={{ marginBottom: '1.25rem' }}>
-                <ShieldAlert size={16} />
-                <span>{error}</span>
+            {sessionChecking && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", padding: "2rem 0", color: "#6B7280", fontSize: "0.9rem" }}>
+                <Loader2 className="spinner" size={20} style={{ animation: "spin 1s linear infinite" }} />
+                <span>Verifying your reset link...</span>
               </div>
             )}
 
-            {success && (
-              <div style={{
-                display: "flex",
-                gap: "0.75rem",
-                width: "100%",
-                padding: "1rem 1.25rem",
-                borderRadius: "12px",
-                fontSize: "0.85rem",
-                lineHeight: "1.5",
-                marginBottom: "1.25rem",
-                background: "rgba(5, 150, 105, 0.1)",
-                color: "#059669",
-                border: "1px solid rgba(5, 150, 105, 0.2)"
-              }}>
-                <ShieldCheck size={16} />
-                <span>{success}</span>
+            {!sessionChecking && !sessionReady && (
+              <div style={{ textAlign: "center", padding: "1.5rem 0" }}>
+                <div className="auth-alert auth-alert-error" role="alert" style={{ marginBottom: '1.25rem', justifyContent: "center" }}>
+                  <ShieldAlert size={16} />
+                  <span>This reset link is invalid or has expired. Please request a new one.</span>
+                </div>
+                <Link href="/auth/reset-password" style={{ display: "inline-flex", alignItems: "center", gap: "6px", color: "#00008C", fontSize: "0.9rem", fontWeight: 700 }}>
+                  Request a new reset link →
+                </Link>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="auth-form" style={{ gap: "1rem" }}>
-              <div className="form-group" style={{ position: "relative" }}>
-                <label className="label" htmlFor="new-password" style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: '600' }}>
-                  New Password
-                </label>
-                <div className="auth-input-wrap" style={{ position: "relative" }}>
-                  <Key className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
-                  <input
-                    id="new-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••"
-                    className="input auth-input"
-                    style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem', width: '100%' }}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="auth-password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', zIndex: 10 }}
+            {!sessionChecking && sessionReady && (
+              <>
+                {error && (
+                  <div className="auth-alert auth-alert-error" role="alert" style={{ marginBottom: '1.25rem' }}>
+                    <ShieldAlert size={16} />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                {success && (
+                  <div style={{
+                    display: "flex",
+                    gap: "0.75rem",
+                    width: "100%",
+                    padding: "1rem 1.25rem",
+                    borderRadius: "12px",
+                    fontSize: "0.85rem",
+                    lineHeight: "1.5",
+                    marginBottom: "1.25rem",
+                    background: "rgba(5, 150, 105, 0.1)",
+                    color: "#059669",
+                    border: "1px solid rgba(5, 150, 105, 0.2)"
+                  }}>
+                    <ShieldCheck size={16} />
+                    <span>{success}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="auth-form" style={{ gap: "1rem" }}>
+                  <div className="form-group" style={{ position: "relative" }}>
+                    <label className="label" htmlFor="new-password" style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: '600' }}>
+                      New Password
+                    </label>
+                    <div className="auth-input-wrap" style={{ position: "relative" }}>
+                      <Key className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
+                      <input
+                        id="new-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••"
+                        className="input auth-input"
+                        style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem', width: '100%' }}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="auth-password-toggle"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', zIndex: 10 }}
+                      >
+                        {showPassword ? <EyeOff size={18} style={{ color: '#98A2B3' }} /> : <Eye size={18} style={{ color: '#98A2B3' }} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="label" htmlFor="confirm-password" style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: '600' }}>
+                      Confirm Password
+                    </label>
+                    <div className="auth-input-wrap">
+                      <Key className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
+                      <input
+                        id="confirm-password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••"
+                        className="input auth-input"
+                        style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem', width: '100%' }}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      height: '48px',
+                      borderRadius: '8px',
+                      background: '#00008C',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontWeight: '600',
+                      fontSize: '0.95rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      transition: 'background 0.2s',
+                      marginTop: '0.5rem'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = '#00005E'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = '#00008C'; }}
                   >
-                    {showPassword ? <EyeOff size={18} style={{ color: '#98A2B3' }} /> : <Eye size={18} style={{ color: '#98A2B3' }} />}
+                    {loading ? <><Loader2 className="spinner animate-spin" size={18} /> Updating...</> : <><Lock size={16} /> Update Password</>}
                   </button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="label" htmlFor="confirm-password" style={{ fontSize: '0.8rem', color: '#6B7280', fontWeight: '600' }}>
-                  Confirm Password
-                </label>
-                <div className="auth-input-wrap">
-                  <Key className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
-                  <input
-                    id="confirm-password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••"
-                    className="input auth-input"
-                    style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem', width: '100%' }}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <button 
-                type="submit" 
-                disabled={loading}
-                style={{
-                  width: '100%',
-                  height: '48px',
-                  borderRadius: '8px',
-                  background: '#00008C',
-                  color: '#ffffff',
-                  border: 'none',
-                  fontWeight: '600',
-                  fontSize: '0.95rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  transition: 'background 0.2s',
-                  marginTop: '0.5rem'
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.background = '#00005E'; }}
-                onMouseOut={(e) => { e.currentTarget.style.background = '#00008C'; }}
-              >
-                {loading ? <><Loader2 className="spinner animate-spin" size={18} /> Updating...</> : "Update Password"}
-              </button>
-            </form>
+                </form>
+              </>
+            )}
 
             {/* Back to Login Link */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.5rem' }}>
@@ -243,3 +301,4 @@ export default function UpdatePasswordPage() {
     </div>
   );
 }
+

@@ -20,8 +20,7 @@ export async function POST(req) {
     }
 
     if (isSupabaseConfigured()) {
-      const requestUrl = new URL(req.url);
-      const origin = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin;
+      const origin = process.env.NEXT_PUBLIC_APP_URL || "https://dues-payment.vercel.app";
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${origin}/auth/update-password`,
       });
