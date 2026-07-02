@@ -115,7 +115,6 @@ export async function POST(req) {
       // --- Normal login succeeded ---
       let profile = await db.getProfile(email);
       const studentRecord = await db.getStudentByEmail(email);
-      const isDefault = (String(password).trim() === 'password123') || (studentRecord && (String(password).trim() === String(studentRecord.index_number).trim()));
 
       if (!profile) {
         profile = await db.createProfile({
@@ -127,10 +126,13 @@ export async function POST(req) {
         });
       }
 
+      // Only prompt password change if they haven't changed it yet
+      const mustChangePassword = profile.password_changed === false;
+
       return Response.json({
         success: true,
         user: profile,
-        mustChangePassword: isDefault
+        mustChangePassword
       });
 
     } else {
@@ -155,14 +157,14 @@ export async function POST(req) {
 
       await db.addAuditLog(profile.id, 'LOGIN_SUCCESS', `${profile.full_name} (${profile.role}) logged in.`);
 
-      const studentRecord = await db.getStudentByEmail(email);
-      const isDefault = (password === 'password123') || (studentRecord && (password === studentRecord.index_number));
+      // Only prompt password change if they haven't changed it yet
+      const mustChangePassword = profile.password_changed === false;
 
       const { password: _, ...userWithoutPassword } = profile;
       return Response.json({
         success: true,
         user: userWithoutPassword,
-        mustChangePassword: isDefault
+        mustChangePassword
       });
     }
   } catch (err) {

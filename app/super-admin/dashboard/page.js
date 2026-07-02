@@ -24,7 +24,8 @@ import {
   ShieldCheck,
   Loader2,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  KeyRound
 } from "lucide-react";
 import { getClientSession, setClientSession, clearClientSession } from "@/lib/session";
 
@@ -91,6 +92,14 @@ export default function SuperAdminDashboard() {
 
   // Admin info popover
   const [adminPopover, setAdminPopover] = useState(null); // admin object
+
+  // Reset password modal
+  const [resetPasswordTarget, setResetPasswordTarget] = useState(null); // admin object
+  const [resetNewPassword, setResetNewPassword] = useState("");
+  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
+  const [resetPasswordError, setResetPasswordError] = useState("");
+  const [resetPasswordSuccess, setResetPasswordSuccess] = useState("");
 
   // Search states
   const [logSearch, setLogSearch] = useState("");
@@ -363,6 +372,41 @@ export default function SuperAdminDashboard() {
       }
     } catch (err) {
       alert("Server connection error.");
+    }
+  };
+
+  const handleResetPasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (resetNewPassword.length < 6) {
+      setResetPasswordError("Password must be at least 6 characters.");
+      return;
+    }
+    if (resetNewPassword !== resetConfirmPassword) {
+      setResetPasswordError("Passwords do not match.");
+      return;
+    }
+    setResetPasswordLoading(true);
+    setResetPasswordError("");
+    setResetPasswordSuccess("");
+    try {
+      const res = await fetch("/api/super-admin/admins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reset-password", id: resetPasswordTarget.id, newPassword: resetNewPassword })
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to reset password.");
+      setResetPasswordSuccess(`Password reset for ${resetPasswordTarget.full_name}. They will be prompted to change it on next login.`);
+      setResetNewPassword("");
+      setResetConfirmPassword("");
+      setTimeout(() => {
+        setResetPasswordTarget(null);
+        setResetPasswordSuccess("");
+      }, 2500);
+    } catch (err) {
+      setResetPasswordError(err.message || "Something went wrong.");
+    } finally {
+      setResetPasswordLoading(false);
     }
   };
 
@@ -865,14 +909,31 @@ export default function SuperAdminDashboard() {
                           </span>
                         </td>
                         <td>
-                          {adm.role !== 'super_admin' && (
-                            <button 
-                              onClick={() => handleDeleteAdmin(adm.id, adm.full_name)} 
-                              className="btn btn-outline" 
-                              style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", color: "var(--danger)", borderColor: "rgba(239, 68, 68, 0.2)" }}
-                            >
-                              <Trash2 size={12} /> Remove
-                            </button>
+                          {adm.id !== admin?.id && (
+                            <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+                              <button
+                                onClick={() => {
+                                  setResetPasswordTarget(adm);
+                                  setResetNewPassword("");
+                                  setResetConfirmPassword("");
+                                  setResetPasswordError("");
+                                  setResetPasswordSuccess("");
+                                }}
+                                className="btn btn-outline"
+                                style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "var(--primary)", borderColor: "rgba(0,0,140,0.2)" }}
+                              >
+                                <KeyRound size={12} /> Reset Password
+                              </button>
+                              {adm.role !== 'super_admin' && (
+                                <button
+                                  onClick={() => handleDeleteAdmin(adm.id, adm.full_name)}
+                                  className="btn btn-outline"
+                                  style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", color: "var(--danger)", borderColor: "rgba(239, 68, 68, 0.2)" }}
+                                >
+                                  <Trash2 size={12} /> Remove
+                                </button>
+                              )}
+                            </div>
                           )}
                         </td>
                       </tr>
@@ -1316,6 +1377,92 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
       )}
+      {/* RESET ADMIN PASSWORD MODAL */}
+      {resetPasswordTarget && (
+        <div className="modal-overlay" onClick={() => setResetPasswordTarget(null)}>
+          <div className="modal" style={{ maxWidth: "460px" }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+              <div>
+                <h3 style={{ color: "var(--primary)", fontFamily: "var(--font-heading)", marginBottom: "0.25rem" }}>
+                  Reset Password
+                </h3>
+                <p style={{ fontSize: "0.8rem", opacity: 0.6, margin: 0 }}>
+                  Setting a new password for <strong>{resetPasswordTarget.full_name}</strong>
+                </p>
+              </div>
+              <button onClick={() => setResetPasswordTarget(null)} style={{ border: "none", background: "none", cursor: "pointer", opacity: 0.5 }}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.75rem 1rem", backgroundColor: "rgba(0,0,140,0.04)", border: "1px solid rgba(0,0,140,0.12)", borderRadius: "var(--radius)", marginBottom: "1.5rem" }}>
+              <div style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg, var(--primary), var(--primary-hover))", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: "1rem", flexShrink: 0 }}>
+                {resetPasswordTarget.full_name?.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>{resetPasswordTarget.full_name}</p>
+                <p style={{ fontSize: "0.78rem", opacity: 0.6, margin: 0 }}>{resetPasswordTarget.email}</p>
+              </div>
+              <span className={`badge ${resetPasswordTarget.role === 'super_admin' ? 'badge-danger' : 'badge-info'}`} style={{ marginLeft: "auto", fontSize: "0.68rem" }}>
+                {resetPasswordTarget.role === 'super_admin' ? 'Super Admin' : 'Dept Admin'}
+              </span>
+            </div>
+
+            {resetPasswordError && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.65rem 1rem", backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: "var(--radius)", marginBottom: "1rem", fontSize: "0.82rem", color: "var(--danger)" }}>
+                <AlertTriangle size={15} /> {resetPasswordError}
+              </div>
+            )}
+            {resetPasswordSuccess && (
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.65rem 1rem", backgroundColor: "rgba(5,150,105,0.08)", border: "1px solid rgba(5,150,105,0.2)", borderRadius: "var(--radius)", marginBottom: "1rem", fontSize: "0.82rem", color: "var(--success)" }}>
+                <CheckCircle2 size={15} /> {resetPasswordSuccess}
+              </div>
+            )}
+
+            <form onSubmit={handleResetPasswordSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="form-group">
+                <label className="label">New Password</label>
+                <input
+                  type="password"
+                  placeholder="At least 6 characters"
+                  className="input"
+                  value={resetNewPassword}
+                  onChange={(e) => setResetNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="form-group">
+                <label className="label">Confirm New Password</label>
+                <input
+                  type="password"
+                  placeholder="Re-enter password"
+                  className="input"
+                  value={resetConfirmPassword}
+                  onChange={(e) => setResetConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", padding: "0.5rem 0.75rem", backgroundColor: "rgba(245,158,11,0.05)", border: "1px dashed rgba(245,158,11,0.25)", borderRadius: "var(--radius)", fontSize: "0.75rem", opacity: 0.85 }}>
+                <AlertCircle size={15} style={{ color: "#b45309", flexShrink: 0, marginTop: "2px" }} />
+                <span>The user will be prompted to set a new password on their next login.</span>
+              </div>
+
+              <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.25rem" }}>
+                <button type="button" onClick={() => setResetPasswordTarget(null)} className="btn btn-outline" style={{ flex: 1 }}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }} disabled={resetPasswordLoading}>
+                  {resetPasswordLoading ? <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} /> : <KeyRound size={15} />}
+                  {resetPasswordLoading ? "Resetting..." : "Reset Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {forcePasswordChange && (
         <div style={{
           position: "fixed",

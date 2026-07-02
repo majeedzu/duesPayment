@@ -9,10 +9,10 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'Unauthorized.' }, { status: 401 });
     }
 
-    const { action, id, email, full_name, department_id, whatsapp } = await req.json();
+    const { action, id, email, full_name, department_id, whatsapp, newPassword } = await req.json();
 
-    if (!action || (action !== 'create' && action !== 'delete')) {
-      return Response.json({ success: false, message: 'Invalid action. Use "create" or "delete".' }, { status: 400 });
+    if (!action || !['create', 'delete', 'reset-password'].includes(action)) {
+      return Response.json({ success: false, message: 'Invalid action.' }, { status: 400 });
     }
 
     if (action === 'create') {
@@ -87,6 +87,29 @@ export async function POST(req) {
       );
 
       return Response.json({ success: true });
+    }
+
+    if (action === 'reset-password') {
+      if (!id) {
+        return Response.json({ success: false, message: 'Admin ID is required.' }, { status: 400 });
+      }
+      if (!newPassword || newPassword.length < 6) {
+        return Response.json({ success: false, message: 'New password must be at least 6 characters.' }, { status: 400 });
+      }
+
+      if (id === session.id) {
+        return Response.json({ success: false, message: 'Use the change-password endpoint to update your own password.' }, { status: 400 });
+      }
+
+      await db.resetAdminPassword(id, newPassword);
+
+      await db.addAuditLog(
+        session.id,
+        'ADMIN_PASSWORD_RESET',
+        `Super admin reset password for profile ID ${id}`
+      );
+
+      return Response.json({ success: true, message: 'Password reset successfully.' });
     }
   } catch (err) {
     console.error("Super Admin Admins API Error:", err);

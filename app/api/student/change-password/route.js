@@ -20,7 +20,7 @@ export async function POST(req) {
       }
 
       // Update password in Supabase Auth
-      const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(
         session.id,
         { password: password }
       );
@@ -29,6 +29,8 @@ export async function POST(req) {
         return Response.json({ success: false, message: error.message }, { status: 400 });
       }
 
+      // Mark password as changed so the force-change modal won't show again
+      await db.setPasswordChanged(session.id);
       await db.addAuditLog(session.id, 'PASSWORD_CHANGE', `${session.role.toUpperCase()} updated password successfully.`);
     } else {
       // Mock database update
@@ -36,6 +38,7 @@ export async function POST(req) {
       if (!success) {
         return Response.json({ success: false, message: 'Profile not found.' }, { status: 404 });
       }
+      await db.setPasswordChanged(session.id);
       await db.addAuditLog(session.id, 'PASSWORD_CHANGE', `${session.role.toUpperCase()} updated password successfully (Mock).`);
     }
 

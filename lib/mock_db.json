@@ -171,7 +171,8 @@
       "full_name": "HTU Super Administrator",
       "department_id": null,
       "avatar_url": null,
-      "password": "password123"
+      "password": "password123",
+      "password_changed": false
     },
     {
       "id": "user-super-admin-2",
@@ -180,7 +181,8 @@
       "full_name": "HTU Super Administrator Two",
       "department_id": null,
       "avatar_url": null,
-      "password": "password123"
+      "password": "password123",
+      "password_changed": false
     },
     {
       "id": "user-cs-admin",
@@ -190,7 +192,8 @@
       "department_id": "dept-cs-111",
       "avatar_url": null,
       "password": "password123",
-      "whatsapp": "+233244123456"
+      "whatsapp": "+233244123456",
+      "password_changed": false
     },
     {
       "id": "user-student-unpaid",
@@ -199,7 +202,8 @@
       "full_name": "John Doe",
       "department_id": "dept-cs-111",
       "avatar_url": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAUGBgsICwsLCwsNCwsLDQ4ODQ0ODg8NDg4ODQ8QEBARERAQEBAPExITDxARExQUExETFhYWExYVFRYZFhkWFhIBBQUFCgcKCAkJCAsICggLCgoJCQoKDAkKCQoJDA0LCgsLCgsNDAsLCAsLDAwMDQ0MDA0KCwoNDA0NDBMUExMTnP/CABEIAtgBwwMBIgACEQEDEQH/xADNAAEBAAMBAQEAAAAAAAAAAAAAAQIDBgUEBxAAAAMJAQEAAwEBAAAAAAAAAAERAwQHIDA1QIS0EAISIUFRgREAAQICBQgHBQcDBQEAAAAAAQACAxEEEBIhMQUgM0BBUXOyBhMiMDJhcVCBkaGxI0JSYnLB0YLh8BQVNJKi0hIAAgECBQMEAwEBAQAAAAAAAAERITEQQVFhcVCBkaGx0fAgQMHh8TATAAIBAgQGAgMBAQAAAAAAAAABERAhMUFRYSBxgZGh8LHBMNHhQPH/2gADA00000000000oAD/9k=",
-      "password": "password123"
+      "password": "password123",
+      "password_changed": false
     },
     {
       "id": "user-student-paid",
@@ -208,7 +212,8 @@
       "full_name": "Jane Smith",
       "department_id": "dept-cs-111",
       "avatar_url": null,
-      "password": "password123"
+      "password": "password123",
+      "password_changed": false
     },
     {
       "id": "user-1782472485401",
@@ -217,7 +222,8 @@
       "role": "student",
       "full_name": "Eugene Dushie",
       "department_id": "dept-cs-111",
-      "password": "Eugene123"
+      "password": "Eugene123",
+      "password_changed": true
     },
     {
       "id": "admin-1782472990012",
@@ -227,7 +233,8 @@
       "full_name": "Prof Eugene",
       "role": "dept_admin",
       "department_id": "dept-1782471584825",
-      "whatsapp": "+233544987654"
+      "whatsapp": "+233544987654",
+      "password_changed": false
     }
   ],
   "students": [
