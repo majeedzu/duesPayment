@@ -1,32 +1,167 @@
 {
   "departments": [
-    { "id": "dept-cs-111", "name": "Department of Computer Science", "faculty": "Faculty of Applied Sciences and Technology", "dues_amount": 150 },
-    { "id": "dept-agro-222", "name": "Department of Agro Enterprise Development", "faculty": "Faculty of Applied Sciences and Technology", "dues_amount": 150 },
-    { "id": "dept-fst-333", "name": "Department of Food Science and Technology", "faculty": "Faculty of Applied Sciences and Technology", "dues_amount": 150 },
-    { "id": "dept-htm-444", "name": "Department of Hospitality and Tourism Management", "faculty": "Faculty of Applied Sciences and Technology", "dues_amount": 150 },
-    { "id": "dept-ms-555", "name": "Department of Mathematics and Statistics", "faculty": "Faculty of Applied Sciences and Technology", "dues_amount": 150 },
-    { "id": "dept-eee-601", "name": "Electrical & Electronic Engineering", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-auto-602", "name": "Automobile Engineering", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-civil-603", "name": "Civil Engineering", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-aee-604", "name": "Agricultural & Environmental Engineering", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-ageng-605", "name": "Agricultural Engineering", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-dme-606", "name": "Design & Manufacturing Engineering", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-btech-607", "name": "Building Technology", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-arch-608", "name": "Architectural Technology", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-fm-609", "name": "Facilities Management", "faculty": "Faculty of Engineering", "dues_amount": 150 },
-    { "id": "dept-fdt-701", "name": "Fashion Design and Textiles", "faculty": "Faculty of Art and Design", "dues_amount": 150 },
-    { "id": "dept-ias-702", "name": "Industrial Art with Sculpture", "faculty": "Faculty of Art and Design", "dues_amount": 150 },
-    { "id": "dept-paint-703", "name": "Painting", "faculty": "Faculty of Art and Design", "dues_amount": 150 },
-    { "id": "dept-gd-704", "name": "Graphic Design", "faculty": "Faculty of Art and Design", "dues_amount": 150 },
-    { "id": "dept-cer-705", "name": "Ceramics", "faculty": "Faculty of Art and Design", "dues_amount": 150 },
-    { "id": "dept-tex-706", "name": "Textiles", "faculty": "Faculty of Art and Design", "dues_amount": 150 },
-    { "id": "dept-acct-801", "name": "Accounting & Taxation", "faculty": "Faculty of Business and Management Studies", "dues_amount": 150 },
-    { "id": "dept-mkt-802", "name": "Marketing & IT", "faculty": "Faculty of Business and Management Studies", "dues_amount": 150 },
-    { "id": "dept-psm-803", "name": "Procurement & Supply Chain Management", "faculty": "Faculty of Business and Management Studies", "dues_amount": 150 },
-    { "id": "dept-sms-804", "name": "Secretaryship & Management Studies", "faculty": "Faculty of Business and Management Studies", "dues_amount": 150 },
-    { "id": "dept-comm-901", "name": "Communication Studies", "faculty": "Faculty of Applied Social Sciences", "dues_amount": 150 },
-    { "id": "dept-eng-902", "name": "English", "faculty": "Faculty of Applied Social Sciences", "dues_amount": 150 },
-    { "id": "dept-fr-903", "name": "French", "faculty": "Faculty of Applied Social Sciences", "dues_amount": 150 }
+    {
+      "id": "dept-cs-111",
+      "name": "Department of Computer Science",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-agro-222",
+      "name": "Department of Agro Enterprise Development",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-fst-333",
+      "name": "Department of Food Science and Technology",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-htm-444",
+      "name": "Department of Hospitality and Tourism Management",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-ms-555",
+      "name": "Department of Mathematics and Statistics",
+      "faculty": "Faculty of Applied Sciences and Technology",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-eee-601",
+      "name": "Electrical & Electronic Engineering",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-auto-602",
+      "name": "Automobile Engineering",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-civil-603",
+      "name": "Civil Engineering",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-aee-604",
+      "name": "Agricultural & Environmental Engineering",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-ageng-605",
+      "name": "Agricultural Engineering",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-dme-606",
+      "name": "Design & Manufacturing Engineering",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-btech-607",
+      "name": "Building Technology",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-arch-608",
+      "name": "Architectural Technology",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-fm-609",
+      "name": "Facilities Management",
+      "faculty": "Faculty of Engineering",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-fdt-701",
+      "name": "Fashion Design and Textiles",
+      "faculty": "Faculty of Art and Design",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-ias-702",
+      "name": "Industrial Art with Sculpture",
+      "faculty": "Faculty of Art and Design",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-paint-703",
+      "name": "Painting",
+      "faculty": "Faculty of Art and Design",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-gd-704",
+      "name": "Graphic Design",
+      "faculty": "Faculty of Art and Design",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-cer-705",
+      "name": "Ceramics",
+      "faculty": "Faculty of Art and Design",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-tex-706",
+      "name": "Textiles",
+      "faculty": "Faculty of Art and Design",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-acct-801",
+      "name": "Accounting & Taxation",
+      "faculty": "Faculty of Business and Management Studies",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-mkt-802",
+      "name": "Marketing & IT",
+      "faculty": "Faculty of Business and Management Studies",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-psm-803",
+      "name": "Procurement & Supply Chain Management",
+      "faculty": "Faculty of Business and Management Studies",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-sms-804",
+      "name": "Secretaryship & Management Studies",
+      "faculty": "Faculty of Business and Management Studies",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-comm-901",
+      "name": "Communication Studies",
+      "faculty": "Faculty of Applied Social Sciences",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-eng-902",
+      "name": "English",
+      "faculty": "Faculty of Applied Social Sciences",
+      "dues_amount": 150
+    },
+    {
+      "id": "dept-fr-903",
+      "name": "French",
+      "faculty": "Faculty of Applied Social Sciences",
+      "dues_amount": 150
+    }
   ],
   "profiles": [
     {
@@ -488,6 +623,41 @@
       "action": "LOGIN_SUCCESS",
       "details": "HTU Super Administrator (super_admin) logged in.",
       "created_at": "2026-06-30T13:50:27.809Z"
+    },
+    {
+      "id": "audit-1783019293306",
+      "actor_id": "user-super-admin-2",
+      "action": "LOGIN_SUCCESS",
+      "details": "HTU Super Administrator Two (super_admin) logged in.",
+      "created_at": "2026-07-02T19:08:13.306Z"
+    },
+    {
+      "id": "audit-1783019315711",
+      "actor_id": "user-super-admin-2",
+      "action": "PASSWORD_CHANGE",
+      "details": "SUPER_ADMIN updated password successfully (Mock).",
+      "created_at": "2026-07-02T19:08:35.711Z"
+    },
+    {
+      "id": "audit-1783019348608",
+      "actor_id": "user-cs-admin",
+      "action": "LOGIN_SUCCESS",
+      "details": "CS Department Administrator (dept_admin) logged in.",
+      "created_at": "2026-07-02T19:09:08.608Z"
+    },
+    {
+      "id": "audit-1783019370037",
+      "actor_id": "user-cs-admin",
+      "action": "PASSWORD_CHANGE",
+      "details": "DEPT_ADMIN updated password successfully (Mock).",
+      "created_at": "2026-07-02T19:09:30.037Z"
+    },
+    {
+      "id": "audit-1783019522887",
+      "actor_id": "user-super-admin-2",
+      "action": "LOGIN_SUCCESS",
+      "details": "HTU Super Administrator Two (super_admin) logged in.",
+      "created_at": "2026-07-02T19:12:02.887Z"
     }
   ]
 }
