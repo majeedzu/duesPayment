@@ -9,7 +9,10 @@ import {
   AlertCircle,
   Search,
   Download,
-  Filter
+  Filter,
+  Edit,
+  Trash2,
+  KeyRound
 } from "lucide-react";
 
 export default function AdminRosterPage() {
@@ -28,6 +31,29 @@ export default function AdminRosterPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+
+  // Student management states
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+
+  // Edit fields
+  const [editFullName, setEditFullName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editProgramme, setEditProgramme] = useState("");
+  const [editLevel, setEditLevel] = useState("");
+  const [editFaculty, setEditFaculty] = useState("");
+
+  // Reset password fields
+  const [resetPassword, setResetPassword] = useState("");
+  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
+  const [showPasswordText, setShowPasswordText] = useState(false);
+
+  // Action feedback states
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [actionSuccess, setActionSuccess] = useState("");
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -50,7 +76,6 @@ export default function AdminRosterPage() {
 
   useEffect(() => {
     (async () => { await fetchStudents(); })();
-   
   }, []);
 
   // Export to CSV
@@ -106,6 +131,158 @@ export default function AdminRosterPage() {
   useEffect(() => {
     Promise.resolve().then(() => setCurrentPage(1));
   }, [search, statusFilter]);
+
+  // Modal open helpers
+  const openEditModal = (student) => {
+    setSelectedStudent(student);
+    setEditFullName(student.full_name);
+    setEditEmail(student.email);
+    setEditProgramme(student.programme);
+    setEditLevel(student.level);
+    setEditFaculty(student.faculty);
+    setActionError("");
+    setActionSuccess("");
+    setShowEditModal(true);
+  };
+
+  const openDeleteModal = (student) => {
+    setSelectedStudent(student);
+    setActionError("");
+    setActionSuccess("");
+    setShowDeleteModal(true);
+  };
+
+  const openResetModal = (student) => {
+    setSelectedStudent(student);
+    setResetPassword("");
+    setResetConfirmPassword("");
+    setShowPasswordText(false);
+    setActionError("");
+    setActionSuccess("");
+    setShowResetModal(true);
+  };
+
+  // API Call handlers
+  const handleEditStudent = async (e) => {
+    e.preventDefault();
+    setActionLoading(true);
+    setActionError("");
+    setActionSuccess("");
+
+    try {
+      const res = await fetch("/api/admin/students", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          index_number: selectedStudent.index_number,
+          full_name: editFullName,
+          email: editEmail,
+          programme: editProgramme,
+          level: editLevel,
+          faculty: editFaculty
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to update student record.");
+      }
+      setActionSuccess("Student record updated successfully!");
+      await fetchStudents();
+      setTimeout(() => {
+        setShowEditModal(false);
+        setSelectedStudent(null);
+      }, 1200);
+    } catch (err) {
+      setActionError(err.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteStudent = async () => {
+    setActionLoading(true);
+    setActionError("");
+    setActionSuccess("");
+
+    try {
+      const res = await fetch("/api/admin/students", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          index_number: selectedStudent.index_number
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to delete student record.");
+      }
+      setActionSuccess("Student record deleted successfully!");
+      await fetchStudents();
+      setTimeout(() => {
+        setShowDeleteModal(false);
+        setSelectedStudent(null);
+      }, 1200);
+    } catch (err) {
+      setActionError(err.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setActionLoading(true);
+    setActionError("");
+    setActionSuccess("");
+
+    if (resetPassword !== resetConfirmPassword) {
+      setActionError("Passwords do not match.");
+      setActionLoading(false);
+      return;
+    }
+
+    if (resetPassword.length < 6) {
+      setActionError("Password must be at least 6 characters long.");
+      setActionLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/admin/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "reset-password",
+          email: selectedStudent.email,
+          password: resetPassword
+        })
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to reset student password.");
+      }
+      setActionSuccess("Student password reset successfully!");
+      setTimeout(() => {
+        setShowResetModal(false);
+        setSelectedStudent(null);
+      }, 1200);
+    } catch (err) {
+      setActionError(err.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const generateRandomPassword = () => {
+    const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*";
+    let pass = "";
+    for (let i = 0; i < 8; i++) {
+      pass += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setResetPassword(pass);
+    setResetConfirmPassword(pass);
+    setShowPasswordText(true);
+  };
 
   if (loading) {
     return (
@@ -222,12 +399,13 @@ export default function AdminRosterPage() {
                 <th>Level</th>
                 <th>Faculty</th>
                 <th>Dues Status</th>
+                <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {paginatedStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="7" style={{ textAlign: "center", padding: "3rem", opacity: 0.6 }}>
+                  <td colSpan="8" style={{ textAlign: "center", padding: "3rem", opacity: 0.6 }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
                       <AlertCircle size={28} />
                       <span>No students match the search criteria.</span>
@@ -255,6 +433,34 @@ export default function AdminRosterPage() {
                       }`}>
                         {student.paymentStatus || (student.isPaid ? "Fully Paid" : "Unpaid")}
                       </span>
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: "0.35rem", justifyContent: "flex-end" }}>
+                        <button
+                          onClick={() => openEditModal(student)}
+                          className="btn btn-outline"
+                          style={{ padding: "0.35rem", borderRadius: "8px", minWidth: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border)" }}
+                          title="Edit Details"
+                        >
+                          <Edit size={14} style={{ color: "var(--primary)" }} />
+                        </button>
+                        <button
+                          onClick={() => openResetModal(student)}
+                          className="btn btn-outline"
+                          style={{ padding: "0.35rem", borderRadius: "8px", minWidth: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid var(--border)" }}
+                          title="Reset Password"
+                        >
+                          <KeyRound size={14} style={{ color: "#F59E0B" }} />
+                        </button>
+                        <button
+                          onClick={() => openDeleteModal(student)}
+                          className="btn btn-outline"
+                          style={{ padding: "0.35rem", borderRadius: "8px", minWidth: "32px", height: "32px", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(220, 38, 38, 0.2)" }}
+                          title="Delete Record"
+                        >
+                          <Trash2 size={14} style={{ color: "var(--danger)" }} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -291,6 +497,374 @@ export default function AdminRosterPage() {
           </div>
         )}
       </div>
+
+      {/* Edit Student Modal */}
+      {showEditModal && selectedStudent && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(15, 23, 42, 0.6)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          padding: "1rem"
+        }}>
+          <div style={{
+            backgroundColor: "#ffffff",
+            width: "100%",
+            maxWidth: "500px",
+            borderRadius: "20px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
+            padding: "2rem",
+            border: "1px solid rgba(226, 232, 240, 0.8)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.25rem"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, color: "var(--primary)", fontFamily: "var(--font-heading)", fontSize: "1.25rem", fontWeight: 800 }}>Edit Student Record</h3>
+              <button 
+                onClick={() => { setShowEditModal(false); setSelectedStudent(null); }}
+                style={{ border: "none", background: "none", cursor: "pointer", opacity: 0.6, padding: "0.25rem", display: "flex" }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {actionError && (
+              <div className="badge badge-danger" style={{ padding: "0.75rem", borderRadius: "var(--radius)", textTransform: "none", fontSize: "0.85rem", width: "100%" }}>
+                {actionError}
+              </div>
+            )}
+
+            {actionSuccess && (
+              <div className="badge badge-success" style={{ padding: "0.75rem", borderRadius: "var(--radius)", textTransform: "none", fontSize: "0.85rem", width: "100%" }}>
+                {actionSuccess}
+              </div>
+            )}
+
+            <form onSubmit={handleEditStudent} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="form-group">
+                <label className="label">Index Number (Read Only)</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={selectedStudent.index_number}
+                  disabled
+                  style={{ backgroundColor: "var(--background)", cursor: "not-allowed" }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="label">Full Name</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={editFullName}
+                  onChange={(e) => setEditFullName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="label">Institutional Email</label>
+                <input
+                  type="email"
+                  className="input"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="label">Programme</label>
+                <input
+                  type="text"
+                  className="input"
+                  value={editProgramme}
+                  onChange={(e) => setEditProgramme(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+                <div className="form-group">
+                  <label className="label">Level</label>
+                  <select
+                    className="input"
+                    value={editLevel}
+                    onChange={(e) => setEditLevel(e.target.value)}
+                    required
+                    style={{ cursor: "pointer" }}
+                  >
+                    <option value="100">Level 100</option>
+                    <option value="200">Level 200</option>
+                    <option value="300">Level 300</option>
+                    <option value="400">Level 400</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="label">Faculty</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value={editFaculty}
+                    onChange={(e) => setEditFaculty(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  onClick={() => { setShowEditModal(false); setSelectedStudent(null); }}
+                  className="btn btn-outline"
+                  style={{ flex: 1, padding: "0.6rem" }}
+                  disabled={actionLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1, padding: "0.6rem" }}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Student Modal */}
+      {showDeleteModal && selectedStudent && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(15, 23, 42, 0.6)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          padding: "1rem"
+        }}>
+          <div style={{
+            backgroundColor: "#ffffff",
+            width: "100%",
+            maxWidth: "460px",
+            borderRadius: "20px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
+            padding: "2rem",
+            border: "1px solid rgba(226, 232, 240, 0.8)",
+            textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.25rem"
+          }}>
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <button 
+                onClick={() => { setShowDeleteModal(false); setSelectedStudent(null); }}
+                style={{ border: "none", background: "none", cursor: "pointer", opacity: 0.6, padding: "0.25rem", display: "flex" }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{
+              width: "56px",
+              height: "56px",
+              borderRadius: "50%",
+              backgroundColor: "var(--danger-bg)",
+              color: "var(--danger)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto"
+            }}>
+              <AlertCircle size={28} />
+            </div>
+
+            <div>
+              <h3 style={{ margin: "0 0 0.5rem", color: "var(--danger)", fontFamily: "var(--font-heading)", fontSize: "1.25rem", fontWeight: 800 }}>Delete Student Record?</h3>
+              <p style={{ fontSize: "0.9rem", opacity: 0.7, lineHeight: 1.5, margin: 0 }}>
+                Are you sure you want to remove <strong>{selectedStudent.full_name}</strong> ({selectedStudent.index_number})?
+              </p>
+              <p style={{ fontSize: "0.8rem", color: "var(--danger)", fontWeight: 600, marginTop: "0.5rem", lineHeight: 1.4 }}>
+                Warning: If this student has registered their portal account, this action will delete their login credentials and student profile as well. This is irreversible.
+              </p>
+            </div>
+
+            {actionError && (
+              <div className="badge badge-danger" style={{ padding: "0.75rem", borderRadius: "var(--radius)", textTransform: "none", fontSize: "0.85rem", width: "100%" }}>
+                {actionError}
+              </div>
+            )}
+
+            {actionSuccess && (
+              <div className="badge badge-success" style={{ padding: "0.75rem", borderRadius: "var(--radius)", textTransform: "none", fontSize: "0.85rem", width: "100%" }}>
+                {actionSuccess}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
+              <button
+                type="button"
+                onClick={() => { setShowDeleteModal(false); setSelectedStudent(null); }}
+                className="btn btn-outline"
+                style={{ flex: 1, padding: "0.6rem" }}
+                disabled={actionLoading}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteStudent}
+                className="btn btn-danger"
+                style={{ flex: 1, padding: "0.6rem" }}
+                disabled={actionLoading}
+              >
+                {actionLoading ? "Deleting..." : "Yes, Delete Record"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal */}
+      {showResetModal && selectedStudent && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(15, 23, 42, 0.6)",
+          backdropFilter: "blur(8px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          padding: "1rem"
+        }}>
+          <div style={{
+            backgroundColor: "#ffffff",
+            width: "100%",
+            maxWidth: "460px",
+            borderRadius: "20px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
+            padding: "2rem",
+            border: "1px solid rgba(226, 232, 240, 0.8)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "1.25rem"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <h3 style={{ margin: 0, color: "var(--primary)", fontFamily: "var(--font-heading)", fontSize: "1.25rem", fontWeight: 800 }}>Reset Password</h3>
+              <button 
+                onClick={() => { setShowResetModal(false); setSelectedStudent(null); }}
+                style={{ border: "none", background: "none", cursor: "pointer", opacity: 0.6, padding: "0.25rem", display: "flex" }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ fontSize: "0.85rem", opacity: 0.7, lineHeight: 1.4 }}>
+              Set a new login password for <strong>{selectedStudent.full_name}</strong> ({selectedStudent.email}).
+            </div>
+
+            {actionError && (
+              <div className="badge badge-danger" style={{ padding: "0.75rem", borderRadius: "var(--radius)", textTransform: "none", fontSize: "0.85rem", width: "100%" }}>
+                {actionError}
+              </div>
+            )}
+
+            {actionSuccess && (
+              <div className="badge badge-success" style={{ padding: "0.75rem", borderRadius: "var(--radius)", textTransform: "none", fontSize: "0.85rem", width: "100%" }}>
+                {actionSuccess}
+              </div>
+            )}
+
+            <form onSubmit={handleResetPassword} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="form-group">
+                <label className="label" style={{ display: "flex", justifyContent: "space-between" }}>
+                  <span>New Password</span>
+                  <button 
+                    type="button" 
+                    onClick={generateRandomPassword}
+                    style={{ border: "none", background: "none", color: "var(--primary)", fontWeight: 600, fontSize: "0.75rem", cursor: "pointer", padding: 0 }}
+                  >
+                    Generate Random
+                  </button>
+                </label>
+                <input
+                  type={showPasswordText ? "text" : "password"}
+                  className="input"
+                  placeholder="Min 6 characters"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="label">Confirm New Password</label>
+                <input
+                  type={showPasswordText ? "text" : "password"}
+                  className="input"
+                  placeholder="Re-enter password"
+                  value={resetConfirmPassword}
+                  onChange={(e) => setResetConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <input 
+                  type="checkbox" 
+                  id="showPasswordCheck" 
+                  checked={showPasswordText}
+                  onChange={(e) => setShowPasswordText(e.target.checked)}
+                  style={{ cursor: "pointer" }}
+                />
+                <label htmlFor="showPasswordCheck" style={{ fontSize: "0.8rem", opacity: 0.8, cursor: "pointer" }}>Show password text</label>
+              </div>
+
+              <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
+                <button
+                  type="button"
+                  onClick={() => { setShowResetModal(false); setSelectedStudent(null); }}
+                  className="btn btn-outline"
+                  style={{ flex: 1, padding: "0.6rem" }}
+                  disabled={actionLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  style={{ flex: 1, padding: "0.6rem" }}
+                  disabled={actionLoading}
+                >
+                  {actionLoading ? "Resetting..." : "Reset Password"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

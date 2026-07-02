@@ -115,7 +115,7 @@ export async function POST(req) {
       // --- Normal login succeeded ---
       let profile = await db.getProfile(email);
       const studentRecord = await db.getStudentByEmail(email);
-      const isDefault = studentRecord && (String(password).trim() === String(studentRecord.index_number).trim());
+      const isDefault = (String(password).trim() === 'password123') || (studentRecord && (String(password).trim() === String(studentRecord.index_number).trim()));
 
       if (!profile) {
         profile = await db.createProfile({
@@ -156,7 +156,7 @@ export async function POST(req) {
       await db.addAuditLog(profile.id, 'LOGIN_SUCCESS', `${profile.full_name} (${profile.role}) logged in.`);
 
       const studentRecord = await db.getStudentByEmail(email);
-      const isDefault = studentRecord && (password === studentRecord.index_number);
+      const isDefault = (password === 'password123') || (studentRecord && (password === studentRecord.index_number));
 
       const { password: _, ...userWithoutPassword } = profile;
       return Response.json({

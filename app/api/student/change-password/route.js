@@ -5,7 +5,7 @@ import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 export async function POST(req) {
   try {
     const session = getServerSession(req);
-    if (!session || session.role !== 'student') {
+    if (!session || (session.role !== 'student' && session.role !== 'dept_admin' && session.role !== 'super_admin')) {
       return Response.json({ success: false, message: 'Unauthorized access.' }, { status: 401 });
     }
 
@@ -29,14 +29,14 @@ export async function POST(req) {
         return Response.json({ success: false, message: error.message }, { status: 400 });
       }
 
-      await db.addAuditLog(session.id, 'PASSWORD_CHANGE', `Student updated password successfully.`);
+      await db.addAuditLog(session.id, 'PASSWORD_CHANGE', `${session.role.toUpperCase()} updated password successfully.`);
     } else {
       // Mock database update
       const success = await db.updateProfilePassword(session.email, password);
       if (!success) {
         return Response.json({ success: false, message: 'Profile not found.' }, { status: 404 });
       }
-      await db.addAuditLog(session.id, 'PASSWORD_CHANGE', `Student updated password successfully (Mock).`);
+      await db.addAuditLog(session.id, 'PASSWORD_CHANGE', `${session.role.toUpperCase()} updated password successfully (Mock).`);
     }
 
     return Response.json({
