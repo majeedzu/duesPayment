@@ -147,7 +147,7 @@ export default function VerifyReceiptPage() {
                     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", opacity: 0.5, fontSize: "0.75rem", textTransform: "uppercase", fontWeight: 700, marginBottom: "0.25rem" }}>
                       <Calendar size={12} /> Academic Period
                     </div>
-                    <p style={{ fontWeight: 600 }}>{data.academic_year || '2025/2026'} &middot; {data.semester || 'Both Semesters'}</p>
+                    <p style={{ fontWeight: 600 }}>{data.academic_year || '2025/2026'} &middot; {data.semester || 'Academic Year'}</p>
                   </div>
 
                   <div>

@@ -9,10 +9,15 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'Unauthorized.' }, { status: 401 });
     }
 
-    const { indexNumber, email, amount, departmentId, semester = 'Both Semesters', academicYear = '2025/2026' } = await req.json();
+    const { indexNumber, email, amount, departmentId, academicYear = '2025/2026' } = await req.json();
 
-    if (!indexNumber || !email) {
+    if (!indexNumber || !email || amount === undefined) {
       return Response.json({ success: false, message: 'Missing required payment fields.' }, { status: 400 });
+    }
+
+    const paymentAmount = parseFloat(amount);
+    if (isNaN(paymentAmount) || paymentAmount <= 0) {
+      return Response.json({ success: false, message: 'Payment amount must be a positive number.' }, { status: 400 });
     }
 
     // Retrieve student and department to get the dues baseline
@@ -26,55 +31,44 @@ export async function POST(req) {
     }
 
     const baselineDues = parseFloat(department.dues_amount);
-    let targetAmount = baselineDues;
-    if (semester === '1st Semester' || semester === '2nd Semester') {
-      targetAmount = baselineDues / 2;
-    }
-
-    // Prevent duplicate payments
+    
+    // Retrieve all successful payments for the student for this academic year
     const existingPayments = await db.getPaymentsByStudent(indexNumber);
     const successfulPayments = existingPayments.filter(p => p.status === 'success' && (p.academic_year === academicYear || !p.academic_year));
+    const totalPaidAlready = successfulPayments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+    
+    const outstandingBalance = baselineDues - totalPaidAlready;
 
-    // Determine what has been paid already
-    const hasPaidFull = successfulPayments.some(p => p.semester === 'Both Semesters' || !p.semester);
-    const hasPaidFirst = successfulPayments.some(p => p.semester === '1st Semester');
-    const hasPaidSecond = successfulPayments.some(p => p.semester === '2nd Semester');
-
-    if (hasPaidFull) {
+    if (outstandingBalance <= 0) {
       return Response.json({ success: false, message: 'Dues are already fully paid for this academic period.' }, { status: 400 });
     }
 
-    if (semester === 'Both Semesters' && (hasPaidFirst || hasPaidSecond)) {
-      return Response.json({ success: false, message: 'You have already paid for a semester. Please pay for the outstanding semester individually.' }, { status: 400 });
-    }
-
-    if (semester === '1st Semester' && hasPaidFirst) {
-      return Response.json({ success: false, message: '1st Semester dues are already paid.' }, { status: 400 });
-    }
-
-    if (semester === '2nd Semester' && hasPaidSecond) {
-      return Response.json({ success: false, message: '2nd Semester dues are already paid.' }, { status: 400 });
+    if (paymentAmount > outstandingBalance + 0.01) {
+      return Response.json({ 
+        success: false, 
+        message: `Payment amount (GHS ${paymentAmount.toFixed(2)}) exceeds the outstanding balance of GHS ${outstandingBalance.toFixed(2)}.` 
+      }, { status: 400 });
     }
 
     // Generate unique reference
     const reference = `HTU-${indexNumber}-${Date.now()}`;
 
     // Initialize with Paystack (real or mock)
-    const paystackRes = await paystack.initialize(email, targetAmount, reference);
+    const paystackRes = await paystack.initialize(email, paymentAmount, reference);
 
     // Save pending payment record
     await db.initializePayment({
       student_index_number: indexNumber,
-      amount: targetAmount,
+      amount: paymentAmount,
       paystack_reference: reference,
       status: 'pending',
       receipt_id: null,
       payment_date: null,
-      semester,
+      semester: 'Academic Year',
       academic_year: academicYear
     });
 
-    await db.addAuditLog(session.id, 'PAYMENT_INITIATED', `Student ${indexNumber} initiated payment of GHS ${targetAmount} for ${semester}. Ref: ${reference}`);
+    await db.addAuditLog(session.id, 'PAYMENT_INITIATED', `Student ${indexNumber} initiated payment of GHS ${paymentAmount} for academic year ${academicYear}. Ref: ${reference}`);
 
     return Response.json({
       success: true,

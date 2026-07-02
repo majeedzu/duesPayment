@@ -54,7 +54,7 @@ export async function POST(req) {
         if (profile) {
           await db.addNotification(
             'Payment Confirmed ✓',
-            `Your departmental dues payment of GHS ${parseFloat(amountPaid).toFixed(2)} for ${existing.semester || 'Both Semesters'} has been verified. Receipt: ${receiptId}`,
+            `Your departmental dues payment of GHS ${parseFloat(amountPaid).toFixed(2)} for ${existing.semester || 'Academic Year'} has been verified. Receipt: ${receiptId}`,
             profile.id,
             null
           );
@@ -62,7 +62,7 @@ export async function POST(req) {
         if (student.department_id) {
           await db.addNotificationToAdminOfDepartment(
             'New Payment Received',
-            `Student ${student.full_name} (${student.index_number}) has paid dues for ${existing.semester || 'Both Semesters'}. Ref: ${reference}`,
+            `Student ${student.full_name} (${student.index_number}) has paid dues for ${existing.semester || 'Academic Year'}. Ref: ${reference}`,
             student.department_id
           );
         }

@@ -20,9 +20,13 @@ import {
   Check, 
   X, 
   Database,
-  Search
+  Search,
+  ShieldCheck,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle
 } from "lucide-react";
-import { getClientSession, clearClientSession } from "@/lib/session";
+import { getClientSession, setClientSession, clearClientSession } from "@/lib/session";
 
 const getFacultyAbbreviation = (name) => {
   if (!name) return "GEN";
@@ -41,6 +45,14 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview"); // overview, departments, admins, audit
   
+  // Forced password change states
+  const [forcePasswordChange, setForcePasswordChange] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changePasswordLoading, setChangePasswordLoading] = useState(false);
+  const [changePasswordError, setChangePasswordError] = useState("");
+  const [changePasswordSuccess, setChangePasswordSuccess] = useState("");
+
   // Dashboard Data
   const [stats, setStats] = useState({
     totalStudents: 0,
@@ -127,10 +139,57 @@ export default function SuperAdminDashboard() {
     // Use a microtask to avoid synchronous setState inside effect
     Promise.resolve().then(() => {
       setAdmin(session);
+      if (session.mustChangePassword) {
+        setForcePasswordChange(true);
+      }
       fetchSuperDashboardData();
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
+
+  const handlePasswordChangeSubmit = async (e) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      setChangePasswordError("Password must be at least 6 characters long.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setChangePasswordError("Passwords do not match.");
+      return;
+    }
+
+    setChangePasswordLoading(true);
+    setChangePasswordError("");
+    setChangePasswordSuccess("");
+
+    try {
+      const res = await fetch("/api/student/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.message || "Failed to update password.");
+      }
+
+      setChangePasswordSuccess("Password updated successfully!");
+      
+      // Update client session cookie to remove mustChangePassword flag
+      const userSession = getClientSession();
+      const updatedSession = { ...userSession, mustChangePassword: false };
+      setClientSession(updatedSession);
+      setAdmin(updatedSession);
+
+      setTimeout(() => {
+        setForcePasswordChange(false);
+      }, 1500);
+    } catch (err) {
+      setChangePasswordError(err.message || "Something went wrong.");
+    } finally {
+      setChangePasswordLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     clearClientSession();
@@ -1244,7 +1303,176 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
       )}
+      {forcePasswordChange && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(15, 23, 42, 0.6)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 99999,
+          padding: "1rem"
+        }}>
+          <div style={{
+            backgroundColor: "#ffffff",
+            width: "100%",
+            maxWidth: "480px",
+            borderRadius: "24px",
+            boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            padding: "2.5rem 2rem",
+            textAlign: "center",
+            border: "1px solid rgba(226, 232, 240, 0.8)",
+            animation: "fadeIn 0.3s ease-out"
+          }}>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              borderRadius: "50%",
+              backgroundColor: "rgba(0, 0, 140, 0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 1.5rem"
+            }}>
+              <ShieldCheck style={{ color: "#00008C" }} size={32} />
+            </div>
 
+            <h2 style={{
+              fontFamily: "var(--font-heading)",
+              fontSize: "1.5rem",
+              fontWeight: 700,
+              color: "#0F172A",
+              marginBottom: "0.5rem"
+            }}>
+              Set Your Secure Password
+            </h2>
+            <p style={{
+              fontSize: "0.9rem",
+              color: "#64748B",
+              marginBottom: "2rem",
+              lineHeight: "1.5"
+            }}>
+              Welcome to the HTU Dues Payment Portal! To secure your account, please choose a new password for your administrative portal.
+            </p>
+
+            <form onSubmit={handlePasswordChangeSubmit} style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#475569", marginBottom: "0.5rem" }}>
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="At least 6 characters"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  style={{
+                    width: "100%",
+                    height: "48px",
+                    padding: "0 1rem",
+                    borderRadius: "12px",
+                    backgroundColor: "#EEF3FF",
+                    border: "none",
+                    fontSize: "0.95rem",
+                    color: "#0F172A",
+                    outline: "none"
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#475569", marginBottom: "0.5rem" }}>
+                  Confirm Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Re-type your new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  style={{
+                    width: "100%",
+                    height: "48px",
+                    padding: "0 1rem",
+                    borderRadius: "12px",
+                    backgroundColor: "#EEF3FF",
+                    border: "none",
+                    fontSize: "0.95rem",
+                    color: "#0F172A",
+                    outline: "none"
+                  }}
+                />
+              </div>
+
+              {changePasswordError && (
+                <div style={{
+                  color: "#EF4444",
+                  fontSize: "0.85rem",
+                  fontWeight: 500,
+                  backgroundColor: "rgba(239, 68, 68, 0.1)",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px"
+                }}>
+                  <AlertTriangle size={16} />
+                  <span>{changePasswordError}</span>
+                </div>
+              )}
+
+              {changePasswordSuccess && (
+                <div style={{
+                  color: "#059669",
+                  fontSize: "0.85rem",
+                  fontWeight: 500,
+                  backgroundColor: "rgba(5, 150, 105, 0.1)",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "8px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px"
+                }}>
+                  <CheckCircle2 size={16} />
+                  <span>{changePasswordSuccess}</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={changePasswordLoading}
+                style={{
+                  width: "100%",
+                  height: "48px",
+                  borderRadius: "12px",
+                  backgroundColor: "#00008C",
+                  color: "#ffffff",
+                  border: "none",
+                  fontWeight: "600",
+                  fontSize: "0.95rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  transition: "background 0.2s",
+                  marginTop: "0.5rem"
+                }}
+                onMouseOver={(e) => { if (!changePasswordLoading) e.currentTarget.style.background = '#00005E'; }}
+                onMouseOut={(e) => { if (!changePasswordLoading) e.currentTarget.style.background = '#00008C'; }}
+              >
+                {changePasswordLoading ? (
+                  <Loader2 className="spin-icon" style={{ animation: "spin 1s linear infinite" }} size={18} />
+                ) : (
+                  "Update & Continue"
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

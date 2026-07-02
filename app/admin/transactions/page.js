@@ -135,7 +135,7 @@ export default function AdminTransactionsPage() {
                 <tr>
                   <th>Index Number</th>
                   <th>Amount</th>
-                  <th>Semester</th>
+                  <th>Period</th>
                   <th>Paystack Reference</th>
                   <th>Status</th>
                   <th>Receipt ID</th>
@@ -148,7 +148,7 @@ export default function AdminTransactionsPage() {
                   <tr key={i}>
                     <td style={{ fontWeight: 700 }}>{pay.student_index_number}</td>
                     <td style={{ fontWeight: 800 }}>GHS {parseFloat(pay.amount).toFixed(2)}</td>
-                    <td style={{ fontSize: "0.85rem", fontWeight: 600 }}>{pay.semester || "Both Semesters"}</td>
+                    <td style={{ fontSize: "0.85rem", fontWeight: 600 }}>{pay.semester || "Academic Year"}</td>
                     <td style={{ fontFamily: "monospace", fontSize: "0.8rem", opacity: 0.8 }}>{pay.paystack_reference}</td>
                     <td>
                       <span className={`badge ${pay.status === 'success' ? 'badge-success' : pay.status === 'pending' ? 'badge-warning' : 'badge-danger'}`}>

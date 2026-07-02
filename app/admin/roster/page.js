@@ -116,7 +116,7 @@ export default function AdminRosterPage() {
       student.level.includes(search);
 
     if (statusFilter === "paid") return matchesSearch && student.paymentStatus === "Fully Paid";
-    if (statusFilter === "partial") return matchesSearch && (student.paymentStatus === "1st Sem Only" || student.paymentStatus === "2nd Sem Only");
+    if (statusFilter === "partial") return matchesSearch && student.paymentStatus === "Partially Paid";
     if (statusFilter === "unpaid") return matchesSearch && student.paymentStatus === "Unpaid";
     return matchesSearch;
   });
@@ -397,7 +397,6 @@ export default function AdminRosterPage() {
                 <th>Email Address</th>
                 <th>Programme</th>
                 <th>Level</th>
-                <th>Faculty</th>
                 <th>Dues Status</th>
                 <th style={{ textAlign: "right" }}>Actions</th>
               </tr>
@@ -405,7 +404,7 @@ export default function AdminRosterPage() {
             <tbody>
               {paginatedStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="8" style={{ textAlign: "center", padding: "3rem", opacity: 0.6 }}>
+                  <td colSpan="7" style={{ textAlign: "center", padding: "3rem", opacity: 0.6 }}>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
                       <AlertCircle size={28} />
                       <span>No students match the search criteria.</span>
@@ -420,18 +419,15 @@ export default function AdminRosterPage() {
                     <td style={{ fontSize: "0.85rem", opacity: 0.8 }}>{student.email}</td>
                     <td style={{ fontSize: "0.85rem" }}>{student.programme}</td>
                     <td style={{ fontSize: "0.85rem" }}>L{student.level}</td>
-                    <td style={{ fontSize: "0.8rem", opacity: 0.7 }}>{student.faculty}</td>
                     <td>
                       <span className={`badge ${
                         student.paymentStatus === "Fully Paid" 
                           ? "badge-success" 
-                          : student.paymentStatus === "1st Sem Only" 
-                          ? "badge-info" 
-                          : student.paymentStatus === "2nd Sem Only"
+                          : student.paymentStatus === "Partially Paid" 
                           ? "badge-warning"
                           : "badge-danger"
                       }`}>
-                        {student.paymentStatus || (student.isPaid ? "Fully Paid" : "Unpaid")}
+                        {student.paymentStatus || "Unpaid"}
                       </span>
                     </td>
                     <td>
@@ -608,17 +604,6 @@ export default function AdminRosterPage() {
                     <option value="300">Level 300</option>
                     <option value="400">Level 400</option>
                   </select>
-                </div>
-
-                <div className="form-group">
-                  <label className="label">Faculty</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={editFaculty}
-                    onChange={(e) => setEditFaculty(e.target.value)}
-                    required
-                  />
                 </div>
               </div>
 

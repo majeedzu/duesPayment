@@ -20,8 +20,10 @@ export async function POST(req) {
     }
 
     if (isSupabaseConfigured()) {
+      const requestUrl = new URL(req.url);
+      const origin = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin;
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/update-password`,
+        redirectTo: `${origin}/auth/update-password`,
       });
 
       if (error) {

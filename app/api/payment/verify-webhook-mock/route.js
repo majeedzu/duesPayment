@@ -32,14 +32,14 @@ export async function POST(req) {
         if (profile) {
           await db.addNotification(
             'Payment Confirmed ✓',
-            `Your dues payment of GHS ${parseFloat(amount).toFixed(2)} for ${existing.semester || 'Both Semesters'} was successful! Receipt ID: ${receiptId}`,
+            `Your dues payment of GHS ${parseFloat(amount).toFixed(2)} for ${existing.semester || 'Academic Year'} was successful! Receipt ID: ${receiptId}`,
             profile.id,
             null
           );
         }
         await db.addNotificationToAdminOfDepartment(
             'New Payment Received',
-            `${student.full_name} (${student.index_number}) paid departmental dues for ${existing.semester || 'Both Semesters'}. Ref: ${reference}`,
+            `${student.full_name} (${student.index_number}) paid departmental dues for ${existing.semester || 'Academic Year'}. Ref: ${reference}`,
             student.department_id
           );
       }

@@ -18,39 +18,34 @@ export async function GET(req) {
     const payments = await db.getPaymentsByDepartment(departmentId);
     const notifications = await db.getNotifications(session.id, 'dept_admin');
 
-    // Group successful payments by student index
+    // Calculate successful payments sum by student index
     const studentPayments = {};
     payments.forEach(p => {
       if (p.status === 'success') {
         const index = p.student_index_number;
-        if (!studentPayments[index]) studentPayments[index] = [];
-        studentPayments[index].push(p);
+        if (!studentPayments[index]) studentPayments[index] = 0;
+        studentPayments[index] += parseFloat(p.amount);
       }
     });
+
+    const baselineDues = parseFloat(department.dues_amount);
 
     const studentPaymentStatus = {};
     students.forEach(s => {
       const idx = s.index_number;
-      const studentPays = studentPayments[idx] || [];
-      const hasFull = studentPays.some(p => p.semester === 'Both Semesters' || !p.semester);
-      const hasFirst = studentPays.some(p => p.semester === '1st Semester');
-      const hasSecond = studentPays.some(p => p.semester === '2nd Semester');
+      const totalPaid = studentPayments[idx] || 0;
 
-      if (hasFull || (hasFirst && hasSecond)) {
+      if (totalPaid >= baselineDues) {
         studentPaymentStatus[idx] = 'Fully Paid';
-      } else if (hasFirst) {
-        studentPaymentStatus[idx] = '1st Sem Only';
-      } else if (hasSecond) {
-        studentPaymentStatus[idx] = '2nd Sem Only';
+      } else if (totalPaid > 0) {
+        studentPaymentStatus[idx] = 'Partially Paid';
       } else {
         studentPaymentStatus[idx] = 'Unpaid';
       }
     });
 
     const paidCount = students.filter(s => studentPaymentStatus[s.index_number] === 'Fully Paid').length;
-    const partiallyPaidCount = students.filter(s => 
-      studentPaymentStatus[s.index_number] === '1st Sem Only' || studentPaymentStatus[s.index_number] === '2nd Sem Only'
-    ).length;
+    const partiallyPaidCount = students.filter(s => studentPaymentStatus[s.index_number] === 'Partially Paid').length;
     const unpaidCount = students.length - paidCount - partiallyPaidCount;
 
     const totalRevenue = payments
