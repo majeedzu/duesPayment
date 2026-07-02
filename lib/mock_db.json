@@ -39,6 +39,15 @@
       "password": "password123"
     },
     {
+      "id": "user-super-admin-2",
+      "email": "0325080328@htu.edu.gh",
+      "role": "super_admin",
+      "full_name": "HTU Super Administrator Two",
+      "department_id": null,
+      "avatar_url": null,
+      "password": "password123"
+    },
+    {
       "id": "user-cs-admin",
       "email": "csadmin@htu.edu.gh",
       "role": "dept_admin",
