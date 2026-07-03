@@ -108,6 +108,8 @@ export default function Home() {
 
   // Department Dues search states
   const [deptSearch, setDeptSearch] = useState("");
+  const [departments, setDepartments] = useState([]);
+  const [deptsLoading, setDeptsLoading] = useState(true);
 
   // Fetch live departments on mount
   useEffect(() => {
@@ -172,14 +174,7 @@ export default function Home() {
     }
   };
 
-  const mockDepartments = [
-    { name: "Computer Science", code: "CS", fee: 150.00, faculty: "Applied Sciences & Technology" },
-    { name: "Information Technology", code: "IT", fee: 180.00, faculty: "Applied Sciences & Technology" },
-    { name: "Electrical Engineering", code: "EE", fee: 220.00, faculty: "Engineering" },
-    { name: "Hospitality & Tourism Mgmt", code: "HTM", fee: 200.00, faculty: "Applied Sciences & Technology" },
-    { name: "Mechanical Engineering", code: "ME", fee: 210.00, faculty: "Engineering" },
-    { name: "Accountancy", code: "ACC", fee: 160.00, faculty: "Business School" },
-  ];
+
 
   const faqs = [
     {
@@ -825,14 +820,16 @@ export default function Home() {
 
           {/* Mobile card list */}
           <div className="dues-mobile-list">
-            {filteredDepts.length === 0 ? (
+            {deptsLoading ? (
+              <p className="dues-mobile-empty">Loading departments...</p>
+            ) : filteredDepts.length === 0 ? (
               <p className="dues-mobile-empty">No matching departments found.</p>
             ) : (
               filteredDepts.map((dept, idx) => (
                 <article key={idx} className="dues-mobile-card">
                   <div className="dues-mobile-card-top">
-                    <span className="dues-mobile-code">{dept.code}</span>
-                    <span className="dues-mobile-fee">GHS {dept.fee.toFixed(2)}</span>
+                    <span className="dues-mobile-code">{dept.id?.split('-').slice(-1)[0]?.toUpperCase() || "—"}</span>
+                    <span className="dues-mobile-fee">GHS {parseFloat(dept.dues_amount).toFixed(2)}</span>
                   </div>
                   <h4 className="dues-mobile-name">{dept.name}</h4>
                   <p className="dues-mobile-faculty">{dept.faculty}</p>
@@ -845,25 +842,25 @@ export default function Home() {
             <table className="table">
               <thead>
                 <tr>
-                  <th style={{ width: "120px" }}>Code</th>
                   <th>Department</th>
                   <th>Faculty</th>
                   <th style={{ textAlign: "right", width: "140px" }}>Amount (GHS)</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredDepts.length === 0 ? (
+                {deptsLoading ? (
+                  <tr><td colSpan="3" style={{ textAlign: "center", padding: "2.5rem", opacity: 0.6 }}>Loading departments...</td></tr>
+                ) : filteredDepts.length === 0 ? (
                   <tr>
-                    <td colSpan="4" style={{ textAlign: "center", padding: "2.5rem", opacity: 0.6 }}>No matching departments found.</td>
+                    <td colSpan="3" style={{ textAlign: "center", padding: "2.5rem", opacity: 0.6 }}>No matching departments found.</td>
                   </tr>
                 ) : (
                   filteredDepts.map((dept, idx) => (
                     <tr key={idx}>
-                      <td style={{ fontWeight: 700 }}>{dept.code}</td>
                       <td style={{ fontWeight: 600, color: "var(--foreground)" }}>{dept.name}</td>
                       <td style={{ fontSize: "0.85rem", opacity: 0.8 }}>{dept.faculty}</td>
                       <td style={{ fontWeight: 800, color: "var(--primary)", textAlign: "right", fontSize: "0.95rem" }}>
-                        GHS {dept.fee.toFixed(2)}
+                        GHS {parseFloat(dept.dues_amount).toFixed(2)}
                       </td>
                     </tr>
                   ))

@@ -89,6 +89,15 @@ export default function AdminLayout({ children }) {
       router.push("/super-admin/dashboard");
       return;
     }
+    // Restore dark mode preference
+    const savedTheme = localStorage.getItem("htu-dues-theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.body.classList.remove("dark-mode");
+      document.documentElement.removeAttribute("data-theme");
+    }
     Promise.resolve().then(() => {
       setAdmin(session);
       if (session.mustChangePassword) {

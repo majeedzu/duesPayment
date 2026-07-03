@@ -162,6 +162,12 @@ export async function POST(req) {
     // 3. Perform password reset
     await db.resetStudentPassword(email.toLowerCase().trim(), password);
 
+    // 3b. Reset password_changed flag so student is prompted to change on next login
+    const profileForReset = await db.getProfile(email.toLowerCase().trim());
+    if (profileForReset) {
+      await db.resetPasswordChangedFlag(profileForReset.id);
+    }
+
     // 4. Add audit log
     await db.addAuditLog(
       session.id,

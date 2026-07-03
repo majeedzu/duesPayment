@@ -63,6 +63,9 @@ export async function POST(req) {
         newProfile.id
       );
 
+      // Audit log — matches mock path
+      await db.addAuditLog(newProfile.id, 'REGISTRATION_SUCCESS', `Student ${student.full_name} registered their account.`);
+
       return Response.json({
         success: true,
         message: 'Registration successful! You can now log in.',

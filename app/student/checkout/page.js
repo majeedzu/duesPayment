@@ -45,7 +45,10 @@ function CheckoutContent() {
       // Direct update payment route
       const res = await fetch("/api/payment/verify-webhook-mock", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-mock-secret": "htu-mock-dev-secret"
+        },
         body: JSON.stringify({
           reference,
           status: shouldSucceed ? "success" : "failed",

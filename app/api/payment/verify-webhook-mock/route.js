@@ -1,7 +1,20 @@
 import { db } from '@/lib/db';
+import { isSupabaseConfigured } from '@/lib/supabase';
 
-// Mock webhook endpoint — called by the checkout simulator page
+// Mock webhook endpoint — called only by the checkout simulator page (mock/test mode only)
 export async function POST(req) {
+  // Block this endpoint entirely in production (when real Paystack is configured)
+  if (isSupabaseConfigured() && process.env.PAYSTACK_SECRET_KEY) {
+    return Response.json({ success: false, message: 'Not available in production.' }, { status: 403 });
+  }
+
+  // Require a shared mock secret to prevent arbitrary calls
+  const mockSecret = req.headers.get('x-mock-secret');
+  const expectedSecret = process.env.MOCK_WEBHOOK_SECRET || 'htu-mock-dev-secret';
+  if (mockSecret !== expectedSecret) {
+    return Response.json({ success: false, message: 'Unauthorized.' }, { status: 401 });
+  }
+
   try {
     const { reference, status, amount } = await req.json();
 

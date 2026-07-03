@@ -64,7 +64,7 @@ export async function GET(req) {
           department_id: a.department_id
         })),
         payments: payments.slice(0, 50), // Send last 50 transactions
-        auditLogs: auditLogs.slice(0, 100), // Send last 100 logs
+        auditLogs: auditLogs, // Full log history — UI handles pagination
         notifications
       }
     });

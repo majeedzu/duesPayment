@@ -605,6 +605,22 @@ export default function AdminRosterPage() {
                     <option value="400">Level 400</option>
                   </select>
                 </div>
+                <div className="form-group">
+                  <label className="label">Faculty</label>
+                  <select
+                    className="input"
+                    value={editFaculty}
+                    onChange={(e) => setEditFaculty(e.target.value)}
+                    required
+                    style={{ cursor: "pointer" }}
+                  >
+                    <option value="Faculty of Applied Sciences and Technology">Applied Sciences & Technology</option>
+                    <option value="Faculty of Engineering">Engineering</option>
+                    <option value="Faculty of Art and Design">Art and Design</option>
+                    <option value="Faculty of Business and Management Studies">Business & Management Studies</option>
+                    <option value="Faculty of Applied Social Sciences">Applied Social Sciences</option>
+                  </select>
+                </div>
               </div>
 
               <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>

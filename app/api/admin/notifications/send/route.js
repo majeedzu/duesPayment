@@ -9,8 +9,9 @@ export async function POST(req) {
     }
 
     const departmentId = session.department_id;
+    // Super admins have no fixed department — they can't send dept-level notifications here
     if (!departmentId) {
-      return Response.json({ success: false, message: 'No department assigned to this admin.' }, { status: 400 });
+      return Response.json({ success: false, message: 'No department assigned. Use the Super Admin broadcast panel to send notifications.' }, { status: 400 });
     }
 
     const body = await req.json();

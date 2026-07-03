@@ -145,6 +145,15 @@ export default function SuperAdminDashboard() {
       router.push("/auth/login?role=super_admin");
       return;
     }
+    // Restore dark mode preference
+    const savedTheme = localStorage.getItem("htu-dues-theme");
+    if (savedTheme === "dark") {
+      document.body.classList.add("dark-mode");
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.body.classList.remove("dark-mode");
+      document.documentElement.removeAttribute("data-theme");
+    }
     // Use a microtask to avoid synchronous setState inside effect
     Promise.resolve().then(() => {
       setAdmin(session);
@@ -924,7 +933,7 @@ export default function SuperAdminDashboard() {
                               >
                                 <KeyRound size={12} /> Reset Password
                               </button>
-                              {adm.role !== 'super_admin' && (
+                              {adm.role !== 'super_admin' ? (
                                 <button
                                   onClick={() => handleDeleteAdmin(adm.id, adm.full_name)}
                                   className="btn btn-outline"
@@ -932,6 +941,13 @@ export default function SuperAdminDashboard() {
                                 >
                                   <Trash2 size={12} /> Remove
                                 </button>
+                              ) : (
+                                <span
+                                  title="Super admin accounts cannot be removed from this panel. Delete them directly in Supabase if needed."
+                                  style={{ fontSize: "0.72rem", opacity: 0.45, padding: "0.3rem 0.5rem", border: "1px dashed var(--border)", borderRadius: "var(--radius-sm)", cursor: "default", whiteSpace: "nowrap" }}
+                                >
+                                  Protected
+                                </span>
                               )}
                             </div>
                           )}

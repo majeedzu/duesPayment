@@ -11,6 +11,7 @@ export default function UpdatePasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -239,7 +240,7 @@ export default function UpdatePasswordPage() {
                       <Key className="auth-input-icon" size={18} style={{ color: '#98A2B3' }} />
                       <input
                         id="confirm-password"
-                        type={showPassword ? "text" : "password"}
+                        type={showConfirmPassword ? "text" : "password"}
                         placeholder="••••••"
                         className="input auth-input"
                         style={{ background: '#EEF3FF', border: 'none', height: '48px', borderRadius: '8px', paddingLeft: '2.75rem', width: '100%' }}
@@ -247,6 +248,14 @@ export default function UpdatePasswordPage() {
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                       />
+                      <button
+                        type="button"
+                        className="auth-password-toggle"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', zIndex: 10 }}
+                      >
+                        {showConfirmPassword ? <EyeOff size={18} style={{ color: '#98A2B3' }} /> : <Eye size={18} style={{ color: '#98A2B3' }} />}
+                      </button>
                     </div>
                   </div>
 

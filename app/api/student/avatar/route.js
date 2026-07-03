@@ -13,6 +13,18 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'Avatar image URL is required.' }, { status: 400 });
     }
 
+    // Reject oversized base64 payloads (limit ~500KB decoded ≈ ~680KB base64)
+    if (avatarUrl.length > 700000) {
+      return Response.json({ success: false, message: 'Image is too large. Please use an image under 500KB.' }, { status: 400 });
+    }
+
+    // Only allow base64 data URIs or https URLs
+    const isBase64 = avatarUrl.startsWith('data:image/');
+    const isHttps = avatarUrl.startsWith('https://');
+    if (!isBase64 && !isHttps) {
+      return Response.json({ success: false, message: 'Invalid image format.' }, { status: 400 });
+    }
+
     // In a real production setup, we would save to Supabase Storage and get public URL.
     // For this unified adapter, we accept the base64 or storage URL and update profiles table.
     const updatedProfile = await db.updateProfileAvatar(session.email, avatarUrl);

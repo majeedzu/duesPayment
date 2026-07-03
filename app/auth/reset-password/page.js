@@ -29,7 +29,7 @@ export default function ResetPasswordPage() {
         throw new Error(data.message || "Failed to initiate password reset.");
       }
 
-      setSuccess("A password reset link has been simulated & logged! Check your inbox.");
+      setSuccess("Password reset link sent! Check your inbox for an email from HTU Dues Portal.");
     } catch (err) {
       setError(err.message || "An error occurred. Try again.");
     } finally {
