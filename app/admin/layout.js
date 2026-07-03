@@ -80,13 +80,18 @@ export default function AdminLayout({ children }) {
 
   useEffect(() => {
     const session = getClientSession();
-    if (!session || (session.role !== "dept_admin" && session.role !== "super_admin")) {
+    if (!session) {
       router.push("/auth/login?role=dept_admin");
       return;
     }
-    // Super admins without a department should use their own dashboard
-    if (session.role === "super_admin" && !session.department_id) {
+    // Super admins have their own dashboard — send them there
+    if (session.role === "super_admin") {
       router.push("/super-admin/dashboard");
+      return;
+    }
+    // Only dept_admin should be in this layout
+    if (session.role !== "dept_admin") {
+      router.push("/auth/login?role=dept_admin");
       return;
     }
     // Restore dark mode preference
