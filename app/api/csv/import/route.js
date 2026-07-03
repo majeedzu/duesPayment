@@ -9,7 +9,7 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'Unauthorized.' }, { status: 401 });
     }
 
-    const { students, departmentId } = await req.json();
+    const { students, departmentId, skipDuplicates = false } = await req.json();
 
     if (!students || !Array.isArray(students) || students.length === 0) {
       return Response.json({ success: false, message: 'No student records provided.' }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(req) {
     const required = ['index_number', 'full_name', 'email', 'programme', 'level', 'faculty'];
     const errors = [];
     const valid = [];
-    const manualPayments = []; // students flagged with paid_status = 'paid'
+    const manualPaymentIndexes = []; // students flagged with paid_status = 'paid'
 
     students.forEach((student, i) => {
       const missing = required.filter(f => !student[f] || !String(student[f]).trim());
@@ -53,7 +53,7 @@ export async function POST(req) {
 
       // Track manually-paid students for payment record creation
       if (paidStatus === 'paid' || paidStatus === 'yes' || paidStatus === '1') {
-        manualPayments.push(indexNum);
+        manualPaymentIndexes.push(indexNum);
       }
     });
 
@@ -61,15 +61,23 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'No valid records to import.', errors }, { status: 400 });
     }
 
-    const { data: importedData, insertedCount, updatedCount } = await db.importStudentsCSV(valid);
+    // Pass skipDuplicates flag to the database layer
+    const { data: importedData, insertedCount, updatedCount, skippedDuplicates } =
+      await db.importStudentsCSV(valid, skipDuplicates);
 
-    // Create manual payment records for students with paid_status = paid
+    // Create manual payment records for students with paid_status = 'paid'.
+    // When skipDuplicates is true, only create payments for newly inserted students.
+    const insertedIndexNumbers = importedData.map(s => s.index_number);
+    const paymentTargets = skipDuplicates
+      ? manualPaymentIndexes.filter(idx => insertedIndexNumbers.includes(idx))
+      : manualPaymentIndexes;
+
     let manualPaymentsCreated = 0;
-    if (manualPayments.length > 0 && isSupabaseConfigured()) {
+    if (paymentTargets.length > 0 && isSupabaseConfigured()) {
       const dept = await db.getDepartment(departmentId);
       const duesAmount = dept?.dues_amount || 0;
 
-      for (const indexNum of manualPayments) {
+      for (const indexNum of paymentTargets) {
         const existingPayments = await db.getPaymentsByStudent(indexNum);
         const alreadyPaid = existingPayments.some(p => p.status === 'success');
         if (!alreadyPaid) {
@@ -90,16 +98,23 @@ export async function POST(req) {
       }
     }
 
+    const duplicateAction = skipDuplicates ? 'skipped' : 'updated';
+
     await db.addAuditLog(
       session.id,
       'CSV_IMPORT',
-      `${session.full_name} imported students into department ${departmentId}: ${insertedCount} new added, ${updatedCount} updated/verified. ${manualPaymentsCreated} manual payment(s) recorded.`
+      `${session.full_name} imported students into department ${departmentId}: ` +
+      `${insertedCount} new, ${updatedCount} ${duplicateAction}, ` +
+      `${skippedDuplicates} duplicates skipped, ${manualPaymentsCreated} manual payment(s).`
     );
 
-    // Notify only the uploading admin, not all dept admins
     await db.addNotification(
       'CSV Import Complete',
-      `${insertedCount} new student record(s) added, ${updatedCount} updated/verified. ${manualPaymentsCreated} manual payment(s) recorded. ${errors.length} row(s) skipped.`,
+      `${insertedCount} new student(s) added. ` +
+      `${updatedCount} existing record(s) updated. ` +
+      `${skippedDuplicates} duplicate(s) skipped. ` +
+      `${manualPaymentsCreated} cash payment(s) recorded. ` +
+      `${errors.length} row(s) had validation errors.`,
       session.id,
       null
     );
@@ -108,6 +123,7 @@ export async function POST(req) {
       success: true,
       imported: insertedCount,
       updated: updatedCount,
+      skippedDuplicates,
       manualPayments: manualPaymentsCreated,
       skipped: errors.length,
       errors
