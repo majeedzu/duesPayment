@@ -29,12 +29,17 @@ export default function AdminImportPage() {
   const fetchDepartmentInfo = async () => {
     try {
       const res = await fetch("/api/admin/stats");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) setDepartment(data.data.department);
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setDepartment(data.data.department);
+      } else if (data.message === 'No department assigned to this admin.') {
+        setImportErrors(["Your account has no department assigned. Ask the Super Admin to assign you to a department, then log out and back in."]);
+      } else {
+        setImportErrors([data.message || "Failed to load department info. Please refresh the page."]);
       }
     } catch (err) {
       console.error("Failed to load department details for CSV upload:", err);
+      setImportErrors(["Could not connect to server. Please refresh the page."]);
     } finally {
       setLoading(false);
     }
@@ -160,6 +165,11 @@ export default function AdminImportPage() {
 
   // ── Step 3: Perform the actual import ─────────────────────────────────────
   const runImport = async (rows, skipDuplicates) => {
+    if (!department?.id) {
+      setImportErrors(["Department not loaded. Please refresh the page and try again."]);
+      setShowDuplicateModal(false);
+      return;
+    }
     setImporting(true);
     setShowDuplicateModal(false);
     try {
