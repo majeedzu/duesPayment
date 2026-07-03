@@ -6,7 +6,7 @@ import Link from "next/link";
 import { 
   CreditCard, ShieldCheck, CheckCircle2, AlertTriangle, 
   Download, Image as ImageIcon, Bell, LogOut, Loader2,
-  Calendar, FileText, User, Mail, GraduationCap, Building2, Eye,
+  Calendar, FileText, User, Mail, GraduationCap, Building2, Eye, EyeOff,
   ChevronLeft, ChevronRight, Menu, X, Check, MessageCircle, Phone, HelpCircle
 } from "lucide-react";
 import { getClientSession, setClientSession, clearClientSession } from "@/lib/session";
@@ -50,6 +50,8 @@ export default function StudentDashboard() {
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [changePasswordError, setChangePasswordError] = useState("");
   const [changePasswordSuccess, setChangePasswordSuccess] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Floating help button state
   const [helpOpen, setHelpOpen] = useState(false);
@@ -1254,12 +1256,19 @@ export default function StudentDashboard() {
 
             {/* Printable Receipt Slip */}
             <div id="printable-receipt" style={{ padding: "2.5rem 2rem", position: "relative" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", borderBottom: "2px solid #00008C", paddingBottom: "1.5rem", marginBottom: "1.5rem" }}>
-                <div>
-                  <h2 style={{ color: "#00008C", fontSize: "1.4rem", fontWeight: 800 }}>HO TECHNICAL UNIVERSITY</h2>
-                  <p style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#64748B", fontWeight: 700 }}>
-                    Official Dues Receipt
-                  </p>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #00008C", paddingBottom: "1.5rem", marginBottom: "1.5rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+                  <img
+                    src="/htu_logo.jpg"
+                    alt="HTU Logo"
+                    style={{ width: "56px", height: "56px", borderRadius: "6px", objectFit: "contain", flexShrink: 0 }}
+                  />
+                  <div>
+                    <h2 style={{ color: "#00008C", fontSize: "1.2rem", fontWeight: 800, margin: 0 }}>HO TECHNICAL UNIVERSITY</h2>
+                    <p style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "#64748B", fontWeight: 700, margin: "0.2rem 0 0" }}>
+                      Official Dues Receipt
+                    </p>
+                  </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <span style={{ 
@@ -1606,48 +1615,62 @@ export default function StudentDashboard() {
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#475569", marginBottom: "0.5rem" }}>
                   New Password
                 </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="At least 6 characters"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "48px",
-                    padding: "0 1rem",
-                    borderRadius: "12px",
-                    backgroundColor: "#EEF3FF",
-                    border: "none",
-                    fontSize: "0.95rem",
-                    color: "#0F172A",
-                    outline: "none"
-                  }}
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    required
+                    placeholder="At least 6 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    style={{
+                      width: "100%",
+                      height: "48px",
+                      padding: "0 2.75rem 0 1rem",
+                      borderRadius: "12px",
+                      backgroundColor: "#EEF3FF",
+                      border: "none",
+                      fontSize: "0.95rem",
+                      color: "#0F172A",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                  <button type="button" onClick={() => setShowNewPassword(v => !v)}
+                    style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", color: "#94a3b8" }}>
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#475569", marginBottom: "0.5rem" }}>
                   Confirm Password
                 </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Re-type your new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "48px",
-                    padding: "0 1rem",
-                    borderRadius: "12px",
-                    backgroundColor: "#EEF3FF",
-                    border: "none",
-                    fontSize: "0.95rem",
-                    color: "#0F172A",
-                    outline: "none"
-                  }}
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    required
+                    placeholder="Re-type your new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    style={{
+                      width: "100%",
+                      height: "48px",
+                      padding: "0 2.75rem 0 1rem",
+                      borderRadius: "12px",
+                      backgroundColor: "#EEF3FF",
+                      border: "none",
+                      fontSize: "0.95rem",
+                      color: "#0F172A",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(v => !v)}
+                    style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", color: "#94a3b8" }}>
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {changePasswordError && (

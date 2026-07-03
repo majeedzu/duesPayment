@@ -25,7 +25,9 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
-  KeyRound
+  KeyRound,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { getClientSession, setClientSession, clearClientSession } from "@/lib/session";
 
@@ -53,6 +55,8 @@ export default function SuperAdminDashboard() {
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [changePasswordError, setChangePasswordError] = useState("");
   const [changePasswordSuccess, setChangePasswordSuccess] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Dashboard Data
   const [stats, setStats] = useState({
@@ -1538,48 +1542,62 @@ export default function SuperAdminDashboard() {
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#475569", marginBottom: "0.5rem" }}>
                   New Password
                 </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="At least 6 characters"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "48px",
-                    padding: "0 1rem",
-                    borderRadius: "12px",
-                    backgroundColor: "#EEF3FF",
-                    border: "none",
-                    fontSize: "0.95rem",
-                    color: "#0F172A",
-                    outline: "none"
-                  }}
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    required
+                    placeholder="At least 6 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    style={{
+                      width: "100%",
+                      height: "48px",
+                      padding: "0 2.75rem 0 1rem",
+                      borderRadius: "12px",
+                      backgroundColor: "#EEF3FF",
+                      border: "none",
+                      fontSize: "0.95rem",
+                      color: "#0F172A",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                  <button type="button" onClick={() => setShowNewPassword(v => !v)}
+                    style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", color: "#94a3b8" }}>
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#475569", marginBottom: "0.5rem" }}>
                   Confirm Password
                 </label>
-                <input
-                  type="password"
-                  required
-                  placeholder="Re-type your new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  style={{
-                    width: "100%",
-                    height: "48px",
-                    padding: "0 1rem",
-                    borderRadius: "12px",
-                    backgroundColor: "#EEF3FF",
-                    border: "none",
-                    fontSize: "0.95rem",
-                    color: "#0F172A",
-                    outline: "none"
-                  }}
-                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    required
+                    placeholder="Re-type your new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    style={{
+                      width: "100%",
+                      height: "48px",
+                      padding: "0 2.75rem 0 1rem",
+                      borderRadius: "12px",
+                      backgroundColor: "#EEF3FF",
+                      border: "none",
+                      fontSize: "0.95rem",
+                      color: "#0F172A",
+                      outline: "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(v => !v)}
+                    style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", color: "#94a3b8" }}>
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {changePasswordError && (

@@ -212,16 +212,19 @@ export default function AdminImportPage() {
   };
 
   const handleDownloadTemplate = () => {
+    const deptFaculty = department?.faculty || "Faculty of Applied Sciences and Technology";
+    const deptName = department?.name || "Your Department";
     const csvContent = [
       ["index_number", "full_name", "email", "programme", "level", "faculty", "paid_status"],
-      ["0322080456", "John Doe", "0322080456@htu.edu.gh", "BTech Computer Science", "400", "Faculty of Applied Sciences and Technology", ""],
-      ["0322080999", "Jane Smith", "0322080999@htu.edu.gh", "BTech Computer Science", "300", "Faculty of Applied Sciences and Technology", "paid"]
+      ["0322080456", "John Doe", "0322080456@htu.edu.gh", `BTech ${deptName}`, "400", deptFaculty, ""],
+      ["0322080999", "Jane Smith", "0322080999@htu.edu.gh", `BTech ${deptName}`, "300", deptFaculty, "paid"]
     ].map(e => e.join(",")).join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", "htu_student_import_template.csv");
+    const safeName = deptName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+    link.setAttribute("download", `htu_${safeName}_import_template.csv`);
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
@@ -244,18 +247,22 @@ export default function AdminImportPage() {
     padding: "1rem"
   };
 
+  // Fully opaque card background — never inherits transparency from overlay
+  const modalCardStyle = {
+    backgroundColor: "#ffffff",
+    borderRadius: "16px",
+    width: "100%",
+    boxShadow: "0 25px 80px rgba(0,0,0,0.45)",
+    overflow: "hidden"
+  };
+
   return (
     <div style={{ maxWidth: "800px", margin: "0 auto" }}>
 
       {/* ── FACULTY MISMATCH WARNING ───────────────────────────────────────── */}
       {showFacultyWarning && (
         <div style={overlayStyle}>
-          <div style={{
-            background: "var(--card)", borderRadius: "16px",
-            width: "100%", maxWidth: "520px",
-            boxShadow: "0 25px 80px rgba(0,0,0,0.45)",
-            overflow: "hidden"
-          }}>
+          <div style={{ ...modalCardStyle, maxWidth: "520px" }}>
             {/* Red warning header banner */}
             <div style={{
               background: "linear-gradient(135deg, #dc2626, #b91c1c)",
@@ -286,23 +293,23 @@ export default function AdminImportPage() {
               }}>
                 <div style={{
                   padding: "0.85rem 1rem", borderRadius: "10px",
-                  backgroundColor: "rgba(5,150,105,0.08)",
-                  border: "1px solid rgba(5,150,105,0.25)"
+                  backgroundColor: "#f0fdf4",
+                  border: "1px solid #86efac"
                 }}>
-                  <p style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--success)", marginBottom: "0.35rem" }}>
+                  <p style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#16a34a", marginBottom: "0.35rem" }}>
                     Your Department
                   </p>
-                  <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "var(--foreground)", lineHeight: 1.3 }}>
+                  <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "#0f172a", lineHeight: 1.3 }}>
                     {department?.name}
                   </p>
-                  <p style={{ fontSize: "0.75rem", opacity: 0.65, marginTop: "0.2rem", lineHeight: 1.3 }}>
+                  <p style={{ fontSize: "0.75rem", color: "#475569", marginTop: "0.2rem", lineHeight: 1.3 }}>
                     {department?.faculty}
                   </p>
                 </div>
                 <div style={{
                   padding: "0.85rem 1rem", borderRadius: "10px",
-                  backgroundColor: "rgba(220,38,38,0.08)",
-                  border: "1px solid rgba(220,38,38,0.25)"
+                  backgroundColor: "#fef2f2",
+                  border: "1px solid #fca5a5"
                 }}>
                   <p style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "#dc2626", marginBottom: "0.35rem" }}>
                     Found in CSV
@@ -313,7 +320,7 @@ export default function AdminImportPage() {
                 </div>
               </div>
 
-              <p style={{ fontSize: "0.82rem", opacity: 0.75, lineHeight: 1.6, margin: 0 }}>
+              <p style={{ fontSize: "0.82rem", color: "#374151", lineHeight: 1.6, margin: 0 }}>
                 Uploading this file will add students from a <strong>different faculty</strong> into your department roster. This is likely a mistake. Are you sure you want to continue?
               </p>
 
@@ -347,7 +354,7 @@ export default function AdminImportPage() {
       {showDuplicateModal && (
         <div style={overlayStyle}>
           <div style={{
-            background: "var(--card)", borderRadius: "16px",
+            backgroundColor: "#ffffff", color: "#0f172a", borderRadius: "16px",
             width: "100%", maxWidth: "580px",
             boxShadow: "0 25px 80px rgba(0,0,0,0.45)",
             overflow: "hidden", maxHeight: "90vh", display: "flex", flexDirection: "column"
@@ -411,17 +418,17 @@ export default function AdminImportPage() {
                     <span style={{ fontWeight: 700, color: "#d97706", fontFamily: "monospace" }}>
                       {s.index_number}
                     </span>
-                    <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#1e293b" }}>
                       {s.full_name}
                     </span>
-                    <span style={{ opacity: 0.65, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <span style={{ color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {s.programme}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <p style={{ fontSize: "0.82rem", opacity: 0.7, margin: 0 }}>
+              <p style={{ fontSize: "0.82rem", color: "#374151", margin: 0 }}>
                 How would you like to handle these <strong>{duplicates.length}</strong> existing record{duplicates.length !== 1 ? "s" : ""}?
               </p>
 
