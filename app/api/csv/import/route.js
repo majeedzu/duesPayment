@@ -19,6 +19,11 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'Department ID is required.' }, { status: 400 });
     }
 
+    // Dept isolation: a dept_admin can only import into their own department
+    if (session.role === 'dept_admin' && session.department_id && session.department_id !== departmentId) {
+      return Response.json({ success: false, message: 'Unauthorized: you can only import into your assigned department.' }, { status: 403 });
+    }
+
     // Validate required fields in each row
     const required = ['index_number', 'full_name', 'email', 'programme', 'level', 'faculty'];
     const errors = [];

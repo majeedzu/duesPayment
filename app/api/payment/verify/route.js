@@ -1,8 +1,16 @@
 import { db } from '@/lib/db';
+import { getServerSession } from '@/lib/session';
 import { isSupabaseConfigured } from '@/lib/supabase';
 
 export async function POST(req) {
   try {
+    // Auth: only students and admins who own the payment's student record
+    // should be able to trigger verification. At minimum require a valid session.
+    const session = getServerSession(req);
+    if (!session) {
+      return Response.json({ success: false, message: 'Unauthorized.' }, { status: 401 });
+    }
+
     const { reference } = await req.json();
 
     if (!reference) {
@@ -12,6 +20,14 @@ export async function POST(req) {
     const existing = await db.getPaymentByRef(reference);
     if (!existing) {
       return Response.json({ success: false, message: 'Reference not found.' }, { status: 404 });
+    }
+
+    // Ownership check: students can only verify their own payments
+    if (session.role === 'student') {
+      const student = await db.getStudentByEmail(session.email);
+      if (!student || student.index_number !== existing.student_index_number) {
+        return Response.json({ success: false, message: 'Unauthorized: this payment does not belong to your account.' }, { status: 403 });
+      }
     }
 
     if (existing.status === 'success') {

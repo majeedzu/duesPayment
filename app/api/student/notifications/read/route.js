@@ -28,6 +28,17 @@ export async function POST(req) {
       return Response.json({ success: false, message: 'Notification ID is required.' }, { status: 400 });
     }
 
+    // Ownership check: verify this notification belongs to the requesting student
+    const profile = await db.getProfile(session.email);
+    if (!profile) {
+      return Response.json({ success: false, message: 'Profile not found.' }, { status: 404 });
+    }
+    const studentNotifs = await db.getNotifications(profile.id, 'student');
+    const owned = studentNotifs.some(n => String(n.id) === String(id));
+    if (!owned) {
+      return Response.json({ success: false, message: 'Unauthorized: notification does not belong to your account.' }, { status: 403 });
+    }
+
     await db.markNotificationRead(id);
     return Response.json({ success: true, message: 'Notification marked as read.' });
   } catch (err) {

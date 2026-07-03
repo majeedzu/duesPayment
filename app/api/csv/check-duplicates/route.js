@@ -27,11 +27,11 @@ export async function POST(req) {
       if (error) throw error;
       existingStudents = data || [];
     } else {
-      const { readMockDB } = await import('@/lib/db');
-      const dbData = readMockDB();
-      existingStudents = (dbData.students || []).filter(s =>
-        indexNumbers.includes(s.index_number)
+      // Mock mode: use getStudentByIndex for each provided index number
+      const results = await Promise.all(
+        indexNumbers.map(idx => db.getStudentByIndex(idx))
       );
+      existingStudents = results.filter(Boolean);
     }
 
     return Response.json({
