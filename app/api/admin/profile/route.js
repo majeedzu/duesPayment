@@ -4,7 +4,8 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   try {
-    const sessionCookie = cookies().get("htu_session");
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("htu_session");
     if (!sessionCookie) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
@@ -50,7 +51,8 @@ export async function GET() {
 
 export async function PUT(request) {
   try {
-    const sessionCookie = cookies().get("htu_session");
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("htu_session");
     if (!sessionCookie) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
