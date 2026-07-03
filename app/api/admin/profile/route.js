@@ -20,8 +20,8 @@ export async function GET() {
       return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
     }
 
-    // Get admin profile
-    const profile = await db.getProfile(session.id);
+    // Get admin profile by email (session stores email, not id directly)
+    const profile = await db.getProfile(session.email);
     if (!profile) {
       return NextResponse.json({ success: false, message: "Profile not found" }, { status: 404 });
     }
@@ -42,7 +42,7 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching admin profile:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: error.message || "Internal server error" },
       { status: 500 }
     );
   }
@@ -76,8 +76,14 @@ export async function PUT(request) {
       );
     }
 
+    // Get the user's profile first to get their ID
+    const profile = await db.getProfile(session.email);
+    if (!profile) {
+      return NextResponse.json({ success: false, message: "Profile not found" }, { status: 404 });
+    }
+
     // Update profile with WhatsApp number
-    const success = await db.updateProfile(session.id, { whatsapp: whatsapp || null });
+    const success = await db.updateProfile(profile.id, { whatsapp: whatsapp || null });
 
     if (!success) {
       return NextResponse.json(
@@ -87,11 +93,11 @@ export async function PUT(request) {
     }
 
     // Log audit event
-    await db.addAuditLog({
-      actor_id: session.id,
-      action: "PROFILE_UPDATED",
-      details: `Admin updated WhatsApp number to ${whatsapp || "(removed)"}`,
-    });
+    await db.addAuditLog(
+      profile.id,
+      "PROFILE_UPDATED",
+      `Admin updated WhatsApp number to ${whatsapp || "(removed)"}`
+    );
 
     return NextResponse.json({
       success: true,
@@ -100,7 +106,7 @@ export async function PUT(request) {
   } catch (error) {
     console.error("Error updating admin profile:", error);
     return NextResponse.json(
-      { success: false, message: "Internal server error" },
+      { success: false, message: error.message || "Internal server error" },
       { status: 500 }
     );
   }

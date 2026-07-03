@@ -3617,9 +3617,34 @@ body.dark-mode .floating-metric-card strong, [data-theme="dark"] .floating-metri
   margin-bottom: 1.5rem;
 }
 
+/* Student Roster Stats Grid - more breathing room */
+.roster-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.roster-stats-grid .card {
+  padding: 1.25rem 1.5rem;
+  min-height: 110px;
+}
+
+.roster-stats-grid .stat-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 @media (max-width: 1200px) {
   .admin-stats-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  
+  .roster-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
   }
 }
 
@@ -3629,6 +3654,16 @@ body.dark-mode .floating-metric-card strong, [data-theme="dark"] .floating-metri
   }
   .admin-stats-grid > div:last-child {
     grid-column: span 2;
+  }
+  
+  .roster-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem;
+  }
+  
+  .roster-stats-grid .card {
+    padding: 1.25rem 1.25rem;
+    min-height: 100px;
   }
 }
 
@@ -3641,6 +3676,21 @@ body.dark-mode .floating-metric-card strong, [data-theme="dark"] .floating-metri
   }
   .grid-cols-4 {
     grid-template-columns: 1fr !important;
+  }
+  
+  /* Admin Quick Actions: increase tap target on mobile */
+  .admin-quick-actions .card {
+    min-height: 140px;
+    padding: 1.25rem 1.25rem !important;
+  }
+  
+  .roster-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .roster-stats-grid .card {
+    padding: 1.25rem 1.25rem;
   }
 }
 

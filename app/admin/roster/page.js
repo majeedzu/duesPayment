@@ -296,41 +296,41 @@ export default function AdminRosterPage() {
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
 
       {/* Mini Stats Strip */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: "1rem" }}>
-        <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)", padding: "1rem 1.25rem" }}>
+      <div className="roster-stats-grid">
+        <div className="card stat-card" style={{ borderLeft: "4px solid var(--primary)" }}>
           <div>
-            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Enrolled</span>
-            <div style={{ fontSize: "1.5rem", fontWeight: 800, fontFamily: "var(--font-heading)" }}>{stats.totalStudents}</div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>Enrolled</span>
+            <div style={{ fontSize: "1.75rem", fontWeight: 800, fontFamily: "var(--font-heading)", marginTop: "0.35rem" }}>{stats.totalStudents}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "rgba(0, 55, 114, 0.1)", color: "var(--primary)" }}>
-            <Users size={18} />
+          <div className="stat-icon-wrapper" style={{ width: 42, height: 42, backgroundColor: "rgba(0, 55, 114, 0.1)", color: "var(--primary)" }}>
+            <Users size={20} />
           </div>
         </div>
-        <div className="card stat-card" style={{ borderLeft: "4px solid var(--success)", padding: "1rem 1.25rem" }}>
+        <div className="card stat-card" style={{ borderLeft: "4px solid var(--success)" }}>
           <div>
-            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Fully Paid</span>
-            <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-heading)" }}>{stats.paidCount}</div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>Fully Paid</span>
+            <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-heading)", marginTop: "0.35rem" }}>{stats.paidCount}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "var(--success-bg)", color: "var(--success)" }}>
-            <Check size={18} />
+          <div className="stat-icon-wrapper" style={{ width: 42, height: 42, backgroundColor: "var(--success-bg)", color: "var(--success)" }}>
+            <Check size={20} />
           </div>
         </div>
-        <div className="card stat-card" style={{ borderLeft: "4px solid #F59E0B", padding: "1rem 1.25rem" }}>
+        <div className="card stat-card" style={{ borderLeft: "4px solid #F59E0B" }}>
           <div>
-            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Partially Paid</span>
-            <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#F59E0B", fontFamily: "var(--font-heading)" }}>{stats.partiallyPaidCount || 0}</div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>Partially Paid</span>
+            <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "#F59E0B", fontFamily: "var(--font-heading)", marginTop: "0.35rem" }}>{stats.partiallyPaidCount || 0}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "rgba(245, 158, 11, 0.1)", color: "#F59E0B" }}>
-            <Check size={18} />
+          <div className="stat-icon-wrapper" style={{ width: 42, height: 42, backgroundColor: "rgba(245, 158, 11, 0.1)", color: "#F59E0B" }}>
+            <Check size={20} />
           </div>
         </div>
-        <div className="card stat-card" style={{ borderLeft: "4px solid var(--danger)", padding: "1rem 1.25rem" }}>
+        <div className="card stat-card" style={{ borderLeft: "4px solid var(--danger)" }}>
           <div>
-            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase" }}>Unpaid Dues</span>
-            <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--danger)", fontFamily: "var(--font-heading)" }}>{stats.unpaidCount}</div>
+            <span style={{ fontSize: "0.75rem", opacity: 0.6, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.03em" }}>Unpaid Dues</span>
+            <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--danger)", fontFamily: "var(--font-heading)", marginTop: "0.35rem" }}>{stats.unpaidCount}</div>
           </div>
-          <div className="stat-icon-wrapper" style={{ width: 36, height: 36, backgroundColor: "var(--danger-bg)", color: "var(--danger)" }}>
-            <X size={18} />
+          <div className="stat-icon-wrapper" style={{ width: 42, height: 42, backgroundColor: "var(--danger-bg)", color: "var(--danger)" }}>
+            <X size={20} />
           </div>
         </div>
       </div>

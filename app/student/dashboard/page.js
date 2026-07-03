@@ -201,6 +201,31 @@ export default function StudentDashboard() {
     }
   };
 
+  const handleClearAllNotifications = async () => {
+    if (!window.confirm("Are you sure you want to clear all notifications? This action cannot be undone.")) {
+      return;
+    }
+
+    setNotifUpdating(true);
+    try {
+      const res = await fetch("/api/student/notifications/read", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
+      
+      if (res.ok) {
+        await refreshNotifications();
+      } else {
+        alert("Failed to clear notifications");
+      }
+    } catch (err) {
+      console.error("Failed to clear all notifications:", err);
+      alert("Error clearing notifications");
+    } finally {
+      setNotifUpdating(false);
+    }
+  };
+
   const handleLogout = () => {
     clearClientSession();
     router.push("/");
@@ -1087,16 +1112,29 @@ export default function StudentDashboard() {
                   <p style={{ fontSize: "0.85rem", opacity: 0.7, marginTop: "0.25rem" }}>Review official department messages, transaction clearances, and registration alerts.</p>
                 </div>
                 
-                {notifications.some(n => !n.is_read) && (
-                  <button 
-                    onClick={handleMarkAllRead} 
-                    className="btn btn-outline" 
-                    style={{ fontSize: "0.8rem", padding: "0.5rem 1rem", display: "inline-flex", gap: "0.35rem", alignItems: "center" }}
-                    disabled={notifUpdating}
-                  >
-                    <Check size={14} /> Mark All as Read
-                  </button>
-                )}
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                  {notifications.some(n => !n.is_read) && (
+                    <button 
+                      onClick={handleMarkAllRead} 
+                      className="btn btn-outline" 
+                      style={{ fontSize: "0.8rem", padding: "0.5rem 1rem", display: "inline-flex", gap: "0.35rem", alignItems: "center" }}
+                      disabled={notifUpdating}
+                    >
+                      <Check size={14} /> Mark All as Read
+                    </button>
+                  )}
+                  
+                  {notifications.length > 0 && (
+                    <button 
+                      onClick={handleClearAllNotifications} 
+                      className="btn btn-danger" 
+                      style={{ fontSize: "0.8rem", padding: "0.5rem 1rem", display: "inline-flex", gap: "0.35rem", alignItems: "center" }}
+                      disabled={notifUpdating}
+                    >
+                      <X size={14} /> Clear All
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Filter Tabs */}

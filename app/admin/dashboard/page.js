@@ -184,7 +184,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Action Cards */}
-      <div className="grid grid-cols-3" style={{ gap: "1.25rem" }}>
+      <div className="grid grid-cols-3 admin-quick-actions" style={{ gap: "1.25rem" }}>
         <Link href="/admin/roster" style={{ textDecoration: "none" }}>
           <div className="card" style={{ cursor: "pointer", transition: "var(--transition)", padding: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem", borderTop: "3px solid var(--primary)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

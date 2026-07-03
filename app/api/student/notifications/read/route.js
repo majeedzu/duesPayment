@@ -35,3 +35,28 @@ export async function POST(req) {
     return Response.json({ success: false, message: err.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+
+export async function DELETE(req) {
+  try {
+    const session = getServerSession(req);
+    if (!session || session.role !== 'student') {
+      return Response.json({ success: false, message: 'Unauthorized access.' }, { status: 401 });
+    }
+
+    const profile = await db.getProfile(session.email);
+    if (!profile) {
+      return Response.json({ success: false, message: 'Profile not found.' }, { status: 404 });
+    }
+
+    // Clear all notifications for this user
+    const notifications = await db.getNotifications(profile.id, 'student');
+    for (const notif of notifications) {
+      await db.deleteNotification(notif.id);
+    }
+
+    return Response.json({ success: true, message: 'All notifications cleared successfully.' });
+  } catch (err) {
+    console.error("Clear All Notifications API Error:", err);
+    return Response.json({ success: false, message: err.message || 'Internal Server Error' }, { status: 500 });
+  }
+}
