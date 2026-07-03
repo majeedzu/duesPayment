@@ -26,12 +26,15 @@ export default function AdminImportPage() {
   const [mismatchedFaculties, setMismatchedFaculties] = useState([]);
   const [pendingValidRows, setPendingValidRows] = useState(null);
 
+  const [students, setStudents] = useState([]);
+
   const fetchDepartmentInfo = async () => {
     try {
       const res = await fetch("/api/admin/stats");
       const data = await res.json();
       if (res.ok && data.success) {
         setDepartment(data.data.department);
+        setStudents(data.data.students || []);
       } else if (data.message === 'No department assigned to this admin.') {
         setImportErrors(["Your account has no department assigned. Ask the Super Admin to assign you to a department, then log out and back in."]);
       } else {
@@ -224,16 +227,37 @@ export default function AdminImportPage() {
   const handleDownloadTemplate = () => {
     const deptFaculty = department?.faculty || "Faculty of Applied Sciences and Technology";
     const deptName = department?.name || "Your Department";
+    const safeName = deptName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+
+    let rows;
+    if (students.length > 0) {
+      // Use actual enrolled students so admin can see the real roster format
+      rows = students.map(s => [
+        s.index_number,
+        s.full_name,
+        s.email,
+        s.programme,
+        s.level,
+        s.faculty || deptFaculty,
+        ""   // paid_status — blank for re-import purposes
+      ]);
+    } else {
+      // Fallback example rows when no students exist yet
+      rows = [
+        ["0322080456", "John Doe", "0322080456@htu.edu.gh", `BTech ${deptName}`, "400", deptFaculty, ""],
+        ["0322080999", "Jane Smith", "0322080999@htu.edu.gh", `BTech ${deptName}`, "300", deptFaculty, "paid"]
+      ];
+    }
+
     const csvContent = [
       ["index_number", "full_name", "email", "programme", "level", "faculty", "paid_status"],
-      ["0322080456", "John Doe", "0322080456@htu.edu.gh", `BTech ${deptName}`, "400", deptFaculty, ""],
-      ["0322080999", "Jane Smith", "0322080999@htu.edu.gh", `BTech ${deptName}`, "300", deptFaculty, "paid"]
+      ...rows
     ].map(e => e.join(",")).join("\n");
+
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    const safeName = deptName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
     link.setAttribute("download", `htu_${safeName}_import_template.csv`);
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
