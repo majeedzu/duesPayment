@@ -7,7 +7,7 @@ import {
   CreditCard, ShieldCheck, CheckCircle2, AlertTriangle, 
   Download, Image as ImageIcon, Bell, LogOut, Loader2,
   Calendar, FileText, User, Mail, GraduationCap, Building2, Eye,
-  ChevronLeft, ChevronRight, Menu, X, Check, MessageCircle
+  ChevronLeft, ChevronRight, Menu, X, Check, MessageCircle, Phone, HelpCircle
 } from "lucide-react";
 import { getClientSession, setClientSession, clearClientSession } from "@/lib/session";
 import QRCode from "qrcode";
@@ -50,6 +50,9 @@ export default function StudentDashboard() {
   const [changePasswordLoading, setChangePasswordLoading] = useState(false);
   const [changePasswordError, setChangePasswordError] = useState("");
   const [changePasswordSuccess, setChangePasswordSuccess] = useState("");
+
+  // Floating help button state
+  const [helpOpen, setHelpOpen] = useState(false);
 
   // Monitor screen size for mobile responsive layout
   useEffect(() => {
@@ -1390,6 +1393,174 @@ export default function StudentDashboard() {
 
           </div>
         </div>
+      )}
+
+      {/* Floating Help Button */}
+      {dashboardData && (
+        <>
+          {/* Backdrop */}
+          {helpOpen && (
+            <div
+              onClick={() => setHelpOpen(false)}
+              style={{ position: "fixed", inset: 0, zIndex: 9998 }}
+            />
+          )}
+
+          {/* Help panel */}
+          {helpOpen && (
+            <div style={{
+              position: "fixed",
+              bottom: "90px",
+              right: "1.5rem",
+              zIndex: 9999,
+              width: "280px",
+              backgroundColor: "var(--card-bg)",
+              border: "1px solid var(--border)",
+              borderRadius: "16px",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+              padding: "1.25rem",
+              animation: "modalEnter 0.2s ease"
+            }}>
+              {/* Header */}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <HelpCircle size={16} style={{ color: "var(--primary)" }} />
+                  <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "var(--primary)" }}>Need Help?</span>
+                </div>
+                <button onClick={() => setHelpOpen(false)} style={{ border: "none", background: "none", cursor: "pointer", opacity: 0.5, padding: "2px" }}>
+                  <X size={16} />
+                </button>
+              </div>
+
+              {dashboardData.deptAdmin ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {/* Admin identity */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.65rem", padding: "0.75rem", backgroundColor: "rgba(0,0,140,0.04)", borderRadius: "10px", border: "1px solid rgba(0,0,140,0.08)" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: "50%", backgroundColor: "var(--primary)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: "0.95rem", flexShrink: 0 }}>
+                      {dashboardData.deptAdmin.full_name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p style={{ fontWeight: 700, fontSize: "0.85rem", margin: 0, color: "var(--foreground)" }}>{dashboardData.deptAdmin.full_name}</p>
+                      <p style={{ fontSize: "0.72rem", opacity: 0.55, margin: 0 }}>Dept Administrator</p>
+                    </div>
+                  </div>
+
+                  {/* WhatsApp button */}
+                  {dashboardData.deptAdmin.whatsapp && (
+                    <a
+                      href={`https://wa.me/${dashboardData.deptAdmin.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${dashboardData.deptAdmin.full_name}, I am ${dashboardData.student?.full_name} (Index: ${dashboardData.student?.index_number}). I need help with my departmental dues.`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                        backgroundColor: "#25D366", color: "#fff", borderRadius: "10px",
+                        padding: "0.65rem 1rem", fontWeight: 700, fontSize: "0.82rem",
+                        textDecoration: "none", border: "none", cursor: "pointer",
+                        transition: "background-color 0.2s"
+                      }}
+                      onMouseOver={e => e.currentTarget.style.backgroundColor = "#1ebc5a"}
+                      onMouseOut={e => e.currentTarget.style.backgroundColor = "#25D366"}
+                    >
+                      <MessageCircle size={15} /> WhatsApp Admin
+                    </a>
+                  )}
+
+                  {/* Call button */}
+                  {dashboardData.deptAdmin.whatsapp && (
+                    <a
+                      href={`tel:${dashboardData.deptAdmin.whatsapp.replace(/[^0-9+]/g, '')}`}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                        backgroundColor: "rgba(0,0,140,0.07)", color: "var(--primary)", borderRadius: "10px",
+                        padding: "0.65rem 1rem", fontWeight: 700, fontSize: "0.82rem",
+                        textDecoration: "none", border: "1px solid rgba(0,0,140,0.15)", cursor: "pointer",
+                        transition: "background-color 0.2s"
+                      }}
+                      onMouseOver={e => e.currentTarget.style.backgroundColor = "rgba(0,0,140,0.12)"}
+                      onMouseOut={e => e.currentTarget.style.backgroundColor = "rgba(0,0,140,0.07)"}
+                    >
+                      <Phone size={15} /> Call Admin
+                    </a>
+                  )}
+
+                  {/* Email fallback */}
+                  {!dashboardData.deptAdmin.whatsapp && (
+                    <div style={{ fontSize: "0.78rem", opacity: 0.65, textAlign: "center", lineHeight: 1.5 }}>
+                      Contact via email:<br />
+                      <strong>{dashboardData.deptAdmin.email}</strong>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
+                  <p style={{ fontSize: "0.78rem", opacity: 0.65, textAlign: "center", lineHeight: 1.5, margin: 0 }}>
+                    No administrator assigned yet. Contact HTU support directly:
+                  </p>
+                  {[
+                    { number: "0595744536", label: "Support Line 1" },
+                    { number: "0545862058", label: "Support Line 2" },
+                  ].map(({ number, label }) => (
+                    <div key={number} style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                      <span style={{ fontSize: "0.7rem", opacity: 0.5, fontWeight: 700, textTransform: "uppercase" }}>{label}</span>
+                      <div style={{ display: "flex", gap: "0.5rem" }}>
+                        <a
+                          href={`tel:${number}`}
+                          style={{
+                            flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                            backgroundColor: "rgba(0,0,140,0.07)", color: "var(--primary)", borderRadius: "8px",
+                            padding: "0.55rem 0.5rem", fontWeight: 700, fontSize: "0.78rem",
+                            textDecoration: "none", border: "1px solid rgba(0,0,140,0.15)"
+                          }}
+                        >
+                          <Phone size={13} /> Call
+                        </a>
+                        <a
+                          href={`https://wa.me/233${number.replace(/^0/, '')}?text=${encodeURIComponent('Hello, I need help with the HTU Departmental Dues Portal.')}`}
+                          target="_blank" rel="noopener noreferrer"
+                          style={{
+                            flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.4rem",
+                            backgroundColor: "#25D366", color: "#fff", borderRadius: "8px",
+                            padding: "0.55rem 0.5rem", fontWeight: 700, fontSize: "0.78rem",
+                            textDecoration: "none", border: "none"
+                          }}
+                        >
+                          <MessageCircle size={13} /> WhatsApp
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Floating trigger button */}
+          <button
+            onClick={() => setHelpOpen(prev => !prev)}
+            title="Help & Support"
+            style={{
+              position: "fixed",
+              bottom: "1.5rem",
+              right: "1.5rem",
+              zIndex: 9999,
+              width: "52px",
+              height: "52px",
+              borderRadius: "50%",
+              backgroundColor: helpOpen ? "var(--primary-hover, #00005E)" : "var(--primary)",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 16px rgba(0,0,140,0.35)",
+              transition: "transform 0.2s, background-color 0.2s",
+              transform: helpOpen ? "rotate(45deg) scale(1.08)" : "scale(1)"
+            }}
+          >
+            {helpOpen ? <X size={22} /> : <HelpCircle size={22} />}
+          </button>
+        </>
       )}
 
       {/* Forced Password Change Modal */}
