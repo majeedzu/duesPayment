@@ -237,6 +237,9 @@ export default function AdminLayout({ children }) {
           <Link href="/admin/transactions" className={`sidebar-link ${pathname === "/admin/transactions" ? "active" : ""}`}>
             <CreditCard size={18} /> Transactions
           </Link>
+          <Link href="/admin/profile" className={`sidebar-link ${pathname === "/admin/profile" ? "active" : ""}`}>
+            <Users size={18} /> Profile Settings
+          </Link>
 
           {/* Department Name Banner — highly visible */}
           <div style={{
@@ -315,6 +318,7 @@ export default function AdminLayout({ children }) {
                   {pathname === "/admin/roster" && "Student Roster"}
                   {pathname === "/admin/import" && "CSV Roster Upload"}
                   {pathname === "/admin/transactions" && "Transactions Monitor"}
+                  {pathname === "/admin/profile" && "Profile Settings"}
                 </h2>
                 {department?.name && (
                   <span style={{
@@ -336,6 +340,7 @@ export default function AdminLayout({ children }) {
                 {pathname === "/admin/roster" && `All enrolled students · ${department?.name || "..."}`}
                 {pathname === "/admin/import" && "Import students using `.csv` templates"}
                 {pathname === "/admin/transactions" && "Live checkouts & cash verification log"}
+                {pathname === "/admin/profile" && "Manage your contact information for student support"}
               </p>
             </div>
           </div>
