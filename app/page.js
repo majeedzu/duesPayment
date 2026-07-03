@@ -108,6 +108,19 @@ export default function Home() {
 
   // Department Dues search states
   const [deptSearch, setDeptSearch] = useState("");
+
+  // Fetch live departments on mount
+  useEffect(() => {
+    fetch("/api/super-admin/departments-public")
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.departments) {
+          setDepartments(data.departments);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setDeptsLoading(false));
+  }, []);
   // Floating panel open state
   const [floatingPanelOpen, setFloatingPanelOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -187,10 +200,9 @@ export default function Home() {
     }
   ];
 
-  const filteredDepts = mockDepartments.filter(d =>
+  const filteredDepts = departments.filter(d =>
     d.name.toLowerCase().includes(deptSearch.toLowerCase()) ||
-    d.faculty.toLowerCase().includes(deptSearch.toLowerCase()) ||
-    d.code.toLowerCase().includes(deptSearch.toLowerCase())
+    d.faculty.toLowerCase().includes(deptSearch.toLowerCase())
   );
 
   // Dynamic style system for accessibility

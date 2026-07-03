@@ -9,7 +9,11 @@ export async function GET(req) {
     }
 
     const departmentId = session.department_id;
+    // Super admins have no department — redirect them to use the super-admin stats endpoint
     if (!departmentId) {
+      if (session.role === 'super_admin') {
+        return Response.json({ success: false, message: 'Super admins should use the super-admin dashboard.', redirectTo: '/super-admin/dashboard' }, { status: 403 });
+      }
       return Response.json({ success: false, message: 'No department assigned to this admin.' }, { status: 400 });
     }
 

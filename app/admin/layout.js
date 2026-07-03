@@ -63,6 +63,11 @@ export default function AdminLayout({ children }) {
         setDepartment(data.data.department);
         setNotifications(data.data.notifications || []);
       } else {
+        // If super_admin hits this route without a department, redirect them
+        if (res.status === 403 && data.redirectTo) {
+          router.push(data.redirectTo);
+          return;
+        }
         setDeptError(data.message || "Access restricted. No department assigned.");
       }
     } catch (error) {
@@ -77,6 +82,11 @@ export default function AdminLayout({ children }) {
     const session = getClientSession();
     if (!session || (session.role !== "dept_admin" && session.role !== "super_admin")) {
       router.push("/auth/login?role=dept_admin");
+      return;
+    }
+    // Super admins without a department should use their own dashboard
+    if (session.role === "super_admin" && !session.department_id) {
+      router.push("/super-admin/dashboard");
       return;
     }
     Promise.resolve().then(() => {
