@@ -951,64 +951,6 @@ export default function StudentDashboard() {
 
                 </div>
 
-                {/* Help & Support Card */}
-                <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1.5rem", width: "100%", boxSizing: "border-box", marginTop: "1.5rem" }}>
-                  <h3 className="card-title" style={{ fontSize: "1.05rem", margin: 0, color: "var(--primary)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                    <MessageCircle size={18} style={{ color: "var(--primary)" }} /> Help & Support
-                  </h3>
-                  <p style={{ fontSize: "0.8rem", opacity: 0.7, margin: 0 }}>
-                    Need help with your payments or student account? Contact your department administrator.
-                  </p>
-                  
-                  {deptAdmin ? (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", backgroundColor: "rgba(0,0,140,0.02)", padding: "1rem", borderRadius: "8px", border: "1px solid var(--border)" }}>
-                      <div>
-                        <span style={{ fontSize: "0.7rem", textTransform: "uppercase", fontWeight: 700, opacity: 0.5, display: "block" }}>Admin Name</span>
-                        <strong style={{ fontSize: "0.9rem", color: "var(--foreground)" }}>{deptAdmin.full_name}</strong>
-                      </div>
-                      
-                      {deptAdmin.whatsapp ? (
-                        <a 
-                          href={`https://wa.me/${deptAdmin.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hello ${deptAdmin.full_name}, I am ${student.full_name} (Index Number: ${student.index_number}). I need help regarding the departmental dues payment.`)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="btn"
-                          style={{ 
-                            width: "100%", 
-                            backgroundColor: "#25D366", 
-                            color: "#FFFFFF", 
-                            border: "none",
-                            borderRadius: "8px",
-                            padding: "0.6rem 1rem",
-                            fontWeight: "600",
-                            fontSize: "0.85rem",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "0.5rem",
-                            textDecoration: "none",
-                            boxShadow: "0 2px 4px rgba(37,211,102,0.2)",
-                            cursor: "pointer",
-                            transition: "background-color 0.2s"
-                          }}
-                          onMouseOver={(e) => { e.currentTarget.style.backgroundColor = "#20ba5a"; }}
-                          onMouseOut={(e) => { e.currentTarget.style.backgroundColor = "#25D366"; }}
-                        >
-                          <MessageCircle size={16} /> Chat on WhatsApp
-                        </a>
-                      ) : (
-                        <div style={{ fontSize: "0.8rem", opacity: 0.6, fontStyle: "italic", wordBreak: "break-all" }}>
-                          No WhatsApp number configured. Please contact via email: <strong>{deptAdmin.email}</strong>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div style={{ backgroundColor: "rgba(0,0,140,0.02)", padding: "1rem", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "0.8rem", opacity: 0.7, textAlign: "center" }}>
-                      No department administrator assigned yet. Please contact the main administration at <strong>info@htu.edu.gh</strong>
-                    </div>
-                  )}
-                </div>
-
               </div>
 
             </div>
